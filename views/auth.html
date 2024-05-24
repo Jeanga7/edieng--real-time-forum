@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="assets/img/bg/forum.ico.png">
+    <title>Login / Register - 4UM</title>
+
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+</head>
+<body>
+    <div id="auth-left">
+        <lottie-player src="https://lottie.host/1d520764-9712-4043-948a-f74a46113f6b/kLdYLagkdA.json" background="##fff" speed="0.75" id="auth-showcase" loop autoplay direction="1" mode="normal"></lottie-player>
+    </div>
+    <div id="auth-right">
+        <div id="auth-block">
+            <form action="/login" id="login-form" class="active" method="POST">
+                <h1 class="auth-title">Login</h1>
+                <div class="error-zone"></div>
+                <div class="inputs-block">
+                    <div class="input-group">
+                        <span class="input-label">Username or Email</span>
+                        <input class="input-field username" type="text" name="username/email">
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-label">Password</span>
+                        <input class="input-field password"  type="password" name="password">
+                    </div>
+
+                    <input type="submit" value="Get in" class="auth-button">
+
+                    <p class="question">Don't have an account ? <span class="change-auth">Register</span></p>
+                </div>
+            </form>
+
+            <form action="/register" id="register-form" method="POST" enctype="multipart/form-data">
+                <h1 class="auth-title">Register</h1>
+                <div class="error-zone"></div>
+                <div class="inputs-block">
+                    <div class="input-group">
+                        <span class="input-label">First & Last name</span>
+                        <input class="input-field name" type="text" name="name" required>
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-label">E-mail</span>
+                        <input class="input-field email" type="text" name="email" required>
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-label">Username</span>
+                        <input class="input-field username" type="text" name="username" required>
+                    </div>
+
+                    <div id="pass-and-picture">
+                        <div class="input-group">
+                            <span class="input-label">Password</span>
+                            <input class="input-field password" type="password" name="password" required>
+                        </div>
+
+                        <div class="input-group">
+                            <span class="input-label">Picture</span>
+                            <input class="input-field picture" type="file" name="picture">
+                        </div>
+                    </div>
+
+                    <input type="submit" value="Join" class="auth-button">
+
+                    <p class="question">Already have an account ? <span class="change-auth">Login</span></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/auth.js"></script>
+</body>
+</html>

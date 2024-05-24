@@ -1,0 +1,158 @@
+/* For mobile phones: */
+body {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 0;
+    color: var(--black);
+}
+
+/* Left block */
+#auth-left {
+    display: flex;
+}
+#auth-showcase {
+    margin: auto;
+    height: 25vh;
+}
+
+/* Right block */
+#auth-right {
+    display: flex;
+    padding: 0;
+}
+#auth-block {
+    height: fit-content;
+    margin: 0 auto;
+    text-align: left;
+    padding: 0;
+}
+.auth-title {
+    color: var(--primary);
+    margin-bottom: 0.8em;
+    font-weight: bolder;
+    letter-spacing: 1px;
+}
+.inputs-block {
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.8em;
+    padding: 2px;
+}
+.input-label {
+    display: block;
+    font-weight: 600;
+    letter-spacing: 1px;
+    font-size: 0.8em;
+    margin-bottom: 8px;
+}
+.input-field {
+    width: clamp(200px, 80vw, 350px);
+    height: 28px;
+    padding: 8px;
+    border: 0;
+    border-radius: 8px;
+}
+.input-field:focus {
+    outline-color: var(--primary);
+    outline-style: solid;
+    outline-width: 2px;
+}
+.auth-button {
+    background-color: var(--primary);
+    color: white;
+    height: 48px;
+    padding: 8px;
+    border: 0;
+    border-radius: 8px;
+    font-size: 1.2em;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-top: 0.5em;
+    cursor: pointer;
+}
+.question {
+    text-align: center;
+    font-size: 0.8em;
+    letter-spacing: 1px;
+}
+.change-auth {
+    font-weight: bold;
+    color: var(--primary);
+    cursor: pointer;
+}
+
+/* Forms Transition */
+#login-form, #register-form {
+    height: auto;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: opacity 0.2s ease-in-out, max-height 0.5s ease-in-out;
+}
+#login-form.active, #register-form.active {
+    opacity: 1;
+    max-height: 120vh; /* Estimation de la hauteur maximale */
+}
+
+  
+/* For tablets: */
+@media only screen and (min-width: 600px) {
+    body {
+        grid-template-columns: 1fr 1fr;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+    }
+
+    /* Left block */
+    #auth-showcase {
+        height: 30vw;
+    }
+
+    /* Right block */
+    #auth-right {
+        display: flex;
+        height: 100vh;
+        overflow-y: auto;
+    }
+    #auth-block {
+        margin: auto;
+        overflow-y: auto;
+        text-align: left;
+    }
+    .input-field {
+        width: clamp(200px, 40vw, 350px);
+    }
+}
+
+
+/* For desktop: */
+@media only screen and (min-width: 768px) {
+    body {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    /* Left block */
+    #auth-showcase {
+        width: 45vw;
+    }
+    #auth-right {
+        display: flex;
+        height: 100vh;
+        overflow-y: auto;
+    }
+    #auth-block {
+        margin: auto;
+    }
+    .input-field {
+        width: clamp(250px, 40vw, 350px);
+    }
+}
+#pass-and-picture {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+#pass-and-picture .input-field {
+    width: clamp(110px, 18vw, 160px);
+}

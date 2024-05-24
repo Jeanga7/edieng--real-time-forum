@@ -1,0 +1,60 @@
+package helpers
+
+import (
+	"encoding/json"
+	"errors"
+	"forum/global"
+	"log"
+	"net/http"
+	"text/template"
+)
+
+func ErrorHandler(w http.ResponseWriter, err error, context string, statusCode int) {
+	global.W = w
+	if err != nil {
+		JSONResponse(w, err, statusCode)
+	}
+}
+
+func JSONResponse(w http.ResponseWriter, err error, statusCode int) {
+	global.W = w
+	response := map[string]string{
+		"value": err.Error(),
+	}
+
+	// Convertir la réponse en JSON
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		log.Printf("%s: %v", err.Error(), err)
+		http.Error(w, err.Error(), statusCode)
+		return
+	}
+
+	// Définir l'entête de la réponse
+	w.Header().Set("Content-Type", "application/json")
+
+	// Envoyer la réponse avec un code d'erreur
+	w.WriteHeader(statusCode)
+	w.Write(jsonResponse)
+}
+
+func ErrorSimple(err error) {
+	if err != nil {
+		tmpl, _ := template.ParseFiles("./views/error.html", "./views/header.html")
+
+		data := map[string]interface{}{
+			"errorName": http.StatusText(http.StatusInternalServerError),
+			"errorCode": http.StatusInternalServerError,
+		}
+		tmpl.Execute(global.W, data)
+		global.Status = 200
+	}
+}
+
+func AllowedMethod(w http.ResponseWriter, allowed string, r *http.Request) {
+	global.W = w
+	if r.Method != allowed {
+		ErrorHandler(w, errors.New("BAD REQUEST"), "AllowedMethod", http.StatusBadRequest)
+		return
+	}
+}
