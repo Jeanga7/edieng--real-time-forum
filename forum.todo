@@ -1,34 +1,24 @@
-[x]! Il faudra parcourir toutes les instances de ErrorHandler et mettre le type d'erreur à exécuter (500, 400 ou 404)
+New features
+-------------
+Single page application : adapt the content according to the route
+Use of Websockets
+Real time messaging
 
-TODO User routes (MANSOUR)
-[ ] mux.HandleFunc("/register", controllers.Register)
-[ ] mux.HandleFunc("/login", controllers.Login)
-[ ] mux.HandleFunc("/logout", controllers.Logout)
 
-TODO Session routes (MANSOUR)
-[ ] mux.HandleFunc("/create-session", controllers.CreateSession)
-[ ] mux.HandleFunc("/delete-session", controllers.DeleteSession)
+Features to update
+-------------
+Registration and logging > SPA
+Creation post > SPA
+Commenting posts > SPA
 
-//DONE Posts routes ( ABDEL)
-[x] mux.HandleFunc("/read-post", controllers.ReadPost)
-[x] mux.HandleFunc("/create-post", controllers.CreatePost)
-[x] mux.HandleFunc("/edit-post", controllers.EditPost)
-[x] mux.HandleFunc("/delete-post", controllers.DeletePost)
-
-//DONE Comments routes(ABDEL)
-[x] mux.HandleFunc("/read-comment", controllers.ReadComment)
-[x] mux.HandleFunc("/create-comment", controllers.CreateComment)
-
-//DONE Category routes(JGG)
-[x] mux.HandleFunc("/add-category", controllers.AddCategory)
-
-//DONE Like routes(JGG)
-[x] mux.HandleFunc("/like", controllers.AddLike)
-
-//DONE Dislike routes(JGG)
-[x] mux.HandleFunc("/dislike", controllers.RemoveDislike)
-
-//ISAAC (rappel)
-[ ] Ajouter un retour de booléen pour les fonctions create, edit et delete
-[ ] Vérifier ce booléen et écrire un status OK sur l'entête si la retour de cette fonction et true
-
+Chat
+-------------
+For the chat system we will have 2 blocks :
+- In contact users: User with who you've already interacted with
+- Not in contact users: User with who you've not interacted with yet
+Create an API for messages:
+- Table: discussions
+- Create an hash for a discussion between two users with their usernames
+- Every exchange message has an numerical id
+- The discussion contains all messages exchanged between two users
+- Messages will be loaded starting with the last one
