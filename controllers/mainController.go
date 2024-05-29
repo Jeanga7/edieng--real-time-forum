@@ -2,9 +2,11 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"forum/global"
 	"forum/helpers"
 	"forum/models"
+	"log"
 	"net/http"
 	"strings"
 	"text/template"
@@ -21,7 +23,49 @@ type ActiveUsersData struct {
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	global.W = w
+	var Usernames string
+	var All_users []helpers.User
 	Users := models.User.Fetch()
+	Sessions := models.Session.Fetch()
+	Cookie, err := r.Cookie("sessionID")
+	if err != nil {
+		// IsLogged = false
+		log.Println(err)
+		// return
+	} else {
+		sessions := models.Session.Fetch([]interface{}{"Id"}, []interface{}{Cookie.Value})
+		if len(sessions) > 0 {
+			userID, ok := sessions[0].Values["idUser"]
+			fmt.Println("test")
+			if !ok {
+				log.Println("seesion introuvable")
+				return
+			}
+
+			conn := models.User.Fetch([]interface{}{"Id"}, []interface{}{userID})
+			if len(conn) > 0 {
+				Usernames = conn[0].Values["name"].(string)
+				fmt.Println("i'm connected", Usernames)
+			}
+			fmt.Println("test2")
+		}
+	}
+	for _, v := range Users {
+		var user helpers.User
+		user.Username = v.Values["name"].(string)
+		for _, s := range Sessions {
+			var id = v.Values["id"].(string)
+			if id == s.Values["idUser"].(string) {
+				fmt.Println(s.Values["idUser"].(string))
+				user.Status = "Online"
+			}
+		}
+		if user.Username != Usernames {
+			All_users = append(All_users, user)
+		}
+	}
+	fmt.Println(All_users)
+
 	Posts := models.Post.Fetch()
 	Likes := models.Like.Fetch()
 	Dislikes := models.Dislike.Fetch()
@@ -66,6 +110,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		Posts:      posts,
 		IsLogged:   isLogged,
 		UserData:   data,
+		AllUser:    All_users,
 		Categories: GetAllCategories(w, r),
 	}
 
@@ -92,18 +137,17 @@ func MostActiveUser(stats map[string]int, UserAllData map[string]map[string]inte
 		}
 	}
 
-	for i := 0; i < len(usersData)-1; i++ {
-		for j := i + 1; j < len(usersData); j++ {
+	for i := 0; i < len(usersData); i++ {
+		for j := i + 1; j < len(usersData)-1; j++ {
 			if usersData[i].Actions < usersData[j].Actions {
 				usersData[i], usersData[j] = usersData[j], usersData[i]
 			}
 		}
 	}
 
-	if len(usersData) > 5 {
-		usersData = usersData[:5]
-	}
-
+	// if len(usersData) > 5 {
+	// 	usersData = usersData[:5]
+	// }
 	return usersData
 }
 
@@ -154,6 +198,7 @@ func GetUsersStats(Posts []models.Model, Likes []models.Model, Dislikes []models
 		stats[v.Values["authorId"].(string)]++
 	}
 	for _, v := range Users {
+		fmt.Println("this is my name", v.Values["name"])
 		UserAllData[v.Values["id"].(string)] = v.Values
 	}
 

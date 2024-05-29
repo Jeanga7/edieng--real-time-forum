@@ -21,4 +21,11 @@ Create an API for messages:
 - Create an hash for a discussion between two users with their usernames
 - Every exchange message has an numerical id
 - The discussion contains all messages exchanged between two users
-- Messages will be loaded starting with the last one
+- Messages will be loaded by 10 and starting with the last one 
+- When scrolled 10 more messages should be available
+Message Format:
+- A date that shows when the message was sent
+- The username of the user that sent the message
+
+Notifications
+- When a user sends a message the receiver should receive a notification  of the new message (in real time)

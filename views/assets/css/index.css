@@ -511,8 +511,12 @@ body {
     width: 94%;
 }
 #most-active-users {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
     font-size: 0.9em;
     width: 100%;
+    height: 100%;
 }
 
 #new-post-title-buttons-zone {

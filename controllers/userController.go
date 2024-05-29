@@ -278,6 +278,7 @@ func Auth(r *http.Request, w http.ResponseWriter) (bool, []models.Model) {
 		users := models.User.Fetch([]interface{}{"Id"}, []interface{}{userID})
 		if len(users) > 0 {
 			IdUser = users[0].Values["id"].(string)
+			
 			return true, users
 		} else {
 			return false, nil

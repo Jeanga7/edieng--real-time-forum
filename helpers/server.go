@@ -16,10 +16,16 @@ import (
 var DummyText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris sit amet ipsum vitae risus ullamcorper facilisis in eu ex. Suspendisse porta rhoncus eros, sed feugiat risus rhoncus id. Cras dapibus urna eu pharetra semper. Morbi commodo est non nisi aliquam molestie. Integer pharetra nibh quis aliquet facilisis. Vivamus volutpat hendrerit velit, id pharetra magna blandit sit amet. Aenean diam sem, pellentesque nec ornare auctor, vestibulum eu magna. Cras placerat justo fermentum, iaculis nisl commodo, gravida arcu. Proin non purus eget velit maximus imperdiet sodales a turpis. Sed laoreet quam ut luctus scelerisque. Integer ut velit urna. Sed vel sapien fringilla, porta nunc in, bibendum dolor."
 var Storage = "./views/assets/img/posts"
 
+type User struct {
+	Username string
+	Status string
+}
+
 type FinalData struct {
 	Posts      []ForumPost
 	IsLogged   bool
 	UserData   map[string]interface{}
+	AllUser    []User
 	Categories []map[string]interface{}
 }
 

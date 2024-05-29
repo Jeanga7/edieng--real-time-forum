@@ -186,12 +186,16 @@
             </div>
 
             <div id="active-users-card" class="card data-card">
-                <h2 class="card-title">Most active users</h2>
-                <ol id="most-active-users">
-                    {{range .UserData.usersStats}}
-                    <li>{{.UserName}} - <b>{{.Actions}} actions</b></li>
+                <h2 class="card-title">Users</h2>
+                <div id="most-active-users">
+                    {{range.AllUser}}
+                        {{if eq .Status "Online"}}
+                            <div class="discussion"><strong>{{.Username}} - {{.Status}}</strong></div>
+                        {{else}}
+                            <div class="discussion"><em>{{.Username}} - Offline</em></div>
+                        {{end}}
                     {{end}}
-                </ol>
+                </div>
             </div>
             
 
@@ -249,6 +253,13 @@
             <lottie-player src="https://lottie.host/13886175-6124-444a-8716-946ada521fa6/XcTHWAJd48.json" background="transparent" speed="1" style="width: 300px; height: 300px" loop autoplay direction="1" mode="normal"></lottie-player>
         </div>
     </div>
+
+    <div class="layer">
+        <div class="popup">
+            <span id="close_popup">X</span>
+        </div>
+    </div>
+
     
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <script src="assets/js/main.js"></script>
@@ -314,6 +325,7 @@
         }
     });
 
+   
     </script>
 
     <!-- Categories -->
@@ -326,6 +338,8 @@
 
     <!-- get search input -->
     <script src="assets/js/search.js"></script>
+
+    <script type="module" src="assets/js/discussion.js"></script>
 </body>
 
 </html>
