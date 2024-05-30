@@ -55,12 +55,11 @@ func HandlerWebs(w http.ResponseWriter, r *http.Request) {
 		IdDestinataire := GetIdByUsername(message.Uname)
 		_, _, _, IdEmetteur := FindUsersOnline(r)
 		idUsers := []string{IdDestinataire, IdEmetteur.(string)}
-		// fmt.Println("Mess:", message.Mess)
-		// fmt.Println("IdDestinataire:", IdDestinataire)
-		// fmt.Println("IdEmetteur:", IdEmetteur)
 
 		var discussion []string
-		// existingDiscussion, err := GetDiscussion("toi", "moi")
+		IdDisc := GetDiscussionId(IdDestinataire, IdEmetteur.(string))
+		fmt.Println("IdDisc", IdDisc.(string))
+	
 		if err != nil {
 			log.Println(err)
 			return
@@ -100,6 +99,24 @@ func GetIdByUsername(username string) (id string) {
 	return id
 }
 
-func GetDiscussion(User1, User2 string) {
+func GetDiscussionId(User1, User2 string) interface{} {
+    resIdDiscussion1, err := json.Marshal([]string{User1, User2})
+    helpers.ErrorSimple(err)
+    resIdDiscussion2, err := json.Marshal([]string{User2, User1})
+    helpers.ErrorSimple(err)
 
+    Diss1 := models.Discussions.Fetch([]interface{}{"idUsers"}, []interface{}{string(resIdDiscussion1)})
+    Diss2 := models.Discussions.Fetch([]interface{}{"idUsers"}, []interface{}{string(resIdDiscussion2)})
+
+    if len(Diss1) > 0 {
+        return Diss1[0].Values["id"]
+    }
+
+    if len(Diss2) > 0 {
+        return Diss2[0].Values["id"]
+    }
+
+    return ""
 }
+
+
