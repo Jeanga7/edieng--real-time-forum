@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// type Message struct {
+// type discussion struct {
 // 	Id       int
 // 	IdUsers  string
 // 	Messages string
@@ -59,19 +59,20 @@ func HandlerWebs(w http.ResponseWriter, r *http.Request) {
 		var discussion []string
 		IdDisc := GetDiscussionId(IdDestinataire, IdEmetteur.(string))
 		fmt.Println("IdDisc", IdDisc.(string))
-	
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		// if existingDiscussion != nil {
-		// err = json.Unmarshal([]byte(existingDiscussion.Messages), &discussion)
-		// 	if err != nil {
-		// 		log.Println(err)
-		// 		return
-		// 	}
-		// }
 
+		if IdDisc != "" {
+			existingDiscussion := models.Discussions.Fetch([]interface{}{"id"}, []interface{}{IdDisc.(string)})
+			if len(existingDiscussion) > 0 {
+				res := existingDiscussion[0].Values["messages"]
+				existingDiscussion[0].Delete()
+				err = json.Unmarshal([]byte(res.(string)), &discussion)
+				if err != nil {
+					log.Println(err)
+					return
+				}
+			}
+		}
+		
 		discussion = append(discussion, string(msg))
 
 		res, err := json.Marshal(discussion)
@@ -100,23 +101,21 @@ func GetIdByUsername(username string) (id string) {
 }
 
 func GetDiscussionId(User1, User2 string) interface{} {
-    resIdDiscussion1, err := json.Marshal([]string{User1, User2})
-    helpers.ErrorSimple(err)
-    resIdDiscussion2, err := json.Marshal([]string{User2, User1})
-    helpers.ErrorSimple(err)
+	resIdDiscussion1, err := json.Marshal([]string{User1, User2})
+	helpers.ErrorSimple(err)
+	resIdDiscussion2, err := json.Marshal([]string{User2, User1})
+	helpers.ErrorSimple(err)
 
-    Diss1 := models.Discussions.Fetch([]interface{}{"idUsers"}, []interface{}{string(resIdDiscussion1)})
-    Diss2 := models.Discussions.Fetch([]interface{}{"idUsers"}, []interface{}{string(resIdDiscussion2)})
+	Diss1 := models.Discussions.Fetch([]interface{}{"idUsers"}, []interface{}{string(resIdDiscussion1)})
+	Diss2 := models.Discussions.Fetch([]interface{}{"idUsers"}, []interface{}{string(resIdDiscussion2)})
 
-    if len(Diss1) > 0 {
-        return Diss1[0].Values["id"]
-    }
+	if len(Diss1) > 0 {
+		return Diss1[0].Values["id"]
+	}
 
-    if len(Diss2) > 0 {
-        return Diss2[0].Values["id"]
-    }
+	if len(Diss2) > 0 {
+		return Diss2[0].Values["id"]
+	}
 
-    return ""
+	return ""
 }
-
-
