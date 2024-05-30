@@ -7,6 +7,7 @@ import (
 	"forum/models"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/websocket"
 )
@@ -43,12 +44,39 @@ func HandlerWebs(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Println("message:", string(msg))
+		// fmt.Println("message:", string(msg))
 
 		var message Message
 		err = json.Unmarshal(msg, &message)
 		if err != nil {
-			log.Println("Erreur JSON:", err)
+			// log.Println("Erreur JSON:", err)
+			IdDestinataire := GetIdByUsername(string(msg))
+			_, _, _, IdEmetteur := FindUsersOnline(r)
+			idUsers := []string{IdDestinataire, IdEmetteur.(string)}
+			IdUserKey, err := json.Marshal(idUsers)
+			helpers.ErrorSimple(err)
+
+			// fmt.Println("IdUserKey:", string(IdUserKey))
+			var Discontent = models.Discussions.Fetch([]interface{}{"idUsers"}, []interface{}{string(IdUserKey)})
+			var result = Discontent[0].Values["messages"]
+
+			// var temp Message
+			// err = json.Unmarshal([]byte(result.(string)), &temp)
+			// if err != nil {
+			// 	log.Println(err)
+			// 	return
+			// }
+			// fmt.Println(temp)
+			var to_send = strings.ReplaceAll(result.(string), "\\", "")
+			to_webs, err := json.Marshal(to_send)
+			if err != nil {
+				log.Println("Error encoding scoreboard message:", err)
+				continue
+			}
+			if err := conn.WriteMessage(websocket.TextMessage, to_webs); err != nil {
+				log.Println("Error sending scoreboard message:", err)
+				continue
+			}
 			continue
 		}
 
@@ -72,7 +100,7 @@ func HandlerWebs(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		}
-		
+
 		discussion = append(discussion, string(msg))
 
 		res, err := json.Marshal(discussion)
