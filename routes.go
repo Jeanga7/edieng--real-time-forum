@@ -8,6 +8,7 @@ import (
 func Routes(mux *http.ServeMux) {
 	fileServer := http.FileServer(http.Dir("./views/assets/"))
 	mux.Handle("/assets/", http.StripPrefix("/assets", fileServer))
+	mux.HandleFunc("/messages", controllers.HandlerWebs)
 	mux.HandleFunc("/", controllers.Index)
 
 	// User routes

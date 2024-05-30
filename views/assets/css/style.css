@@ -145,11 +145,17 @@ body {
 }
 
 #chat-messages {
-    /* height: 70%;
-    width: 90%; */
+    height:auto;
+    width: 90%;
     max-height: 200px;
     overflow-y: scroll;
     padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow-x: hidden;
+    word-wrap: break-word;
+    /* background-color: green; */
 }
 
 #chat-form {
@@ -176,7 +182,7 @@ body {
     border-color: #4e4e4e;
 }
 
-#chat-form button {
+#send-message {
     width: 25%;
     padding: 5px 10px;
     background-color: #007bff;
@@ -184,8 +190,30 @@ body {
     border: none;
     border-radius: 10px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #chat-form button:hover {
     background-color: #0056b3;
+}
+
+.sms{
+    /* position: absolute; */
+    color: black;
+    font-size: medium;
+    height: auto;
+    width:fit-content;
+    max-width: 290px;
+    background-color: rgb(70, 167, 231);
+    border-radius: 10px;
+    margin: 5px;
+    padding: 5px;
+    margin-left: auto;
+}
+
+.dayeu{
+    color: grey;
+    font-size: small;
 }

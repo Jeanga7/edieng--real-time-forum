@@ -25,7 +25,7 @@ if (closePopup) {
 
 document.querySelectorAll('.discussion').forEach(user => {
     user.addEventListener('click', () => {
-        const username = user.textContent.split(' - ')[0];
+        const username = user.textContent.split(' - ')[0].trim();
         startChat(username);
     });
 });
@@ -51,26 +51,67 @@ function startChat(username) {
 //         });
 // }
 
-// function sendMessage(event) {
-//     event.preventDefault();
-//     const messageInput = document.getElementById('chat-input');
-//     const message = messageInput.value;
-//     const username = document.getElementById('chat-user-name').textContent;
+function sendMessage() {
+    const ws = new WebSocket("ws://localhost:8989/messages")
 
-//     fetch('/send-message', {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify({ username, message })
-//     }).then(() => {
-//         messageInput.value = '';
-//         const messageElement = document.createElement('div');
-//         messageElement.textContent = message;
-//         document.getElementById('chat-messages').appendChild(messageElement);
-//     });
-// }
+    ws.onopen = () => {
+        console.log("I'm Connected...");
+        const messageInput = document.getElementById('chat-input');
+        const message = messageInput.value;
+        console.log(message);
+        messageInput.value = ""
+        const username = document.getElementById('chat-user-name').textContent;
+        console.log(username);
+        var date = new Date()
 
+        console.log(date);
+        var data = {
+            mess: message,
+            uname: username,
+            date: date,
+        }
+    
+        var jsonstring = JSON.stringify(data)
+        const blob = new Blob([jsonstring], { type: 'application/json' });
+    
+        ws.send(blob)
+
+        var endroit = document.getElementById("chat-messages")
+        var mns = document.createElement("div")
+        // var container = document.createElement("div")
+        var dayeu = document.createElement("div")
+        var dateTime = data.date.getDay()+"/"+data.date.getMonth()+"/"+data.date.getFullYear()+" "+data.date.getHours()+':'+data.date.getMinutes()+':'+data.date.getSeconds()
+        dayeu.classList.add("dayeu")
+        dayeu.textContent = dateTime
+        mns.classList.add("sms")
+        mns.textContent = data.mess
+
+        // container.appendChild(dayeu)
+        // container.appendChild(mns)
+
+
+        endroit.appendChild(dayeu)
+        endroit.appendChild(mns)
+        // fetch('/send-message', {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json'
+        //     },
+        //     body: JSON.stringify({ username, message })
+        // }).then(() => {
+        //     messageInput.value = '';
+        //     const messageElement = document.createElement('div');
+        //     messageElement.textContent = message;
+        //     document.getElementById('chat-messages').appendChild(messageElement);
+        // });
+    }
+    // event.preventDefault();
+
+}
+
+document.querySelector("#send-message").addEventListener("click",()=>{
+    sendMessage()
+})
 
 document.querySelector("#close-chat").addEventListener('click', () => {
     document.getElementById('chat-container').style.display = 'none';
