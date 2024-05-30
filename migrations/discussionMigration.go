@@ -4,6 +4,6 @@ import (
 	"forum/models"
 )
 
-func MigrateMessage() {
+func MigrateDiscussion() {
 	models.Discussions.Reset()
 }

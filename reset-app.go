@@ -25,5 +25,5 @@ func resetApp() {
 	migrations.MigrateSession()
 
 	//  Réinitialisation des Messages
-	migrations.MigrateMessage()
+	migrations.MigrateDiscussion()
 }

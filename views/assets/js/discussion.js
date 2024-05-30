@@ -61,7 +61,7 @@ function sendMessage() {
         console.log(message);
         messageInput.value = ""
         const username = document.getElementById('chat-user-name').textContent;
-        console.log(username);
+        // console.log(username);
         var date = new Date()
 
         console.log(date);
@@ -71,16 +71,18 @@ function sendMessage() {
             date: date,
         }
     
-        var jsonstring = JSON.stringify(data)
-        const blob = new Blob([jsonstring], { type: 'application/json' });
+        // var jsonstring = JSON.stringify(data)
+        // const blob = new Blob([jsonstring], { type: 'application/json' });
     
-        ws.send(blob)
+        // ws.send(blob)
+        ws.send(JSON.stringify(data))
+
 
         var endroit = document.getElementById("chat-messages")
         var mns = document.createElement("div")
         // var container = document.createElement("div")
         var dayeu = document.createElement("div")
-        var dateTime = data.date.getDay()+"/"+data.date.getMonth()+"/"+data.date.getFullYear()+" "+data.date.getHours()+':'+data.date.getMinutes()+':'+data.date.getSeconds()
+        var dateTime = `${data.date.getDate()}/${data.date.getMonth()+1}/${data.date.getFullYear()}   ${data.date.getHours()}:${data.date.getMinutes()}:${data.date.getSeconds()}`
         dayeu.classList.add("dayeu")
         dayeu.textContent = dateTime
         mns.classList.add("sms")
@@ -92,21 +94,7 @@ function sendMessage() {
 
         endroit.appendChild(dayeu)
         endroit.appendChild(mns)
-        // fetch('/send-message', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify({ username, message })
-        // }).then(() => {
-        //     messageInput.value = '';
-        //     const messageElement = document.createElement('div');
-        //     messageElement.textContent = message;
-        //     document.getElementById('chat-messages').appendChild(messageElement);
-        // });
     }
-    // event.preventDefault();
-
 }
 
 document.querySelector("#send-message").addEventListener("click",()=>{

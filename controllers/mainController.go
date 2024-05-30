@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"forum/global"
 	"forum/helpers"
 	"forum/models"
@@ -23,48 +22,14 @@ type ActiveUsersData struct {
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	global.W = w
-	var Usernames string
-	var All_users []helpers.User
-	Users := models.User.Fetch()
-	Sessions := models.Session.Fetch()
-	Cookie, err := r.Cookie("sessionID")
-	if err != nil {
-		// IsLogged = false
-		log.Println(err)
-		// return
-	} else {
-		sessions := models.Session.Fetch([]interface{}{"Id"}, []interface{}{Cookie.Value})
-		if len(sessions) > 0 {
-			userID, ok := sessions[0].Values["idUser"]
-			fmt.Println("test")
-			if !ok {
-				log.Println("seesion introuvable")
-				return
-			}
+	// IsLogged = false
+	// return
+	Usernames, Sessions, shouldReturn, _ := FindUsersOnline(r)
+	if shouldReturn {
+		return
+	}
 
-			conn := models.User.Fetch([]interface{}{"Id"}, []interface{}{userID})
-			if len(conn) > 0 {
-				Usernames = conn[0].Values["name"].(string)
-				fmt.Println("i'm connected", Usernames)
-			}
-			fmt.Println("test2")
-		}
-	}
-	for _, v := range Users {
-		var user helpers.User
-		user.Username = v.Values["name"].(string)
-		for _, s := range Sessions {
-			var id = v.Values["id"].(string)
-			if id == s.Values["idUser"].(string) {
-				fmt.Println(s.Values["idUser"].(string))
-				user.Status = "Online"
-			}
-		}
-		if user.Username != Usernames {
-			All_users = append(All_users, user)
-		}
-	}
-	fmt.Println(All_users)
+	All_users, Users := GetUsers(Sessions, Usernames)
 
 	Posts := models.Post.Fetch()
 	Likes := models.Like.Fetch()
@@ -123,6 +88,57 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		tmpl.Execute(w, allData)
 		global.Status = 200
 	}
+}
+
+func FindUsersOnline(r *http.Request) (string, []models.Model, bool, interface{}) {
+	var Usernames string
+	var userID interface{}
+	Sessions := models.Session.Fetch()
+	Cookie, err := r.Cookie("sessionID")
+	if err != nil {
+		log.Println(err)
+	} else {
+		sessions := models.Session.Fetch([]interface{}{"Id"}, []interface{}{Cookie.Value})
+		if len(sessions) > 0 {
+			var ok bool
+			userID, ok = sessions[0].Values["idUser"]
+			if !ok {
+				log.Println("seesion introuvable")
+				return "", nil, true, "noId"
+			}
+			Usernames = GetUsernameById(userID)
+		}
+	}
+	return Usernames, Sessions, false, userID
+}
+
+func GetUsernameById(userID interface{}) string {
+	var Usernames string
+	conn := models.User.Fetch([]interface{}{"Id"}, []interface{}{userID})
+	if len(conn) > 0 {
+		Usernames = conn[0].Values["name"].(string)
+	}
+	return Usernames
+}
+
+func GetUsers(Sessions []models.Model, Usernames string) ([]helpers.User, []models.Model) {
+	var All_users []helpers.User
+	Users := models.User.Fetch()
+	for _, v := range Users {
+		var user helpers.User
+		user.Username = v.Values["name"].(string)
+		for _, s := range Sessions {
+			var id = v.Values["id"].(string)
+			if id == s.Values["idUser"].(string) {
+
+				user.Status = "Online"
+			}
+		}
+		if user.Username != Usernames {
+			All_users = append(All_users, user)
+		}
+	}
+	return All_users, Users
 }
 
 func MostActiveUser(stats map[string]int, UserAllData map[string]map[string]interface{}) []ActiveUsersData {
@@ -198,7 +214,7 @@ func GetUsersStats(Posts []models.Model, Likes []models.Model, Dislikes []models
 		stats[v.Values["authorId"].(string)]++
 	}
 	for _, v := range Users {
-		fmt.Println("this is my name", v.Values["name"])
+		// fmt.Println("this is my name", v.Values["name"])
 		UserAllData[v.Values["id"].(string)] = v.Values
 	}
 
