@@ -1,41 +1,41 @@
 package models
 
 // Déclaration des attributs de la classe
+// var Discussions = Model{
+// 	Table: "discussions",
+// 	Columns: []string{
+// 		"id",
+// 		"idUsers",  // [idEmma, idJean]
+// 		"messages", // [{},{},]
+// 		"creationDate",
+// 	},
+// 	Types: []string{
+// 		"id TEXT",
+// 		"idUsers TEXT",
+// 		"messages TEXT",
+// 		"creationDate",
+// 	},
+// }
+
 var Discussions = Model{
 	Table: "discussions",
 	Columns: []string{
 		"id",
-		"idUsers",  // [idEmma, idJean]
+		"idSender",
+		"idReceiver",
 		"messages", // [{},{},]
 		"creationDate",
 	},
 	Types: []string{
-		"id TEXT",
-		"idUsers TEXT",
+		"id Autoincrement",
+		"idSender TEXT",
+		"idReceiver TEXT",
 		"messages TEXT",
 		"creationDate",
 	},
 }
 
 /*
-
-	var Discussions = Model {
-	Table: "discussions",
-	Columns: []string{
-		"id",
-		"idSender",
-		"idReceiver",
-		"messages",          // [{},{},]
-		"creationDate",
-	},
-	Types: []string{
-		"id Autoincrement",
-		"idSender" TEXT,
-		"idReceiver" TEXT,
-		"messages TEXT",
-		"creationDate",
-	},
-}
 
 John Envoi à Alioune
 

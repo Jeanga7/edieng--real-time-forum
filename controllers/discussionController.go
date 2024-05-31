@@ -11,6 +11,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+var dest string
+
 type Message struct {
 	Mess  string `json:"mess"`
 	Uname string `json:"uname"`
@@ -42,28 +44,20 @@ func handleMessage(conn *websocket.Conn, r *http.Request) {
 		log.Println("Error reading message:", err)
 		return
 	}
-
+	fmt.Println(string(msg))
 	var message Message
 	err = json.Unmarshal(msg, &message)
 	if err != nil {
-		// log.Println("Error unmarshalling JSON:", err)
+		dest = string(msg)
 		sendPreviousMessages(conn, r, msg)
 		return
 	}
 
-	IdDestinataire := GetIdByUsername(message.Uname)
+	IdDestinataire := GetIdByUsername(dest)
 	_, _, _, IdEmetteur := FindUsersOnline(r)
 	idUsers := []string{IdDestinataire, IdEmetteur.(string)}
 
-	discussion, err := getDiscussionMessages(IdDestinataire, IdEmetteur.(string))
-	if err != nil {
-		log.Println("Error getting discussion messages:", err)
-		return
-	}
-
-	discussion = append(discussion, string(msg))
-
-	err = saveDiscussion(idUsers, discussion)
+	err = saveDiscussion(idUsers, message.Mess)
 	if err != nil {
 		log.Println("Error saving discussion:", err)
 	}
@@ -72,81 +66,49 @@ func handleMessage(conn *websocket.Conn, r *http.Request) {
 func sendPreviousMessages(conn *websocket.Conn, r *http.Request, msg []byte) {
 	IdDestinataire := GetIdByUsername(string(msg))
 	_, _, _, IdEmetteur := FindUsersOnline(r)
-	idUsers := []string{IdDestinataire, IdEmetteur.(string)}
-	IdUserKey, err := json.Marshal(idUsers)
-	if err != nil {
-		log.Println("Error marshalling idUsers:", err)
-		return
-	}
+	
 
-	discussion := models.Discussions.Fetch([]interface{}{"idUsers"}, []interface{}{string(IdUserKey)})
+	var myDiscussions []string
+	discussion := models.Discussions.Fetch([]interface{}{"idSender"}, []interface{}{IdEmetteur})
+	for _, v := range discussion {
+		if v.Values["idReceiver"] == IdDestinataire {
+			fmt.Println(v.Values["messages"])
+			if v.Values["messages"].(string) != "" {
+				var all = "[" + v.Values["messages"].(string) + v.Values["creationDate"].(string) + "]"
+				fmt.Println(all)
+				myDiscussions = append(myDiscussions, all)
+			}
+		}
+	}
 	if len(discussion) == 0 {
 		return
 	}
 
-	result := discussion[0].Values["messages"]
-	fmt.Println("this is result", result)
-	// toSend := strings.ReplaceAll(result.(string), "\\", "")
-	// t := strings.ReplaceAll(toSend, "[\"", "[")
-	// p := strings.ReplaceAll(t, "\"]", "]")
+	
+	baite := []byte(strings.Join(myDiscussions, ","))
+	
 
-	// fmt.Println(toSend)
-	// fmt.Println(p)
-	baite := []byte("[" + result.(string) + "]")
-	// toWebs, err := json.Marshal(p)
-	// if err != nil {
-	// 	log.Println("Error marshalling previous messages:", err)
-	// 	return
-	// }
-
-	if err := conn.WriteMessage(websocket.TextMessage, baite); err != nil {
-		log.Println("Error sending previous messages:", err)
+	if len(myDiscussions) != 0 {
+		if err := conn.WriteMessage(websocket.TextMessage, baite); err != nil {
+			log.Println("Error sending previous messages:", err)
+		}
 	}
 }
 
-func getDiscussionMessages(User1, User2 string) ([]string, error) {
-	IdDisc := GetDiscussionId(User1, User2)
-	if IdDisc == "" {
-		return []string{}, nil
+
+func saveDiscussion(idUsers []string, discussion string) error {
+	
+	fmt.Println("discussion", discussion)
+	if discussion != "" {
+		newDiscussion := models.Discussions
+
+		newDiscussion.Values = map[string]interface{}{
+			"idSender":   idUsers[1],
+			"idReceiver": idUsers[0],
+			"messages":   discussion,
+		}
+		newDiscussion.Create()
 	}
-
-	existingDiscussion := models.Discussions.Fetch([]interface{}{"id"}, []interface{}{IdDisc.(string)})
-	if len(existingDiscussion) == 0 {
-		return []string{}, nil
-	}
-
-	res := existingDiscussion[0].Values["messages"]
-	existingDiscussion[0].Delete()
-
-	var discussion []string
-	discussion = append(discussion, res.(string))
-	// err := json.Unmarshal([]byte(res.(string)), &discussion)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	return discussion, nil
-}
-
-func saveDiscussion(idUsers []string, discussion []string) error {
-	// res, err := json.Marshal(discussion)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// fmt.Println("this is res", string(res))
-	fmt.Println("this is discussion", strings.Join(discussion, ""))
-	resIdUsers, err := json.Marshal(idUsers)
-	if err != nil {
-		return err
-	}
-	newDiscussion := models.Discussions
-
-	newDiscussion.Values = map[string]interface{}{
-		"idUsers":  string(resIdUsers),
-		"messages": strings.Join(discussion, ","),
-	}
-	newDiscussion.Create()
 	return nil
 }
 
