@@ -22,6 +22,9 @@ function openWs(username) {
 
     ws.onmessage = (e) => {
         console.log("Received:", e.data);
+        // const Jsonstr = e.data.replace("\\","")
+        // console.log("this is js",Jsonstr.replace("\\",""));
+        console.log(JSON.parse(e.data));
         displayMessage(JSON.parse(e.data), "incoming");
     };
 }
@@ -48,19 +51,26 @@ function setupSendMessage(ws) {
 }
 
 function displayMessage(data, type) {
+    console.log("data",data);
     const endroit = document.getElementById("chat-messages");
-    const mns = document.createElement("div");
-    const dayeu = document.createElement("div");
+    for (let i = 0; i < data.length; i++) {
+        const element = data[i];
+        console.log("element",element);
 
-    const dateTime = `${data.date.getDate()}/${data.date.getMonth() + 1}/${data.date.getFullYear()} ${data.date.getHours()}:${data.date.getMinutes()}:${data.date.getSeconds()}`;
-    dayeu.classList.add("dayeu");
-    dayeu.textContent = dateTime;
+        const mns = document.createElement("div");
+        const dayeu = document.createElement("div");
 
-    mns.classList.add("sms", type);
-    mns.textContent = data.mess;
+        // const dateTime = `${data.date.getDate()}/${data.date.getMonth() + 1}/${data.date.getFullYear()} ${data.date.getHours()}:${data.date.getMinutes()}:${data.date.getSeconds()}`;
+        const dateTime = "time"
+        dayeu.classList.add("dayeu");
+        dayeu.textContent = dateTime;
 
-    endroit.appendChild(dayeu);
-    endroit.appendChild(mns);
+        mns.classList.add("sms", type);
+        mns.textContent = element.mess;
+
+        endroit.appendChild(dayeu);
+        endroit.appendChild(mns);
+    }
 }
 
 document.querySelector("#close-chat").addEventListener('click', () => {

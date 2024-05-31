@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"forum/models"
 	"log"
 	"net/http"
@@ -45,7 +46,7 @@ func handleMessage(conn *websocket.Conn, r *http.Request) {
 	var message Message
 	err = json.Unmarshal(msg, &message)
 	if err != nil {
-		log.Println("Error unmarshalling JSON:", err)
+		// log.Println("Error unmarshalling JSON:", err)
 		sendPreviousMessages(conn, r, msg)
 		return
 	}
@@ -84,14 +85,21 @@ func sendPreviousMessages(conn *websocket.Conn, r *http.Request, msg []byte) {
 	}
 
 	result := discussion[0].Values["messages"]
-	toSend := strings.ReplaceAll(result.(string), "\\", "")
-	toWebs, err := json.Marshal(toSend)
-	if err != nil {
-		log.Println("Error marshalling previous messages:", err)
-		return
-	}
+	fmt.Println("this is result", result)
+	// toSend := strings.ReplaceAll(result.(string), "\\", "")
+	// t := strings.ReplaceAll(toSend, "[\"", "[")
+	// p := strings.ReplaceAll(t, "\"]", "]")
 
-	if err := conn.WriteMessage(websocket.TextMessage, toWebs); err != nil {
+	// fmt.Println(toSend)
+	// fmt.Println(p)
+	baite := []byte("[" + result.(string) + "]")
+	// toWebs, err := json.Marshal(p)
+	// if err != nil {
+	// 	log.Println("Error marshalling previous messages:", err)
+	// 	return
+	// }
+
+	if err := conn.WriteMessage(websocket.TextMessage, baite); err != nil {
 		log.Println("Error sending previous messages:", err)
 	}
 }
@@ -111,20 +119,23 @@ func getDiscussionMessages(User1, User2 string) ([]string, error) {
 	existingDiscussion[0].Delete()
 
 	var discussion []string
-	err := json.Unmarshal([]byte(res.(string)), &discussion)
-	if err != nil {
-		return nil, err
-	}
+	discussion = append(discussion, res.(string))
+	// err := json.Unmarshal([]byte(res.(string)), &discussion)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	return discussion, nil
 }
 
 func saveDiscussion(idUsers []string, discussion []string) error {
-	res, err := json.Marshal(discussion)
-	if err != nil {
-		return err
-	}
+	// res, err := json.Marshal(discussion)
+	// if err != nil {
+	// 	return err
+	// }
 
+	// fmt.Println("this is res", string(res))
+	fmt.Println("this is discussion", strings.Join(discussion, ""))
 	resIdUsers, err := json.Marshal(idUsers)
 	if err != nil {
 		return err
@@ -133,7 +144,7 @@ func saveDiscussion(idUsers []string, discussion []string) error {
 
 	newDiscussion.Values = map[string]interface{}{
 		"idUsers":  string(resIdUsers),
-		"messages": string(res),
+		"messages": strings.Join(discussion, ","),
 	}
 	newDiscussion.Create()
 	return nil
