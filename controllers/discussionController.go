@@ -60,7 +60,14 @@ func handleMessage(conn *websocket.Conn, r *http.Request) {
 		_, _, _, IdEmetteur := FindUsersOnline(r)
 		idUsers := []string{IdDestinataire, IdEmetteur.(string)}
 
-		err = saveDiscussion(idUsers, message.Mess)
+		discussionId := GetDiscussionId(IdEmetteur.(string), IdDestinataire)
+		fmt.Println("discussionId", discussionId)
+		if discussionId == "" {
+			err = saveDiscussion(idUsers, message.Mess)
+		} else {
+			err = appendMessageToDiscussion(discussionId, message.Mess)
+		}
+
 		if err != nil {
 			log.Println("Error saving discussion:", err)
 		}
@@ -129,6 +136,32 @@ func saveDiscussion(idUsers []string, discussion string) error {
 	return nil
 }
 
+func appendMessageToDiscussion(discussionId interface{}, message string) error {
+    discussion := models.Discussions.Fetch([]interface{}{"id"}, []interface{}{discussionId})
+    if len(discussion) > 0 {
+        var messages []Message
+        err := json.Unmarshal([]byte(discussion[0].Values["messages"].(string)), &messages)
+        if err != nil {
+            return err
+        }
+
+        newMessage := Message{
+            Mess: message,
+        }
+        messages = append(messages, newMessage)
+
+        messagesJSON, err := json.Marshal(messages)
+        if err != nil {
+            return err
+        }
+
+        data := map[string]interface{}{"messages": string(messagesJSON)}
+        models.Discussions.Update(data, "id", discussionId)
+    }
+    return nil
+}
+
+
 func GetIdByUsername(username string) string {
 	conn := models.User.Fetch([]interface{}{"name"}, []interface{}{username})
 	if len(conn) > 0 {
@@ -137,28 +170,30 @@ func GetIdByUsername(username string) string {
 	return ""
 }
 
+// func GetDiscussionId(User1, User2 string) interface{} {
+//     Diss1 := models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{User1, User2})
+//     Diss2 := models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{User2, User1})
+
+//     if len(Diss1) > 0 {
+//         return Diss1[0].Values["id"]
+//     }
+
+//     if len(Diss2) > 0 {
+//         return Diss2[0].Values["id"]
+//     }
+//     return ""
+// }
+
 func GetDiscussionId(User1, User2 string) interface{} {
-	resIdDiscussion1, err := json.Marshal([]string{User1, User2})
-	if err != nil {
-		log.Println("Error marshalling discussion ID 1:", err)
-		return ""
-	}
-	resIdDiscussion2, err := json.Marshal([]string{User2, User1})
-	if err != nil {
-		log.Println("Error marshalling discussion ID 2:", err)
-		return ""
-	}
+    discussions := models.Discussions.Fetch()
+    for _, discussion := range discussions {
+        idSender := discussion.Values["idSender"].(string)
+        idReceiver := discussion.Values["idReceiver"].(string)
 
-	Diss1 := models.Discussions.Fetch([]interface{}{"idUsers"}, []interface{}{string(resIdDiscussion1)})
-	Diss2 := models.Discussions.Fetch([]interface{}{"idUsers"}, []interface{}{string(resIdDiscussion2)})
+        if (idSender == User1 && idReceiver == User2) || (idSender == User2 && idReceiver == User1) {
+            return discussion.Values["id"]
+        }
+    }
 
-	if len(Diss1) > 0 {
-		return Diss1[0].Values["id"]
-	}
-
-	if len(Diss2) > 0 {
-		return Diss2[0].Values["id"]
-	}
-
-	return ""
+    return ""
 }
