@@ -6,7 +6,6 @@ import (
 	"forum/models"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/gorilla/websocket"
 )
@@ -17,6 +16,7 @@ type Message struct {
 	Mess  string `json:"mess"`
 	Uname string `json:"uname"`
 	Date  string `json:"date"`
+	Type  string `json:"type"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -48,64 +48,81 @@ func handleMessage(conn *websocket.Conn, r *http.Request) {
 	var message Message
 	err = json.Unmarshal(msg, &message)
 	if err != nil {
-		dest = string(msg)
-		sendPreviousMessages(conn, r, msg)
+		log.Println("Error unmarshalling message:", err)
 		return
 	}
 
-	IdDestinataire := GetIdByUsername(dest)
-	_, _, _, IdEmetteur := FindUsersOnline(r)
-	idUsers := []string{IdDestinataire, IdEmetteur.(string)}
+	if message.Type == "fetch" {
+		dest = message.Uname
+		sendPreviousMessages(conn, r, message.Uname)
+	} else if message.Type == "message" {
+		IdDestinataire := GetIdByUsername(dest)
+		_, _, _, IdEmetteur := FindUsersOnline(r)
+		idUsers := []string{IdDestinataire, IdEmetteur.(string)}
 
-	err = saveDiscussion(idUsers, message.Mess)
-	if err != nil {
-		log.Println("Error saving discussion:", err)
+		err = saveDiscussion(idUsers, message.Mess)
+		if err != nil {
+			log.Println("Error saving discussion:", err)
+		}
 	}
 }
 
-func sendPreviousMessages(conn *websocket.Conn, r *http.Request, msg []byte) {
-	IdDestinataire := GetIdByUsername(string(msg))
+func sendPreviousMessages(conn *websocket.Conn, r *http.Request, username string) {
+	IdDestinataire := GetIdByUsername(username)
 	_, _, _, IdEmetteur := FindUsersOnline(r)
-	
 
-	var myDiscussions []string
+	var myDiscussions []Message
 	discussion := models.Discussions.Fetch([]interface{}{"idSender"}, []interface{}{IdEmetteur})
 	for _, v := range discussion {
 		if v.Values["idReceiver"] == IdDestinataire {
-			fmt.Println(v.Values["messages"])
 			if v.Values["messages"].(string) != "" {
-				var all = "[" + v.Values["messages"].(string) + v.Values["creationDate"].(string) + "]"
-				fmt.Println(all)
-				myDiscussions = append(myDiscussions, all)
+				var messages []Message
+				err := json.Unmarshal([]byte(v.Values["messages"].(string)), &messages)
+				if err != nil {
+					log.Println("Error unmarshalling messages:", err)
+					continue
+				}
+
+				myDiscussions = append(myDiscussions, messages...)
 			}
 		}
 	}
-	if len(discussion) == 0 {
-		return
-	}
 
-	
-	baite := []byte(strings.Join(myDiscussions, ","))
-	
+	if len(myDiscussions) > 0 {
+		historyMessage := struct {
+			Type     string    `json:"type"`
+			Messages []Message `json:"messages"`
+		}{
+			Type:     "history",
+			Messages: myDiscussions,
+		}
 
-	if len(myDiscussions) != 0 {
-		if err := conn.WriteMessage(websocket.TextMessage, baite); err != nil {
+		err := conn.WriteJSON(historyMessage)
+		if err != nil {
 			log.Println("Error sending previous messages:", err)
 		}
 	}
 }
 
-
 func saveDiscussion(idUsers []string, discussion string) error {
-	
-	fmt.Println("discussion", discussion)
 	if discussion != "" {
-		newDiscussion := models.Discussions
+		var messages []Message
 
+		newMessage := Message{
+			Mess: discussion,
+		}
+		messages = append(messages, newMessage)
+
+		messagesJSON, err := json.Marshal(messages)
+		if err != nil {
+			return err
+		}
+
+		newDiscussion := models.Discussions
 		newDiscussion.Values = map[string]interface{}{
 			"idSender":   idUsers[1],
 			"idReceiver": idUsers[0],
-			"messages":   discussion,
+			"messages":   string(messagesJSON),
 		}
 		newDiscussion.Create()
 	}
