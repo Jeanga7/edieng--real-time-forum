@@ -1,3 +1,4 @@
+var Chatopened = false
 document.addEventListener('DOMContentLoaded', (event) => {
     openWs();
 
@@ -29,6 +30,7 @@ function openWs() {
 
     ws.onmessage = (e) => {
         const message = JSON.parse(e.data);
+        console.log("message", message);
         if (message.type === 'history') {
             loadHistory(message.messages);
         } else {
@@ -43,9 +45,19 @@ function openWs() {
     ws.onclose = () => {
         console.log("WebSocket connection closed");
     };
+
+   console.log(getCookie("sessionID"))
 }
 
+function getCookie(name) {
+    const value = '; ' + document.cookie;
+    const parts = value.split('; ' + name + '=');
+    console.log(parts);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+
 function startChat(username) {
+    Chatopened = true
     currentUser = username;
     document.getElementById('chat-user-name').textContent = username;
     document.getElementById('chat-container').style.display = 'block';
@@ -76,12 +88,14 @@ function sendMessage() {
             date: dateTime,
             type: "message"
         };
+
+        console.log("je suis here",data.uname);
         ws.send(JSON.stringify(data));
-        displayMessage(message, dateTime);
+        displayMessage(message, dateTime,"sms");
     }
 }
 
-function displayMessage(message, date) {
+function displayMessage(message, date,type) {
     if (message != "") {
         const chatMessages = document.getElementById("chat-messages");
         const messageDiv = document.createElement("div");
@@ -90,7 +104,7 @@ function displayMessage(message, date) {
         timeDiv.classList.add("dayeu");
         timeDiv.textContent = date;
 
-        messageDiv.classList.add("sms");
+        messageDiv.classList.add(type);
         messageDiv.textContent = message;
 
         chatMessages.appendChild(timeDiv);
@@ -103,7 +117,7 @@ function loadHistory(messages) {
     const chatMessages = document.getElementById("chat-messages");
     chatMessages.innerHTML = '';
     messages.forEach(msg => {
-        displayMessage(msg.mess, msg.date);
+        displayMessage(msg.mess, msg.date,"sms-received");
     });
 }
 

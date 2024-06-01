@@ -213,6 +213,20 @@ body {
     margin-left: auto;
 }
 
+.sms-received{
+    /* position: absolute; */
+    color: black;
+    font-size: medium;
+    height: auto;
+    width:fit-content;
+    max-width: 290px;
+    background-color: rgb(61, 119, 158);
+    border-radius: 10px;
+    margin: 5px;
+    padding: 5px;
+    margin-right: auto;
+}
+
 .dayeu{
     color: grey;
     font-size: small;

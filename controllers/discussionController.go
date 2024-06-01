@@ -62,10 +62,12 @@ func handleMessage(conn *websocket.Conn, r *http.Request) {
 
 		discussionId := GetDiscussionId(IdEmetteur.(string), IdDestinataire)
 		fmt.Println("discussionId", discussionId)
+
+		fmt.Println(message.Date)
 		if discussionId == "" {
-			err = saveDiscussion(idUsers, message.Mess)
+			err = saveDiscussion(idUsers, message.Mess, message.Uname, message.Date)
 		} else {
-			err = appendMessageToDiscussion(discussionId, message.Mess)
+			err = appendMessageToDiscussion(discussionId, message.Mess, message.Uname, message.Date)
 		}
 
 		if err != nil {
@@ -79,6 +81,11 @@ func sendPreviousMessages(conn *websocket.Conn, r *http.Request, username string
 	_, _, _, IdEmetteur := FindUsersOnline(r)
 
 	var myDiscussions []Message
+
+	// var Ids = GetDiscussionId(IdEmetteur.(string),IdDestinataire)
+	// for _, v := range Ids.(string) {
+
+	// }
 	discussion := models.Discussions.Fetch([]interface{}{"idSender"}, []interface{}{IdEmetteur})
 	for _, v := range discussion {
 		if v.Values["idReceiver"] == IdDestinataire {
@@ -111,12 +118,14 @@ func sendPreviousMessages(conn *websocket.Conn, r *http.Request, username string
 	}
 }
 
-func saveDiscussion(idUsers []string, discussion string) error {
+func saveDiscussion(idUsers []string, discussion string, username string, date string) error {
 	if discussion != "" {
 		var messages []Message
 
 		newMessage := Message{
-			Mess: discussion,
+			Mess:  discussion,
+			Uname: username,
+			Date: date,
 		}
 		messages = append(messages, newMessage)
 
@@ -124,6 +133,8 @@ func saveDiscussion(idUsers []string, discussion string) error {
 		if err != nil {
 			return err
 		}
+
+		fmt.Println("test", string(messagesJSON))
 
 		newDiscussion := models.Discussions
 		newDiscussion.Values = map[string]interface{}{
@@ -136,31 +147,32 @@ func saveDiscussion(idUsers []string, discussion string) error {
 	return nil
 }
 
-func appendMessageToDiscussion(discussionId interface{}, message string) error {
-    discussion := models.Discussions.Fetch([]interface{}{"id"}, []interface{}{discussionId})
-    if len(discussion) > 0 {
-        var messages []Message
-        err := json.Unmarshal([]byte(discussion[0].Values["messages"].(string)), &messages)
-        if err != nil {
-            return err
-        }
+func appendMessageToDiscussion(discussionId interface{}, message string, username string, date string) error {
+	discussion := models.Discussions.Fetch([]interface{}{"id"}, []interface{}{discussionId})
+	if len(discussion) > 0 {
+		var messages []Message
+		err := json.Unmarshal([]byte(discussion[0].Values["messages"].(string)), &messages)
+		if err != nil {
+			return err
+		}
 
-        newMessage := Message{
-            Mess: message,
-        }
-        messages = append(messages, newMessage)
+		newMessage := Message{
+			Mess:  message,
+			Uname: username,
+			Date: date,
+		}
+		messages = append(messages, newMessage)
 
-        messagesJSON, err := json.Marshal(messages)
-        if err != nil {
-            return err
-        }
+		messagesJSON, err := json.Marshal(messages)
+		if err != nil {
+			return err
+		}
 
-        data := map[string]interface{}{"messages": string(messagesJSON)}
-        models.Discussions.Update(data, "id", discussionId)
-    }
-    return nil
+		data := map[string]interface{}{"messages": string(messagesJSON)}
+		models.Discussions.Update(data, "id", discussionId)
+	}
+	return nil
 }
-
 
 func GetIdByUsername(username string) string {
 	conn := models.User.Fetch([]interface{}{"name"}, []interface{}{username})
@@ -171,15 +183,15 @@ func GetIdByUsername(username string) string {
 }
 
 func GetDiscussionId(User1, User2 string) interface{} {
-    discussions := models.Discussions.Fetch()
-    for _, discussion := range discussions {
-        idSender := discussion.Values["idSender"].(string)
-        idReceiver := discussion.Values["idReceiver"].(string)
+	discussions := models.Discussions.Fetch()
+	for _, discussion := range discussions {
+		idSender := discussion.Values["idSender"].(string)
+		idReceiver := discussion.Values["idReceiver"].(string)
 
-        if (idSender == User1 && idReceiver == User2) || (idSender == User2 && idReceiver == User1) {
-            return discussion.Values["id"]
-        }
-    }
+		if (idSender == User1 && idReceiver == User2) || (idSender == User2 && idReceiver == User1) {
+			return discussion.Values["id"]
+		}
+	}
 
-    return ""
+	return ""
 }
