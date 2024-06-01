@@ -170,20 +170,6 @@ func GetIdByUsername(username string) string {
 	return ""
 }
 
-// func GetDiscussionId(User1, User2 string) interface{} {
-//     Diss1 := models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{User1, User2})
-//     Diss2 := models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{User2, User1})
-
-//     if len(Diss1) > 0 {
-//         return Diss1[0].Values["id"]
-//     }
-
-//     if len(Diss2) > 0 {
-//         return Diss2[0].Values["id"]
-//     }
-//     return ""
-// }
-
 func GetDiscussionId(User1, User2 string) interface{} {
     discussions := models.Discussions.Fetch()
     for _, discussion := range discussions {

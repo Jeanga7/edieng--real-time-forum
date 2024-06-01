@@ -55,8 +55,4 @@ Pour fetcher les messages:
 
 --> if idsender == celui qui est connecté mettre les messages à droite else mettre les messages à gauche??
 
-
-
-
-
 */

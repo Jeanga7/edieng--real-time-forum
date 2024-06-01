@@ -49,7 +49,7 @@ function startChat(username) {
     currentUser = username;
     document.getElementById('chat-user-name').textContent = username;
     document.getElementById('chat-container').style.display = 'block';
-    document.getElementById('chat-messages').innerHTML = '';  // Clear previous messages
+    document.getElementById('chat-messages').innerHTML = ''; 
     sendInitialMessage(username);
 }
 
@@ -81,26 +81,27 @@ function sendMessage() {
     }
 }
 
-function displayMessage(mess, time) {
-    if (mess != "") {
+function displayMessage(message, date) {
+    if (message != "") {
         const chatMessages = document.getElementById("chat-messages");
         const messageDiv = document.createElement("div");
         const timeDiv = document.createElement("div");
 
         timeDiv.classList.add("dayeu");
-        timeDiv.textContent = time;
+        timeDiv.textContent = date;
 
         messageDiv.classList.add("sms");
-        messageDiv.textContent = mess;
+        messageDiv.textContent = message;
 
         chatMessages.appendChild(timeDiv);
         chatMessages.appendChild(messageDiv);
     }
 }
 
+
 function loadHistory(messages) {
     const chatMessages = document.getElementById("chat-messages");
-    chatMessages.innerHTML = ''; 
+    chatMessages.innerHTML = '';
     messages.forEach(msg => {
         displayMessage(msg.mess, msg.date);
     });
