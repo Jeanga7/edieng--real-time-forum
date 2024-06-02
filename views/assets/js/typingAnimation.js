@@ -20,7 +20,7 @@ function disableAllInputs() {
             e.disabled = true;
         })
         resolve();
-    })
+    });
 }
 
 function enableAllInputs() {
@@ -29,7 +29,7 @@ function enableAllInputs() {
             e.disabled = false;
         })
         resolve();
-    })
+    });
 }
 
 function typing(element, txt, className, s = speed) {
@@ -44,16 +44,16 @@ function typing(element, txt, className, s = speed) {
 function typeChar(delay, element, txt, className, i) {
     return new Promise((resolve) => {
         setTimeout(() => {
-            let prevU = document.querySelector("#" + className + "-underscore");
-            if (prevU) {
-                prevU.remove();
+            let prevUnderscore = document.querySelector("#" + className + "-underscore");
+            if (prevUnderscore) {
+                prevUnderscore.remove();
             }
             element.innerHTML += txt.charAt(i);
-            let newU = document.createElement("span");
-            newU.textContent = "_";
-            newU.id = className + "-underscore";
-            newU.className = "cursor blinking"
-            element.appendChild(newU);
+            let newUnderscore = document.createElement("span");
+            newUnderscore.textContent = "_";
+            newUnderscore.id = className + "-underscore";
+            newUnderscore.className = "cursor blinking";
+            element.appendChild(newUnderscore);
             resolve();
         }, delay);
     });
@@ -72,7 +72,7 @@ function loadLoginDOM() {
     return new Promise((resolve) => {
         document.querySelector("#container").innerHTML = loginView;
         resolve();
-    })
+    });
 }
 
 function startWelcomeTerminal() {
@@ -88,10 +88,9 @@ function startWelcomeTerminal() {
             setTimeout(async () => {
                 let txtsList = ["Hello ", "talent", " !", "Welcome to our", "Real Time Forum", "."];
                 await typeInTxts("#welcome-text", txtsList, "wlc", 50);
-                resolve()
+                resolve();
             }, 500)
-        })
-
+        });
         resolve();
     });
 }
@@ -112,20 +111,19 @@ function startLogsTerminal() {
                 l.style.height = "48%";
                 l.style.width = "100%";
                 resolve()
-            }, 200)
-        })
+            }, 200);
+        });
 
         // Typing
         await new Promise((resolve) => {
             setTimeout(async () => {
                 let txtsList = ["$> Page loaded successfully"];
                 await typeInTxts("#logs-text", txtsList, "logs");
-                resolve()
+                resolve();
             }, 500)
-        })
-
-        resolve()
-    })
+        });
+        resolve();
+    });
 }
 
 function shrinkLeftBox() {
@@ -133,9 +131,8 @@ function shrinkLeftBox() {
         let leftBox = document.querySelector("#auth-left")
         leftBox.style.width = "calc(50% - 2vh)";
         leftBox.style.marginLeft = "0";
-
-        resolve()
-    })
+        resolve();
+    });
 }
 
 function expandAuthRight() {
@@ -144,7 +141,7 @@ function expandAuthRight() {
             document.querySelector("#auth-right").style.width = "calc(50% - 2vh)";
             resolve();
         }, 400);
-    })
+    });
 }
 
 function startLoginTerminal() {
@@ -175,10 +172,9 @@ function startLoginTerminal() {
                     " "
                 ];
                 await typeInTxts("#login-username-row", txtsList, "lgn");
-                resolve()
+                resolve();
             }, 500)
-        })
-
+        });
         resolve();
     });
 }
@@ -203,9 +199,9 @@ function resizeInput() {
             let mWidth = m.offsetWidth;
             el.style.width = (mWidth + 15) + "px";
         });
-    })
+    });
 }
 
 function firstFieldFocus(selector) {
-    document.querySelectorAll(`${selector} input`)[0].focus()
+    document.querySelectorAll(`${selector} input`)[0].focus();
 }

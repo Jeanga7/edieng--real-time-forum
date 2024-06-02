@@ -15,12 +15,12 @@ document.addEventListener("keydown", async (e) => {
                     .then(r => r.json())
                     .then(async (d) => {
                         let logTxt = document.querySelector("#logs-text");
-                        let color = "success"
-                        let res = "Username OK."
-                        let found = d.length === 0
+                        let color = "success";
+                        let res = "Username OK.";
+                        let found = d.length === 0;
                         if (found) {
-                            color = "danger"
-                            res = "Bad username. Try again."
+                            color = "danger";
+                            res = "Bad username. Try again.";
                         }
                         logTxt.innerHTML +=
                             `<span class="txt ${color}"></span><br>`;
@@ -29,15 +29,15 @@ document.addEventListener("keydown", async (e) => {
                         await typing(txts[txts.length - 1], res, "logs");
                         if (!found) {
                             resolve();
-                            printed["username"] = true
-                            checked["username"] = true
+                            printed["username"] = true;
+                            checked["username"] = true;
                         }
-                    })
-            })
+                    });
+            });
         }
 
         // Verify password
-        document.querySelector("#login-username").readOnly = true
+        document.querySelector("#login-username").readOnly = true;
 
         if (!printed["password"]) {
             let txtsList = [
@@ -47,7 +47,7 @@ document.addEventListener("keydown", async (e) => {
                 " "
             ];
             await typeInTxts("#login-password-row", txtsList, "lgn");
-            printed["password"] = true
+            printed["password"] = true;
         }
 
         // Verify username
@@ -79,8 +79,8 @@ document.addEventListener("keydown", async (e) => {
                             printed["password"] = true
                             checked["password"] = true
                         }
-                    })
-            })
+                    });
+            });
         }
 
         if (checked["username"] && checked["password"]) {
@@ -88,11 +88,11 @@ document.addEventListener("keydown", async (e) => {
             document.querySelector("#logs").classList.add("slide-bottom-left");
             document.querySelector("#auth-right").classList.add("slide-right");
             await new Promise((resolve) => {
-                setTimeout(()=>{
+                setTimeout(() => {
                     document.querySelector("#container").innerHTML = "";
                     resolve();
                 }, 1800)
-            })
+            });
         }
     }
 });
