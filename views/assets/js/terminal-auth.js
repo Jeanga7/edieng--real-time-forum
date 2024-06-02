@@ -84,7 +84,15 @@ document.addEventListener("keydown", async (e) => {
         }
 
         if (checked["username"] && checked["password"]) {
-            alert("Gooooo")
+            document.querySelector("#welcome").classList.add("slide-top-left");
+            document.querySelector("#logs").classList.add("slide-bottom-left");
+            document.querySelector("#auth-right").classList.add("slide-right");
+            await new Promise((resolve) => {
+                setTimeout(()=>{
+                    document.querySelector("#container").innerHTML = "";
+                    resolve();
+                }, 1800)
+            })
         }
     }
 });

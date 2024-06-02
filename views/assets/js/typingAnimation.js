@@ -1,6 +1,7 @@
 const speed = 15;
 
 window.onload = async () => {
+    await loadLoginDOM();
     await hidePreloader();
     await disableAllInputs();
     await startWelcomeTerminal();
@@ -10,7 +11,7 @@ window.onload = async () => {
     await startLoginTerminal();
     await enableAllInputs();
     resizeInput();
-    console.log("OK");
+    firstFieldFocus("#login-form");
 };
 
 function disableAllInputs() {
@@ -65,6 +66,13 @@ function hidePreloader() {
             resolve();
         }, 2000);
     });
+}
+
+function loadLoginDOM() {
+    return new Promise((resolve) => {
+        document.querySelector("#container").innerHTML = loginView;
+        resolve();
+    })
 }
 
 function startWelcomeTerminal() {
@@ -196,4 +204,8 @@ function resizeInput() {
             el.style.width = (mWidth + 15) + "px";
         });
     })
+}
+
+function firstFieldFocus(selector) {
+    document.querySelectorAll(`${selector} input`)[0].focus()
 }

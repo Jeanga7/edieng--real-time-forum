@@ -17,6 +17,7 @@ body {
     margin: 0;
     font-family: 'IBM Plex Mono';
     letter-spacing: 0.5px;
+    overflow: hidden;
 }
 
 body {
@@ -141,6 +142,7 @@ body {
     font-size: 0.75em;
     padding: 0 12px;
 }
+
 #auth-btns {
     height: 40px;
     width: 100%;
@@ -171,15 +173,19 @@ span.auth-btn.active {
 .warning {
     color: orange;
 }
+
 .danger {
     color: red;
 }
+
 .success {
     color: var(--fluo);
 }
+
 .command {
     font-weight: 600;
 }
+
 .auth-input {
     background-color: black;
     border: none;
@@ -192,6 +198,7 @@ span.auth-btn.active {
     font-family: 'IBM Plex Mono';
     font-size: 1em;
 }
+
 .auth-input:focus {
     outline: none;
 }
@@ -208,4 +215,135 @@ span.auth-btn.active {
     overflow: hidden;
     white-space: nowrap;
     font-size: 0.9em;
+}
+
+.slide-top {
+    animation: slideTop 800ms 1000ms;
+}
+
+.slide-bottom {
+    animation: slideBottom 800ms 1000ms;
+}
+
+.slide-left {
+    animation: slideLeft 800ms 1000ms;
+}
+
+.slide-right {
+    animation: slideRight 800ms 1000ms;
+}
+
+/* Straight Translations */
+@keyframes slideTop {
+    0% {
+        transform: translate(0px, 0px);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(0px, -100vh);
+        opacity: 0;
+    }
+}
+
+@keyframes slideBottom {
+    0% {
+        transform: translate(0px, 0px);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(0px, 100vh);
+        opacity: 0;
+    }
+}
+
+@keyframes slideLeft {
+    0% {
+        transform: translate(0px, 0px);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-100vw, 0px);
+        opacity: 0;
+    }
+}
+
+@keyframes slideRight {
+    0% {
+        transform: translate(0px, 0px);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(100vw, 0px);
+        opacity: 0;
+    }
+}
+
+
+.slide-top-left {
+    animation: slideTopLeft 800ms 1000ms;
+}
+
+.slide-top-right {
+    animation: slideTopRight 800ms 1000ms;
+}
+
+.slide-bottom-left {
+    animation: slideBottomLeft 800ms 1000ms;
+}
+
+.slide-bottom-right {
+    animation: slideBottomRight 800ms 1000ms;
+}
+
+/* Diagonal Translations */
+@keyframes slideTopLeft {
+    0% {
+        transform: translate(0px, 0px);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-100vw, -100vh);
+        opacity: 0;
+    }
+}
+
+@keyframes slideTopRight {
+    0% {
+        transform: translate(0px, 0px);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(100vw, -100vh);
+        opacity: 0;
+    }
+}
+
+@keyframes slideBottomLeft {
+    0% {
+        transform: translate(0px, 0px);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-100vw, 100vh);
+        opacity: 0;
+    }
+}
+
+@keyframes slideBottomRight {
+    0% {
+        transform: translate(0px, 0px);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(100vw, 100vh);
+        opacity: 0;
+    }
 }
