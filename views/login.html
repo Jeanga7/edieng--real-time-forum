@@ -41,16 +41,19 @@
                 <div class="terminal-body">
                     <form id="login-form">
                         <p id="login-text" class="infos-txt">
-                            <span class="txt command"></span><br>
-                            <span class="txt"></span><br>
-                            <span class="txt"></span><br>
-                            <span class="txt"></span><br>
-                            <span class="txt warning"></span><br>
-                            <br><br>
-                            <span class="txt command"></span><br>
+                            <!-- Nickname row -->
+                            <span id="login-intro">
+                                <span class="txt command"></span><br>
+                                <span class="txt"></span><br>
+                                <span class="txt"></span><br>
+                                <span class="txt"></span><br>
+                                <span class="txt warning"></span><br>
+                                <br><br>
+                                <span class="txt command"></span><br>
+                            </span>
 
                             <!-- Nickname row -->
-                            <span class="auth-row">
+                            <span class="auth-row" id="login-username-row">
                                 <span class="txt"></span>
                                 <span class="txt bold-fluo"></span>
                                 <span class="txt"></span>
@@ -59,7 +62,17 @@
                                 <span class="txt"></span>
                                 <span class="measurer"></span>
                             </span>
+                            <br>
 
+                            <!-- Password row -->
+                            <span class="auth-row" id="login-password-row">
+                                <span class="txt"></span>
+                                <span class="txt bold-fluo"></span>
+                                <span class="txt"></span>
+                                <input type="password" name="login-password" id="login-password" class="auth-input">
+                                <span class="txt"></span>
+                                <span class="measurer"></span>
+                            </span>
                             <br>
                         </p>
                     </form>
@@ -75,29 +88,59 @@
     <script src="assets/js/typingAnimation.js"></script>
     <script>
         // Login Check
-        document.querySelector("#login-form").addEventListener("submit", (e) => {
-            e.preventDefault();
+        let printed = {}
+        let checked = {}
+        document.addEventListener("keydown", async (e) => {
+            if (e.code === "Enter") {
+                e.preventDefault();
 
-            var formData = new FormData(event.target);
+                let username = document.querySelector("#login-username").value;
 
-            let entries = formData.entries().toArray();
-            let username = entries[0][1];
-
-            fetch('/api/users?username='+username, {method: 'GET'})
-            .then(r => r.json())
-            .then(async (d)=>{
-                let logTxt = document.querySelector("#logs-text");
-                let color = "success"
-                let res = "Username OK."
-                if (d.length === 0) {
-                    color = "danger"
-                    res = "Bad username. Try again."
+                // Verify username
+                if (!checked["username"]) {
+                    await new Promise((resolve) => {
+                        fetch('/api/users?username=' + username, {
+                                method: 'GET'
+                            })
+                            .then(r => r.json())
+                            .then(async (d) => {
+                                let logTxt = document.querySelector("#logs-text");
+                                let color = "success"
+                                let res = "Username OK."
+                                let found = d.length === 0
+                                if (found) {
+                                    color = "danger"
+                                    res = "Bad username. Try again."
+                                }
+                                logTxt.innerHTML += `<span class="txt ${color}"></span><br>`;
+    
+                                let txts = logTxt.querySelectorAll(".txt");
+                                await typing(txts[txts.length - 1], res, "logs");
+                                if (!found) {
+                                    resolve();
+                                    printed["username"] = true
+                                    checked["username"] = true
+                                }
+                            })
+                    })                    
                 }
-                logTxt.innerHTML += `<span class="txt ${color}"></span><br>`;
-                
-                let txts = logTxt.querySelectorAll(".txt");
-                await typing(txts[txts.length-1], res, "logs");
-            })
+
+                // Verify password
+                document.querySelector("#login-username").readOnly = true
+
+                if (!printed["password"]) {
+                    let txtsList = [
+                        "Enter your ",
+                        "password",
+                        ": ",
+                        " "
+                    ];
+                    await typeInTxts("#login-password-row", txtsList, "lgn");
+                    printed["password"] = true
+                }
+
+                document.querySelector("#login-password").focus();
+            }
         });
     </script>
 </body>

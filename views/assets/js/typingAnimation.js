@@ -15,7 +15,7 @@ window.onload = async () => {
 
 function disableAllInputs() {
     return new Promise((resolve) => {
-        document.querySelectorAll("input").forEach(e=>{
+        document.querySelectorAll("input").forEach(e => {
             e.disabled = true;
         })
         resolve();
@@ -24,14 +24,14 @@ function disableAllInputs() {
 
 function enableAllInputs() {
     return new Promise((resolve) => {
-        document.querySelectorAll(".auth-input").forEach(e=>{
+        document.querySelectorAll(".auth-input").forEach(e => {
             e.disabled = false;
         })
         resolve();
     })
 }
 
-function typing(element, txt, className, s=speed) {
+function typing(element, txt, className, s = speed) {
     return new Promise(async (resolve) => {
         for (let i = 0; i < txt.length; i++) {
             await typeChar(s, element, txt, className, i);
@@ -78,12 +78,8 @@ function startWelcomeTerminal() {
         // Typing
         await new Promise((resolve) => {
             setTimeout(async () => {
-                let elementsList = document.querySelectorAll("#welcome-text .txt");
                 let txtsList = ["Hello ", "talent", " !", "Welcome to our", "Real Time Forum", "."];
-
-                for (let x = 0; x < elementsList.length; x++) {
-                    await typing(elementsList[x], txtsList[x], "wlc", 50);
-                }
+                await typeInTxts("#welcome-text", txtsList, "wlc", 50);
                 resolve()
             }, 500)
         })
@@ -114,12 +110,8 @@ function startLogsTerminal() {
         // Typing
         await new Promise((resolve) => {
             setTimeout(async () => {
-                let elementsList = document.querySelectorAll("#logs-text .txt");
                 let txtsList = ["$> Page loaded successfully"];
-
-                for (let x = 0; x < elementsList.length; x++) {
-                    await typing(elementsList[x], txtsList[x], "logs");
-                }
+                await typeInTxts("#logs-text", txtsList, "logs");
                 resolve()
             }, 500)
         })
@@ -158,23 +150,23 @@ function startLoginTerminal() {
         // Typing
         await new Promise((resolve) => {
             setTimeout(async () => {
-                let elementsList = document.querySelectorAll("#login-text .txt");
                 let txtsList = [
                     "$> help",
                     "These infos are needed for login :",
                     " - nickname or email",
                     " - password",
                     "User should be registered first before trying to login.",
-                    "$> login",
+                    "$> login"
+                ];
+                await typeInTxts("#login-intro", txtsList, "lgn");
+
+                txtsList = [
                     "Enter your ",
                     "nickname or email",
                     ": ",
                     " "
                 ];
-
-                for (let x = 0; x < elementsList.length; x++) {
-                    await typing(elementsList[x], txtsList[x], "lgn");
-                }
+                await typeInTxts("#login-username-row", txtsList, "lgn");
                 resolve()
             }, 500)
         })
@@ -183,17 +175,25 @@ function startLoginTerminal() {
     });
 }
 
+async function typeInTxts(selector, txtsList, className, s = speed) {
+    let elementsList = document.querySelectorAll(`${selector} .txt`);
+
+    for (let x = 0; x < elementsList.length; x++) {
+        await typing(elementsList[x], txtsList[x], className, s);
+    }
+}
+
 function resizeInput() {
-    document.querySelectorAll(".auth-input").forEach(el=>{
-        el.parentNode.addEventListener("click", (e)=>{
+    document.querySelectorAll(".auth-input").forEach(el => {
+        el.parentNode.addEventListener("click", (e) => {
             el.focus();
         });
-        
-        el.addEventListener("input", (e)=>{
+
+        el.addEventListener("input", (e) => {
             let m = el.parentNode.querySelector(".measurer");
             m.textContent = el.value;
             let mWidth = m.offsetWidth;
-            el.style.width = (mWidth+15) + "px";
+            el.style.width = (mWidth + 15) + "px";
         });
     })
 }
