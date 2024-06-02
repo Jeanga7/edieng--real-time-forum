@@ -9,7 +9,7 @@ document.addEventListener("keydown", async (e) => {
         let username = document.querySelector("#login-username").value;
         if (username.length > 0 && !checked["username"]) {
             await new Promise((resolve) => {
-                fetch('/api/users?username=' + username, {
+                fetch('/api/users?login=' + username, {
                         method: 'POST'
                     })
                     .then(r => r.json())
@@ -56,7 +56,7 @@ document.addEventListener("keydown", async (e) => {
         let password = pwd.value;
         if (password.length > 0 && !checked["password"]) {
             await new Promise((resolve) => {
-                fetch(`/api/users?username=${username}&password=${password}`, {
+                fetch(`/api/users?login=${username}&password=${password}`, {
                         method: 'POST'
                     })
                     .then(r => r.json())

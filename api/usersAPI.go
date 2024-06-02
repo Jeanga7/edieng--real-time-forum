@@ -27,23 +27,38 @@ func FetchUsers(w http.ResponseWriter, r *http.Request) {
 			paramName = "name"
 		} else if len(params.Get("username")) > 0 {
 			paramName = "username"
+		} else if len(params.Get("login")) > 0 {
+			paramName = "login"
 		} else {
 			expectedParams = false
 		}
 
 		if expectedParams {
-			users = models.User.Fetch([]interface{}{paramName}, []interface{}{params.Get(paramName)})
+			if paramName == "login" {
+				users = models.User.Fetch([]interface{}{"username"}, []interface{}{params.Get("login")})
+				if len(users) == 0 {
+					users = models.User.Fetch([]interface{}{"email"}, []interface{}{params.Get("login")})
+				}
+			} else {
+				users = models.User.Fetch([]interface{}{paramName}, []interface{}{params.Get(paramName)})
+			}
 		} else {
 			users = models.User.Fetch()
 		}
 
-	} else if len(params) == 2 && len(params.Get("username")) > 0 && len(params.Get("password")) > 0 {
-		users = models.User.Fetch([]interface{}{"username"}, []interface{}{params.Get("username")})
-		hashedPassword := fmt.Sprintf("%s", users[0].Values["password"])
+	} else if len(params) == 2 && len(params.Get("login")) > 0 && len(params.Get("password")) > 0 {
+		users = models.User.Fetch([]interface{}{"username"}, []interface{}{params.Get("login")})
+		if len(users) == 0 {
+			users = models.User.Fetch([]interface{}{"email"}, []interface{}{params.Get("login")})
+		}
 
-		err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(params.Get("password")))
-		if err != nil {
-			users = []models.Model{}
+		if len(users) > 0 {
+			hashedPassword := fmt.Sprintf("%s", users[0].Values["password"])
+	
+			err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(params.Get("password")))
+			if err != nil {
+				users = []models.Model{}
+			}			
 		}
 	}
 
