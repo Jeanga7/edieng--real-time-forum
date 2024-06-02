@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"forum/helpers"
 	"forum/models"
 	"net/http"
@@ -9,7 +10,31 @@ import (
 
 func FetchUsers(w http.ResponseWriter, r *http.Request) {
 	// Fetch All Users
-	users := models.User.Fetch()
+	var users []models.Model
+
+	params := r.URL.Query()
+	fmt.Println(params)
+	paramName := ""
+	expectedParams := true
+
+	if len(params.Get("id")) > 0 {
+		paramName = "id"
+	} else if len(params.Get("email")) > 0 {
+		paramName = "email"
+	} else if len(params.Get("name")) > 0 {
+		paramName = "name"
+	} else if len(params.Get("username")) > 0 {
+		paramName = "username"
+	} else {
+		expectedParams = false
+	}
+
+	if expectedParams {
+		users = models.User.Fetch([]interface{}{paramName}, []interface{}{params.Get(paramName)})
+	} else {
+		users = models.User.Fetch()
+	}
+
 	usersData := func() []map[string]interface{} {
 		allValues := []map[string]interface{}{}
 		for _, u := range users {
