@@ -15,6 +15,7 @@ func Routes(mux *http.ServeMux) {
 	// User routes
 	mux.HandleFunc("/register", controllers.RegisterHandler)
 	mux.HandleFunc("/login", controllers.LoginHandler)
+	mux.HandleFunc("/start", controllers.NewLogin)
 	mux.HandleFunc("/logout", controllers.LogoutHandler)
 
 	// Posts routes

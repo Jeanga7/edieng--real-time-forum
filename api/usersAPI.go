@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"forum/helpers"
 	"forum/models"
 	"net/http"
@@ -13,7 +12,6 @@ func FetchUsers(w http.ResponseWriter, r *http.Request) {
 	var users []models.Model
 
 	params := r.URL.Query()
-	fmt.Println(params)
 	paramName := ""
 	expectedParams := true
 

@@ -286,3 +286,33 @@ func Auth(r *http.Request, w http.ResponseWriter) (bool, []models.Model) {
 	}
 	return IsLogged, nil
 }
+
+func NewLogin(w http.ResponseWriter, r *http.Request) {
+	IsLogged, _ := Auth(r, w)
+	if IsLogged {
+		// Contenu HTML stocké dans une variable
+        htmlContent := `<html><script>window.location.href = "/";</script></html>`
+
+        // Création d'une nouvelle instance de template
+        tmpl, err := template.New("monTemplate").Parse(htmlContent)
+        helpers.ErrorSimple(err)
+
+        // Exécution du template et écriture dans la réponse HTTP
+        err = tmpl.Execute(w, nil)
+        helpers.ErrorSimple(err)
+
+		return
+	}
+	global.W = w
+
+	if !IsLogged {
+		if r.Method == http.MethodPost {
+			Login(w, r)
+			return
+		}
+
+		tmpl, err := template.ParseFiles("./views/login.html")
+		helpers.ErrorSimple(err)
+		tmpl.Execute(w, nil)
+	}
+}
