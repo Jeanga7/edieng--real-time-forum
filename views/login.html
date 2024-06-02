@@ -86,63 +86,7 @@
     </div>
 
     <script src="assets/js/typingAnimation.js"></script>
-    <script>
-        // Login Check
-        let printed = {}
-        let checked = {}
-        document.addEventListener("keydown", async (e) => {
-            if (e.code === "Enter") {
-                e.preventDefault();
-
-                let username = document.querySelector("#login-username").value;
-
-                // Verify username
-                if (!checked["username"]) {
-                    await new Promise((resolve) => {
-                        fetch('/api/users?username=' + username, {
-                                method: 'GET'
-                            })
-                            .then(r => r.json())
-                            .then(async (d) => {
-                                let logTxt = document.querySelector("#logs-text");
-                                let color = "success"
-                                let res = "Username OK."
-                                let found = d.length === 0
-                                if (found) {
-                                    color = "danger"
-                                    res = "Bad username. Try again."
-                                }
-                                logTxt.innerHTML += `<span class="txt ${color}"></span><br>`;
-    
-                                let txts = logTxt.querySelectorAll(".txt");
-                                await typing(txts[txts.length - 1], res, "logs");
-                                if (!found) {
-                                    resolve();
-                                    printed["username"] = true
-                                    checked["username"] = true
-                                }
-                            })
-                    })                    
-                }
-
-                // Verify password
-                document.querySelector("#login-username").readOnly = true
-
-                if (!printed["password"]) {
-                    let txtsList = [
-                        "Enter your ",
-                        "password",
-                        ": ",
-                        " "
-                    ];
-                    await typeInTxts("#login-password-row", txtsList, "lgn");
-                    printed["password"] = true
-                }
-
-                document.querySelector("#login-password").focus();
-            }
-        });
-    </script>
+    <script src="assets/js/terminal-auth.js"></script>
 </body>
 
 </html>

@@ -2,9 +2,12 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"forum/helpers"
 	"forum/models"
 	"net/http"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func FetchUsers(w http.ResponseWriter, r *http.Request) {
@@ -15,22 +18,33 @@ func FetchUsers(w http.ResponseWriter, r *http.Request) {
 	paramName := ""
 	expectedParams := true
 
-	if len(params.Get("id")) > 0 {
-		paramName = "id"
-	} else if len(params.Get("email")) > 0 {
-		paramName = "email"
-	} else if len(params.Get("name")) > 0 {
-		paramName = "name"
-	} else if len(params.Get("username")) > 0 {
-		paramName = "username"
-	} else {
-		expectedParams = false
-	}
+	if len(params) == 1 {
+		if len(params.Get("id")) > 0 {
+			paramName = "id"
+		} else if len(params.Get("email")) > 0 {
+			paramName = "email"
+		} else if len(params.Get("name")) > 0 {
+			paramName = "name"
+		} else if len(params.Get("username")) > 0 {
+			paramName = "username"
+		} else {
+			expectedParams = false
+		}
 
-	if expectedParams {
-		users = models.User.Fetch([]interface{}{paramName}, []interface{}{params.Get(paramName)})
-	} else {
-		users = models.User.Fetch()
+		if expectedParams {
+			users = models.User.Fetch([]interface{}{paramName}, []interface{}{params.Get(paramName)})
+		} else {
+			users = models.User.Fetch()
+		}
+
+	} else if len(params) == 2 && len(params.Get("username")) > 0 && len(params.Get("password")) > 0 {
+		users = models.User.Fetch([]interface{}{"username"}, []interface{}{params.Get("username")})
+		hashedPassword := fmt.Sprintf("%s", users[0].Values["password"])
+
+		err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(params.Get("password")))
+		if err != nil {
+			users = []models.Model{}
+		}
 	}
 
 	usersData := func() []map[string]interface{} {
