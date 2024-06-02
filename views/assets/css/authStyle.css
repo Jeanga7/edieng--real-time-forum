@@ -87,6 +87,7 @@ body {
     border: 4px solid var(--fluo);
     transition: var(--standard-transition);
     flex-grow: 1;
+    overflow-y: auto;
 }
 
 .terminal-head {
