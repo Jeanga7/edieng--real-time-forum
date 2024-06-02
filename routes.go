@@ -1,6 +1,7 @@
 package main
 
 import (
+	"forum/api"
 	"forum/controllers"
 	"net/http"
 )
@@ -32,4 +33,7 @@ func Routes(mux *http.ServeMux) {
 
 	// Dislike routes
 	mux.HandleFunc("/dislike", controllers.Dislike)
+
+	// API Routes
+	mux.HandleFunc("/api/users", api.FetchUsers)
 }
