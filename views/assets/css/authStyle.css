@@ -171,6 +171,12 @@ span.auth-btn.active {
 .warning {
     color: orange;
 }
+.danger {
+    color: red;
+}
+.success {
+    color: var(--fluo);
+}
 .command {
     font-weight: 600;
 }

@@ -39,27 +39,30 @@
             <div id="login" class="terminal-box">
                 <div class="terminal-head">&lt;LOGIN/&gt;</div>
                 <div class="terminal-body">
-                    <p id="login-text" class="infos-txt">
-                        <span class="txt command"></span><br>
-                        <span class="txt"></span><br>
-                        <span class="txt"></span><br>
-                        <span class="txt"></span><br>
-                        <span class="txt warning"></span><br>
-                        <br><br>
-                        <span class="txt command"></span><br>
+                    <form id="login-form">
+                        <p id="login-text" class="infos-txt">
+                            <span class="txt command"></span><br>
+                            <span class="txt"></span><br>
+                            <span class="txt"></span><br>
+                            <span class="txt"></span><br>
+                            <span class="txt warning"></span><br>
+                            <br><br>
+                            <span class="txt command"></span><br>
 
-                        <!-- Nickname row -->
-                        <span class="auth-row">
-                            <span class="txt"></span>
-                            <span class="txt bold-fluo"></span>
-                            <span class="txt"></span>
-                            <input type="text" name="login-username" id="login-username" class="auth-input" autofocus>
-                            <span class="txt"></span>
-                            <span class="measurer"></span>
-                        </span>
+                            <!-- Nickname row -->
+                            <span class="auth-row">
+                                <span class="txt"></span>
+                                <span class="txt bold-fluo"></span>
+                                <span class="txt"></span>
+                                <input type="text" name="login-username" id="login-username" class="auth-input"
+                                    autofocus>
+                                <span class="txt"></span>
+                                <span class="measurer"></span>
+                            </span>
 
-                        <br>
-                    </p>
+                            <br>
+                        </p>
+                    </form>
                 </div>
             </div>
             <div id="auth-btns">
@@ -70,6 +73,33 @@
     </div>
 
     <script src="assets/js/typingAnimation.js"></script>
+    <script>
+        // Login Check
+        document.querySelector("#login-form").addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            var formData = new FormData(event.target);
+
+            let entries = formData.entries().toArray();
+            let username = entries[0][1];
+
+            fetch('/api/users?username='+username, {method: 'GET'})
+            .then(r => r.json())
+            .then(async (d)=>{
+                let logTxt = document.querySelector("#logs-text");
+                let color = "success"
+                let res = "Username OK."
+                if (d.length === 0) {
+                    color = "danger"
+                    res = "Bad username. Try again."
+                }
+                logTxt.innerHTML += `<span class="txt ${color}"></span><br>`;
+                
+                let txts = logTxt.querySelectorAll(".txt");
+                await typing(txts[txts.length-1], res, "logs");
+            })
+        });
+    </script>
 </body>
 
 </html>
