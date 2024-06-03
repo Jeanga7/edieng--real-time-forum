@@ -34,7 +34,7 @@ function openWs() {
         if (message.type === 'history') {
             loadHistory(message.messages);
         } else {
-            displayMessage(message.mess, message.date);
+            displayMessage(message.mess, message.date,"sms-received");
         }
     };
 
@@ -96,7 +96,6 @@ function sendMessage() {
 }
 
 function displayMessage(message, date,type) {
-    if (message != "") {
         const chatMessages = document.getElementById("chat-messages");
         const messageDiv = document.createElement("div");
         const timeDiv = document.createElement("div");
@@ -109,7 +108,6 @@ function displayMessage(message, date,type) {
 
         chatMessages.appendChild(timeDiv);
         chatMessages.appendChild(messageDiv);
-    }
 }
 
 
