@@ -1,4 +1,8 @@
-var Chatopened = false
+const currentUser = document.querySelector('#user-full-name').textContent;
+
+let ws;
+let currentDestinataire;
+
 document.addEventListener('DOMContentLoaded', (event) => {
     openWs();
 
@@ -18,8 +22,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     });
 });
 
-let ws;
-let currentUser;
 
 function openWs() {
     ws = new WebSocket("ws://localhost:8989/messages");
@@ -30,45 +32,31 @@ function openWs() {
 
     ws.onmessage = (e) => {
         const message = JSON.parse(e.data);
-        console.log("message", message);
+        // console.log("destinataire", currentDestinataire);
         if (message.type === 'history') {
+            console.log("destinataire",message);
             loadHistory(message.messages);
         } else {
-            displayMessage(message.mess, message.date);
+            console.log("desti",message.destinataire);
+            displayMessage(message.message, message.date, message.destinataire);
         }
     };
 
-    ws.onerror = (error) => {
-        console.log("WebSocket Error: ", error);
-    };
-
-    ws.onclose = () => {
-        console.log("WebSocket connection closed");
-    };
-
-   console.log(getCookie("sessionID"))
 }
 
-function getCookie(name) {
-    const value = '; ' + document.cookie;
-    const parts = value.split('; ' + name + '=');
-    console.log(parts);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-  }
-
 function startChat(username) {
-    Chatopened = true
-    currentUser = username;
+    currentDestinataire = username;
     document.getElementById('chat-user-name').textContent = username;
     document.getElementById('chat-container').style.display = 'block';
-    document.getElementById('chat-messages').innerHTML = ''; 
+    document.getElementById('chat-messages').innerHTML = '';
     sendInitialMessage(username);
 }
 
 function sendInitialMessage(username) {
     const data = {
-        mess: "",
-        uname: username,
+        message: "",
+        sender: currentUser,
+        destinataire: username,
         date: "",
         type: "fetch"
     };
@@ -83,28 +71,36 @@ function sendMessage() {
         const date = new Date();
         const dateTime = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
         const data = {
-            mess: message,
-            uname: currentUser,
+            message: message,
+            sender: currentUser,
+            destinataire: currentDestinataire,
             date: dateTime,
             type: "message"
         };
 
-        console.log("je suis here",data.uname);
+        // console.log("je suis here", data.destinataire);
         ws.send(JSON.stringify(data));
-        displayMessage(message, dateTime,"sms");
+        displayMessage(message, dateTime, currentDestinataire);
     }
 }
 
-function displayMessage(message, date,type) {
+function displayMessage(message, date, destinataire) {
+    // class sms-received 
+    // console.log("messageReçu", message);
     if (message != "") {
         const chatMessages = document.getElementById("chat-messages");
         const messageDiv = document.createElement("div");
         const timeDiv = document.createElement("div");
 
-        timeDiv.classList.add("dayeu");
+        timeDiv.classList.add("smsDate");
         timeDiv.textContent = date;
-
-        messageDiv.classList.add(type);
+        console.log(";",currentUser);
+        console.log("ù",destinataire);
+        if (currentUser !== destinataire) {
+            messageDiv.classList.add("sms");
+        } else {
+            messageDiv.classList.add("sms-received");
+        }
         messageDiv.textContent = message;
 
         chatMessages.appendChild(timeDiv);
@@ -117,7 +113,8 @@ function loadHistory(messages) {
     const chatMessages = document.getElementById("chat-messages");
     chatMessages.innerHTML = '';
     messages.forEach(msg => {
-        displayMessage(msg.mess, msg.date,"sms-received");
+        console.log("msg", msg);
+        displayMessage(msg.message, msg.date, msg.destinataire);
     });
 }
 
