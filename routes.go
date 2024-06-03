@@ -38,4 +38,18 @@ func Routes(mux *http.ServeMux) {
 
 	// API Routes
 	mux.HandleFunc("/api/users", api.FetchUsers)
+
+	mux.HandleFunc("/api/posts", api.FetchPosts)
+
+	mux.HandleFunc("/api/category", api.FetchCategory)
+
+	mux.HandleFunc("/api/session", api.FetchSessions)
+	
+	mux.HandleFunc("/api/comments", api.FetchComments)
+
+	mux.HandleFunc("/api/discussions", api.FetchDiscussions)
+
+	mux.HandleFunc("/api/likes", api.FetchLike)
+
+	mux.HandleFunc("/api/dislikes", api.FetchDislike)
 }
