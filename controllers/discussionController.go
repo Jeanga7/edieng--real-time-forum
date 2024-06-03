@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"forum/models"
 	"log"
 	"net/http"
@@ -10,7 +9,10 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var SenderName, DestName string
+var clients = make(map[*websocket.Conn]string)
+var message = make(chan Message)
+
+// var dest string
 
 type Message struct {
 	MessageContent string `json:"message"`
@@ -26,51 +28,64 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
-func HandlerWebs(w http.ResponseWriter, r *http.Request) {
+func HandleMessages(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("Error upgrading connection:", err)
 		return
 	}
 	defer conn.Close()
+	var initialMessage Message
+	err = conn.ReadJSON(&initialMessage)
+	if err != nil {
+		log.Println("Error reading initial message:", err)
+		return
+	}
 
+	if initialMessage.Type == "fetch" {
+		SendPreviousMessages(conn, initialMessage.Sender, initialMessage.Destinataire)
+	}
+
+	name, _, _, _ := FindUsersOnline(r)
+
+	clients[conn] = name
 	for {
-		handleMessage(conn)
-	}
-}
-
-func handleMessage(conn *websocket.Conn) {
-	_, msg, err := conn.ReadMessage()
-	if err != nil {
-		log.Println("Error reading message:", err)
-		return
-	}
-	// fmt.Println("msg", string(msg))
-	var message Message
-	err = json.Unmarshal(msg, &message)
-	if err != nil {
-		log.Println("Error unmarshalling message:", err)
-		return
-	}
-
-	fmt.Println("message", message)
-
-	if message.Type == "fetch" {
-		SenderName = message.Sender
-		DestName = message.Destinataire
-		SendPreviousMessages(conn, message.Sender, message.Destinataire)
-	} else if message.Type == "message" {
-
-		discussionId := GetDiscussionId(SenderName, DestName)
+		var msg Message
+		err := conn.ReadJSON(&msg)
+		if err != nil {
+			log.Printf("Error: %v", err)
+			delete(clients, conn)
+			break
+		}
+		discussionId := GetDiscussionId(msg.Sender, msg.Destinataire)
 
 		if discussionId == "" {
-			err = SaveDiscussion(message.MessageContent, message.Sender, message.Destinataire, message.Date)
+			err = SaveDiscussion(msg.MessageContent, msg.Sender, msg.Destinataire, msg.Date)
+
 		} else {
-			err = AppendMessageToDiscussion(discussionId, message.MessageContent, message.Sender, message.Destinataire, message.Date)
+			err = AppendMessageToDiscussion(discussionId, msg.MessageContent, msg.Sender, msg.Destinataire, msg.Date)
 		}
 
 		if err != nil {
 			log.Println("Error saving discussion:", err)
+		}
+		SendPreviousMessages(conn, msg.Sender, msg.Destinataire)
+		message <- msg
+	}
+}
+
+func HandleTheMessages() {
+	for {
+		msg := <-message
+		for client, username := range clients {
+			if username == msg.Destinataire {
+				err := client.WriteJSON(msg)
+				if err != nil {
+					log.Printf("Error: %v", err)
+					client.Close()
+					delete(clients, client)
+				}
+			}
 		}
 	}
 }
