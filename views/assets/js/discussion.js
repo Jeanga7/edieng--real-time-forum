@@ -1,27 +1,24 @@
 const currentUser = document.querySelector('#user-full-name').textContent;
 
 // let Ischatopened = false
-let currentdiscussion
+let currentdiscussion;
 
 let ws;
 let currentDestinataire;
 
 document.addEventListener('DOMContentLoaded', (event) => {
     openWs();
+    
     document.querySelectorAll('.discussion').forEach(user => {
-        // console.log(user, Ischatopened);
         const username = user.textContent.split(' - ')[0].trim();
         user.addEventListener('click', () => {
             user.setAttribute("Ischatopened", true)
-            // Ischatopened = true
-            // console.log(username);
             currentdiscussion = username
             startChat(username);
         });
     });
 
     document.querySelector("#send-message").addEventListener("click", () => {
-        // Ischatopened = true
         sendMessage();
     });
 
@@ -39,33 +36,39 @@ document.addEventListener('DOMContentLoaded', (event) => {
 function openWs() {
     ws = new WebSocket("ws://localhost:8989/messages");
 
+    
     ws.onopen = () => {
         console.log("Connected to WebSocket...");
+        AskforNotification()
     };
+
+
 
     ws.onmessage = (e) => {
         const message = JSON.parse(e.data);
-        var sender
         if (message.type === 'history') {
             loadHistory(message.messages);
         } else {
-            if (message.sender.includes(" ")) {
-                sender = message.sender.replace(" ", "_")
-            } else {
-                sender = message.sender
-            }
-
             console.log("NOOOOOOOOOOOOOOON");
-            if (currentdiscussion == message.destinataire){
+            
+            if (currentdiscussion == message.sender) {
                 displayMessage(message.message, message.date, message.destinataire);
             }
-            var divs = document.getElementById(sender)
-            divs.style.backgroundColor = "red"
-            console.log(divs);
-          
+            updateNotification(message.sender, message.Notif.notification)
         }
     };
 
+}
+
+function updateNotification(sender, count) {
+    if (sender.includes(" ")) {
+        sender = sender.replace(" ", "_")
+    }
+
+    let notificationElement = document.getElementById(sender);
+    if (notificationElement) {
+        notificationElement.textContent = parseInt(count);
+    }
 }
 
 function startChat(username) {
@@ -84,7 +87,18 @@ function sendInitialMessage(username) {
         date: "",
         type: "fetch"
     };
+
+    ///
+   
     ws.send(JSON.stringify(data));
+}
+
+function AskforNotification(){
+    const data2 = {
+        sender: currentUser,
+        type: "notification"
+    };
+    ws.send(JSON.stringify(data2));
 }
 
 function sendMessage() {

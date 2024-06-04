@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"forum/models"
 	"log"
 	"net/http"
@@ -18,6 +19,7 @@ type Message struct {
 	Sender         string `json:"sender"`
 	Destinataire   string `json:"destinataire"`
 	Date           string `json:"date"`
+	Notif          Notification
 	Type           string `json:"type"`
 }
 
@@ -42,19 +44,20 @@ func HandleMessages(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 	var initialMessage Message
 	err = conn.ReadJSON(&initialMessage)
+
+	name, _, _, _ := FindUsersOnline(r)
+
 	if err != nil {
 		log.Println("Error reading initial message:", err)
 		return
 	}
-
-	if initialMessage.Type == "fetch" {
-		SendPreviousMessages(conn, initialMessage.Sender, initialMessage.Destinataire)
+	if initialMessage.Type == "notification" {
+		fmt.Println("dès le début......")
 	}
-
-	name, _, _, _ := FindUsersOnline(r)
 
 	clients[conn] = name
 	for {
+
 		var msg Message
 		err := conn.ReadJSON(&msg)
 		if err != nil {
@@ -72,16 +75,36 @@ func HandleMessages(w http.ResponseWriter, r *http.Request) {
 		}
 
 		notificationId := GetNotificationId(msg.Sender, msg.Destinataire)
+		fmt.Println(msg)
 		if notificationId == "" {
 			CreateNotification(msg.Sender, msg.Destinataire)
+		} else if msg.Type == "fetch" {
+			fmt.Println(msg.Destinataire, name)
+			notificationId := GetNotificationId(msg.Destinataire, name)
+			fmt.Println(notificationId)
+			notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
+			fmt.Println("ù*******************", notification)
+			SendPreviousMessages(conn, msg.Sender, msg.Destinataire)
+			if len(notification) > 0 {
+				AddNotif(notificationId, msg.Sender, name, 0)
+			}
 		} else {
-			AddNotif(notificationId, msg.Sender, msg.Destinataire)
+			notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
+			if len(notification) > 0 {
+				currentCount, err := strconv.Atoi(notification[0].Values["notifications"].(string))
+				if err != nil {
+					return
+				}
+
+				number := currentCount + 1
+				AddNotif(notificationId, msg.Sender, name, number)
+			}
 		}
 
 		if err != nil {
 			log.Println("Error saving discussion:", err)
 		}
-		SendPreviousMessages(conn, msg.Sender, msg.Destinataire)
+		// SendPreviousMessages(conn, msg.Sender, msg.Destinataire)
 		message <- msg
 	}
 }
@@ -91,6 +114,15 @@ func HandleTheMessages() {
 		msg := <-message
 		for client, username := range clients {
 			if username == msg.Destinataire {
+				notificationId := GetNotificationId(msg.Sender, msg.Destinataire)
+				notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
+				if len(notification) > 0 {
+					currentCount, err := strconv.Atoi(notification[0].Values["notifications"].(string))
+					if err != nil {
+						return
+					}
+					msg.Notif.NombreNotifications = strconv.Itoa(currentCount)
+				}
 				err := client.WriteJSON(msg)
 				if err != nil {
 					log.Printf("Error: %v", err)
@@ -177,19 +209,10 @@ func CreateNotification(sender string, receiver string) {
 	notif.Create()
 }
 
-func AddNotif(notifId interface{}, sender, receiver string) error {
-	notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notifId})
-	if len(notification) > 0 {
-		currentCount, err := strconv.Atoi(notification[0].Values["notifications"].(string))
-		if err != nil {
-			return err
-		}
+func AddNotif(notifId interface{}, sender, receiver string, number int) error {
 
-		number := currentCount + 1
-
-		data := map[string]interface{}{"notifications": strconv.Itoa(number)}
-		models.Notification.Update(data, "id", notifId)
-	}
+	data := map[string]interface{}{"notifications": strconv.Itoa(number)}
+	models.Notification.Update(data, "id", notifId)
 
 	return nil
 }
