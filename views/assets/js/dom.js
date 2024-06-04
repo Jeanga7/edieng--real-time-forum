@@ -45,7 +45,7 @@ const loginTerminal = `
 
 const registerTerminal = `
 <div id="register" class="terminal-box not-displayed">
-                <div class="terminal-head">&lt;register/&gt;</div>
+                <div class="terminal-head">&lt;REGISTER/&gt;</div>
                 <div class="terminal-body">
                     <form id="register-form">
                         <p id="register-text" class="infos-txt">
@@ -117,8 +117,8 @@ var loginView = `
             </div>
             
             <div id="auth-btns">
-                <span id="login-btn" class="auth-btn active">LOGIN</span>
-                <span id="register-btn" class="auth-btn">REGISTER</span>
+                <span id="login-btn" class="auth-btn active"><span class="btn-bg"></span>LOGIN</span>
+                <span id="register-btn" class="auth-btn"><span class="btn-bg"></span>REGISTER</span>
             </div>
         </div>
 `

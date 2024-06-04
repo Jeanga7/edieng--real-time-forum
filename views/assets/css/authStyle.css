@@ -170,11 +170,15 @@ body {
     display: flex;
     justify-content: center;
     cursor: pointer;
+    transition: var(--standard-transition);
+    overflow: hidden;
+    position: relative;
 }
 
 span.auth-btn.active {
-    background-color: var(--fluo);
+    /* background-color: var(--fluo); */
     color: black;
+    transition: var(--standard-transition);
 }
 
 .warning {
@@ -362,4 +366,18 @@ span.auth-btn.active {
 
 .not-displayed {
     display: none;
+}
+
+.btn-bg {
+    background-color: var(--fluo);
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 0;
+    z-index: -1;
+    transition: var(--standard-transition);
+}
+
+span.auth-btn.active span.btn-bg {
+    width: 100%;
 }
