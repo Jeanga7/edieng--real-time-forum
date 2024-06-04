@@ -68,7 +68,20 @@ body {
 
 }
 
+.usercontainer{
+    display: flex;
+}
+
 .discussion{
+    width: 80%;
+    height: auto;
+    background-color: green;
+    cursor: pointer;
+}
+
+.notification{
+    width: 20%;
+    height: auto;
     background-color: green;
     cursor: pointer;
 }

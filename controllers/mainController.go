@@ -126,7 +126,7 @@ func GetUsers(Sessions []models.Model, Usernames string) ([]helpers.User, []mode
 	Users := models.User.Fetch()
 	for _, v := range Users {
 		var user helpers.User
-		user.Username = v.Values["name"].(string)
+		user.Username = strings.Join(strings.Split(v.Values["name"].(string), " "), "_")
 		for _, s := range Sessions {
 			var id = v.Values["id"].(string)
 			if id == s.Values["idUser"].(string) {

@@ -22,6 +22,12 @@ type Message struct {
 	Type           string `json:"type"`
 }
 
+type Notification struct {
+	Sender              string `json:"sender"`
+	Destinataire        string `json:"destinataire"`
+	NombreNotifications string `json:"notification"`
+}
+
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -151,6 +157,23 @@ func SaveDiscussion(content, sender, receiver, date string) error {
 			"messages":   string(messagesJSON),
 		}
 		newDiscussion.Create()
+
+		// notifID := GetnotifID(sender,receiver)
+
+		// var number string
+		// RealNotif := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notifID})
+
+		// if len(RealNotif) >0{
+		// 	number = RealNotif[0].Values["notifications"].(string)
+		// }
+
+		notif := models.Notification
+		notif.Values = map[string]interface{}{
+			"idSender":      sender,
+			"idReceiver":    receiver,
+			"notifications": "1",
+		}
+		notif.Create()
 	}
 	return nil
 }
@@ -191,6 +214,19 @@ func GetDiscussionId(User1, User2 string) interface{} {
 
 		if (idSender == User1 && idReceiver == User2) || (idSender == User2 && idReceiver == User1) {
 			return discussion.Values["id"]
+		}
+	}
+	return ""
+}
+
+func GetnotifID(User1, User2 string) interface{} {
+	Notifications := models.Notification.Fetch()
+	for _, notif := range Notifications {
+		idSender := notif.Values["idSender"].(string)
+		idReceiver := notif.Values["idReceiver"].(string)
+
+		if idSender == User1 && idReceiver == User2 {
+			return notif.Values["id"]
 		}
 	}
 	return ""

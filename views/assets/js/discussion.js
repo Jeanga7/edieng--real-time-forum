@@ -1,23 +1,36 @@
 const currentUser = document.querySelector('#user-full-name').textContent;
 
+// let Ischatopened = false
+let currentdiscussion
+
 let ws;
 let currentDestinataire;
 
 document.addEventListener('DOMContentLoaded', (event) => {
     openWs();
-
     document.querySelectorAll('.discussion').forEach(user => {
+        // console.log(user, Ischatopened);
+        const username = user.textContent.split(' - ')[0].trim();
         user.addEventListener('click', () => {
-            const username = user.textContent.split(' - ')[0].trim();
+            user.setAttribute("Ischatopened", true)
+            // Ischatopened = true
+            // console.log(username);
+            currentdiscussion = username
             startChat(username);
         });
     });
 
     document.querySelector("#send-message").addEventListener("click", () => {
+        // Ischatopened = true
         sendMessage();
     });
 
     document.querySelector("#close-chat").addEventListener('click', () => {
+        // var divs = document.getElementById(currentdiscussion)
+        // divs.style.backgroundColor = "green"
+        document.querySelectorAll('.discussion').forEach(user => {
+            user.setAttribute("Ischatopened", false)
+        });
         closeChat();
     });
 });
@@ -32,13 +45,25 @@ function openWs() {
 
     ws.onmessage = (e) => {
         const message = JSON.parse(e.data);
-        // console.log("destinataire", currentDestinataire);
+        var sender
         if (message.type === 'history') {
-            console.log("destinataire",message);
             loadHistory(message.messages);
         } else {
-            console.log("desti",message.destinataire);
+            if (message.sender.includes(" ")) {
+                sender = message.sender.replace(" ", "_")
+            } else {
+                sender = message.sender
+            }
+
+            // const document.querySelector
+            // if (Ischatopened && message.destinataire === currentUser) {
+            console.log("NOOOOOOOOOOOOOOON");
             displayMessage(message.message, message.date, message.destinataire);
+            var divs = document.getElementById(sender)
+            divs.style.backgroundColor = "red"
+            console.log(divs);
+            // } else {
+            // }
         }
     };
 
@@ -85,8 +110,6 @@ function sendMessage() {
 }
 
 function displayMessage(message, date, destinataire) {
-    // class sms-received 
-    // console.log("messageReçu", message);
     if (message != "") {
         const chatMessages = document.getElementById("chat-messages");
         const messageDiv = document.createElement("div");
@@ -94,8 +117,6 @@ function displayMessage(message, date, destinataire) {
 
         timeDiv.classList.add("smsDate");
         timeDiv.textContent = date;
-        console.log(";",currentUser);
-        console.log("ù",destinataire);
         if (currentUser !== destinataire) {
             messageDiv.classList.add("sms");
         } else {
@@ -105,6 +126,7 @@ function displayMessage(message, date, destinataire) {
 
         chatMessages.appendChild(timeDiv);
         chatMessages.appendChild(messageDiv);
+
     }
 }
 
@@ -113,12 +135,12 @@ function loadHistory(messages) {
     const chatMessages = document.getElementById("chat-messages");
     chatMessages.innerHTML = '';
     messages.forEach(msg => {
-        console.log("msg", msg);
         displayMessage(msg.message, msg.date, msg.destinataire);
     });
 }
 
 function closeChat() {
     document.getElementById('chat-container').style.display = 'none';
+    // Ischatopened = false
     document.getElementById("chat-messages").innerHTML = '';
 }
