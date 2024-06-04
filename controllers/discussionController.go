@@ -5,14 +5,13 @@ import (
 	"forum/models"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/websocket"
 )
 
 var clients = make(map[*websocket.Conn]string)
 var message = make(chan Message)
-
-// var dest string
 
 type Message struct {
 	MessageContent string `json:"message"`
@@ -70,6 +69,13 @@ func HandleMessages(w http.ResponseWriter, r *http.Request) {
 
 		} else {
 			err = AppendMessageToDiscussion(discussionId, msg.MessageContent, msg.Sender, msg.Destinataire, msg.Date)
+		}
+
+		notificationId := GetNotificationId(msg.Sender, msg.Destinataire)
+		if notificationId == "" {
+			CreateNotification(msg.Sender, msg.Destinataire)
+		} else {
+			AddNotif(notificationId, msg.Sender, msg.Destinataire)
 		}
 
 		if err != nil {
@@ -157,24 +163,34 @@ func SaveDiscussion(content, sender, receiver, date string) error {
 			"messages":   string(messagesJSON),
 		}
 		newDiscussion.Create()
-
-		// notifID := GetnotifID(sender,receiver)
-
-		// var number string
-		// RealNotif := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notifID})
-
-		// if len(RealNotif) >0{
-		// 	number = RealNotif[0].Values["notifications"].(string)
-		// }
-
-		notif := models.Notification
-		notif.Values = map[string]interface{}{
-			"idSender":      sender,
-			"idReceiver":    receiver,
-			"notifications": "1",
-		}
-		notif.Create()
 	}
+	return nil
+}
+
+func CreateNotification(sender string, receiver string) {
+	notif := models.Notification
+	notif.Values = map[string]interface{}{
+		"idSender":      sender,
+		"idReceiver":    receiver,
+		"notifications": "1",
+	}
+	notif.Create()
+}
+
+func AddNotif(notifId interface{}, sender, receiver string) error {
+	notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notifId})
+	if len(notification) > 0 {
+		currentCount, err := strconv.Atoi(notification[0].Values["notifications"].(string))
+		if err != nil {
+			return err
+		}
+
+		number := currentCount + 1
+
+		data := map[string]interface{}{"notifications": strconv.Itoa(number)}
+		models.Notification.Update(data, "id", notifId)
+	}
+
 	return nil
 }
 
@@ -205,7 +221,6 @@ func AppendMessageToDiscussion(discussionId interface{}, message, sender, receiv
 	}
 	return nil
 }
-
 func GetDiscussionId(User1, User2 string) interface{} {
 	discussions := models.Discussions.Fetch()
 	for _, discussion := range discussions {
@@ -219,7 +234,7 @@ func GetDiscussionId(User1, User2 string) interface{} {
 	return ""
 }
 
-func GetnotifID(User1, User2 string) interface{} {
+func GetNotificationId(User1, User2 string) interface{} {
 	Notifications := models.Notification.Fetch()
 	for _, notif := range Notifications {
 		idSender := notif.Values["idSender"].(string)

@@ -55,15 +55,14 @@ function openWs() {
                 sender = message.sender
             }
 
-            // const document.querySelector
-            // if (Ischatopened && message.destinataire === currentUser) {
             console.log("NOOOOOOOOOOOOOOON");
-            displayMessage(message.message, message.date, message.destinataire);
+            if (currentdiscussion == message.destinataire){
+                displayMessage(message.message, message.date, message.destinataire);
+            }
             var divs = document.getElementById(sender)
             divs.style.backgroundColor = "red"
             console.log(divs);
-            // } else {
-            // }
+          
         }
     };
 
