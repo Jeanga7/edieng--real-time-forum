@@ -247,11 +247,12 @@ body {
 }
 
 .typing-indicator {
-    position: fixed;
-    top: 80px;
-    right: 20px;
+    /* position: fixed; */
+    /* top: 80px;
+    right: 20px; */
+    color: #000;
     width: auto;
-    background-color: #e77c7c;
+    background-color: #ccc;
     padding: 10px;
     border-radius: 5px;
     font-size: 16px;

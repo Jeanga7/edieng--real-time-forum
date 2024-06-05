@@ -46,8 +46,17 @@ function openWs() {
 
     ws.onmessage = (e) => {
         const message = JSON.parse(e.data);
+
+        // console.log("message", message);
         if (message.type === 'history') {
             loadHistory(message.messages);
+        } else if (message.type == "typing") {
+            console.log("dougouna");
+            document.getElementById('typingIndicator').style.opacity = 1;
+            setTimeout(() => {
+                document.getElementById('typingIndicator').style.opacity = 0;
+            }, 1000);
+            
         } else {
             console.log("NOOOOOOOOOOOOOOON");
 
@@ -168,13 +177,17 @@ function closeChat() {
 //====================================TYPING-PROGRESS========================================
 
 messageInput.addEventListener('keydown', () => {
-    document.getElementById('typingIndicator').style.opacity = 1;
-
-    ws.send(JSON.stringify({ type: 'typing' }));
+    // document.getElementById('typingIndicator').style.opacity = 1;
+    const data3 = {
+        sender: currentUser,
+        destinataire: currentdiscussion,
+        type: "typing"
+    };
+    ws.send(JSON.stringify(data3));
 });
 
-messageInput.addEventListener('keyup', () => {
-    setTimeout(() => {
-        document.getElementById('typingIndicator').style.opacity = 0;
-    }, 1000);
-});
+// messageInput.addEventListener('keyup', () => {
+//     setTimeout(() => {
+//         document.getElementById('typingIndicator').style.opacity = 0;
+//     }, 1000);
+// });
