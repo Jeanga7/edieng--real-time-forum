@@ -1,43 +1,20 @@
 package api
 
 import (
-	"encoding/json"
-	"forum/helpers"
 	"forum/models"
 	"net/http"
 )
 
 func FetchCategory(w http.ResponseWriter, r *http.Request) {
-	var Posts []models.Model
+	var posts []models.Model
 	params := r.URL.Query()
 
 	if toShow := params.Get("category"); len(toShow) > 0 {
-		Posts = models.Post.FetchLike([]interface{}{"categoriesNames"}, []interface{}{"%" + params.Get("category") + "%"})
+		posts = models.Post.FetchLike([]interface{}{"categoriesNames"}, []interface{}{"%" + params.Get("category") + "%"})
 	}
 
-	usersData := func() []map[string]interface{} {
-		allValues := []map[string]interface{}{}
-		for _, u := range Posts {
-			var data = make(map[string]interface{})
-			data["id"] = u.Values["id"]
-			data["authorId"] = u.Values["authorId"]
-			data["title"] = u.Values["title"]
-			data["content"] = u.Values["content"]
-			data["categoriesNames"] = u.Values["categoriesNames"]
-			data["picture"] = u.Values["picture"]
-			data["creationDate"] = u.Values["creationDate"]
-			allValues = append(allValues, data)
-		}
-		return allValues
-	}()
+	fields := []string{"id", "authorId", "title", "content", "categoriesNames", "picture", "creationDate"}
+	usersData := TransformModels(posts, fields)
 
-	res, err := json.Marshal(usersData)
-	helpers.ErrorSimple(err)
-
-	// Header
-	w.Header().Set("Content-Type", "application/json")
-
-	// Response
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
+	WriteJSONResponse(w, usersData)
 }
