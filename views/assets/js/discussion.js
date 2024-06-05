@@ -1,5 +1,5 @@
 const currentUser = document.querySelector('#user-full-name').textContent;
-
+const messageInput = document.getElementById('chat-input');
 // let Ischatopened = false
 let currentdiscussion;
 
@@ -8,7 +8,7 @@ let currentDestinataire;
 
 document.addEventListener('DOMContentLoaded', (event) => {
     openWs();
-    
+
     document.querySelectorAll('.discussion').forEach(user => {
         const username = user.textContent.split(' - ')[0].trim();
         user.addEventListener('click', () => {
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 function openWs() {
     ws = new WebSocket("ws://localhost:8989/messages");
 
-    
+
     ws.onopen = () => {
         console.log("Connected to WebSocket...");
         AskforNotification()
@@ -50,15 +50,15 @@ function openWs() {
             loadHistory(message.messages);
         } else {
             console.log("NOOOOOOOOOOOOOOON");
-            
+
             if (currentdiscussion == message.sender) {
                 displayMessage(message.message, message.date, message.destinataire);
             }
             console.log(message);
-            var div = document.getElementById(message.sender+"_discussion")
+            var div = document.getElementById(message.sender + "_discussion")
             var t = div.getAttribute("ischatopened")
             console.log(t);
-            if (t === "false"){
+            if (t === "false") {
                 updateNotification(message.sender, message.Notif.notification)
             }
         }
@@ -71,7 +71,7 @@ function updateNotification(sender, count) {
         sender = sender.replace(" ", "_")
     }
 
-    let notificationElement = document.getElementById(sender+"_notif");
+    let notificationElement = document.getElementById(sender + "_notif");
     if (notificationElement) {
         notificationElement.textContent = parseInt(count);
     }
@@ -95,11 +95,11 @@ function sendInitialMessage(username) {
     };
 
     ///
-   
+
     ws.send(JSON.stringify(data));
 }
 
-function AskforNotification(){
+function AskforNotification() {
     const data2 = {
         sender: currentUser,
         type: "notification"
@@ -108,7 +108,6 @@ function AskforNotification(){
 }
 
 function sendMessage() {
-    const messageInput = document.getElementById('chat-input');
     const message = messageInput.value;
     messageInput.value = "";
     if (message != "") {
@@ -164,3 +163,18 @@ function closeChat() {
     // Ischatopened = false
     document.getElementById("chat-messages").innerHTML = '';
 }
+
+
+//====================================TYPING-PROGRESS========================================
+
+messageInput.addEventListener('keydown', () => {
+    document.getElementById('typingIndicator').style.opacity = 1;
+
+    ws.send(JSON.stringify({ type: 'typing' }));
+});
+
+messageInput.addEventListener('keyup', () => {
+    setTimeout(() => {
+        document.getElementById('typingIndicator').style.opacity = 0;
+    }, 1000);
+});

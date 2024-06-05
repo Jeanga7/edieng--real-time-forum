@@ -245,3 +245,18 @@ body {
     font-size: small;
     margin: auto;
 }
+
+.typing-indicator {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    width: auto;
+    background-color: #e77c7c;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bolder;
+    opacity: 0; 
+    z-index: 1000;
+    transition: opacity 0.3s ease-in-out; 
+}
