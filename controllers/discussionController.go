@@ -69,7 +69,6 @@ func HandleMessages(w http.ResponseWriter, r *http.Request) {
 
 		if discussionId == "" {
 			err = SaveDiscussion(msg.MessageContent, msg.Sender, msg.Destinataire, msg.Date)
-
 		} else {
 			err = AppendMessageToDiscussion(discussionId, msg.MessageContent, msg.Sender, msg.Destinataire, msg.Date)
 		}
@@ -148,7 +147,7 @@ func SendPreviousMessages(conn *websocket.Conn, sender, receiver string) {
 					log.Println("Error unmarshalling messages:", err)
 					continue
 				}
-
+				
 				myDiscussions = append(myDiscussions, messages...)
 			}
 		}

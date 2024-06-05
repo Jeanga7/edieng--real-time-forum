@@ -54,7 +54,13 @@ function openWs() {
             if (currentdiscussion == message.sender) {
                 displayMessage(message.message, message.date, message.destinataire);
             }
-            updateNotification(message.sender, message.Notif.notification)
+            console.log(message);
+            var div = document.getElementById(message.sender+"_discussion")
+            var t = div.getAttribute("ischatopened")
+            console.log(t);
+            if (t === "false"){
+                updateNotification(message.sender, message.Notif.notification)
+            }
         }
     };
 
@@ -65,7 +71,7 @@ function updateNotification(sender, count) {
         sender = sender.replace(" ", "_")
     }
 
-    let notificationElement = document.getElementById(sender);
+    let notificationElement = document.getElementById(sender+"_notif");
     if (notificationElement) {
         notificationElement.textContent = parseInt(count);
     }
@@ -148,6 +154,7 @@ function loadHistory(messages) {
     const chatMessages = document.getElementById("chat-messages");
     chatMessages.innerHTML = '';
     messages.forEach(msg => {
+        updateNotification(msg.sender, "0")
         displayMessage(msg.message, msg.date, msg.destinataire);
     });
 }
