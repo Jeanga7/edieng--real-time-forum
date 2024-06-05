@@ -217,6 +217,7 @@ span.auth-btn.active {
 .auth-row {
     display: inline-block;
     vertical-align: top;
+    cursor: pointer;
 }
 
 .measurer {

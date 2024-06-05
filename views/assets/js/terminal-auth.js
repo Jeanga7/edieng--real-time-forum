@@ -5,22 +5,26 @@ document.addEventListener("keydown", async (e) => {
     if (e.code === "Enter") {
         e.preventDefault();
 
-        // Verify username
-        let username = document.querySelector("#login-username").value;
-        if (username.length > 0 && !checked["username"]) {
+        // Verify nickname
+        let data = new FormData()
+        let nickname = document.querySelector("#login-nickname").value;
+        data.append("login", nickname)
+        
+        if (nickname.length > 0 && !checked["nickname"]) {
             await new Promise((resolve) => {
-                fetch('/api/users?login=' + username, {
-                        method: 'POST'
+                fetch('/api/users', {
+                        method: 'POST',
+                        body: data
                     })
                     .then(r => r.json())
                     .then(async (d) => {
                         let logTxt = document.querySelector("#logs-text");
                         let color = "success";
-                        let res = "Username OK.";
+                        let res = "Nickname OK.";
                         let found = d.length === 0;
                         if (found) {
                             color = "danger";
-                            res = "Bad username. Try again.";
+                            res = "Bad nickname. Try again.";
                         }
                         logTxt.innerHTML +=
                             `<span class="txt ${color}"></span><br>`;
@@ -28,18 +32,18 @@ document.addEventListener("keydown", async (e) => {
                         let txts = logTxt.querySelectorAll(".txt");
                         await typing(txts[txts.length - 1], res, "logs");
                         if (!found) {
+                            printed["nickname"] = true;
+                            checked["nickname"] = true;
                             resolve();
-                            printed["username"] = true;
-                            checked["username"] = true;
                         }
                     });
             });
         }
 
         // Verify password
-        if (checked["username"]) {
+        if (checked["nickname"]) {
             if (!printed["password"]) {
-                document.querySelector("#login-username").readOnly = true;
+                document.querySelector("#login-nickname").readOnly = true;
                 let txtsList = [
                     "Enter your ",
                     "password",
@@ -55,7 +59,7 @@ document.addEventListener("keydown", async (e) => {
             let password = pwd.value;
             if (password.length > 0 && !checked["password"]) {
                 await new Promise((resolve) => {
-                    fetch(`/api/users?login=${username}&password=${password}`, {
+                    fetch(`/api/users?login=${nickname}&password=${password}`, {
                             method: 'POST'
                         })
                         .then(r => r.json())
@@ -83,7 +87,7 @@ document.addEventListener("keydown", async (e) => {
             }
         }
 
-        if (checked["username"] && checked["password"]) {
+        if (checked["nickname"] && checked["password"]) {
             document.querySelector("#welcome").classList.add("slide-top-left");
             document.querySelector("#logs").classList.add("slide-bottom-left");
             document.querySelector("#auth-right").classList.add("slide-right");

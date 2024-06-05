@@ -1,42 +1,57 @@
+let introRow = (title) => `<!-- Intro row -->
+<span id="${title}-intro">
+    <span class="txt command"></span><br>
+    <span class="txt"></span><br>
+    <span class="txt"></span><br>
+    <span class="txt"></span><br>
+    <span class="txt warning"></span><br>
+    <br><br>
+    <span class="txt command"></span><br>
+</span>`
+
+let terminalRow = (terminal, title, type) => `<!-- ${title} row -->
+<span class="auth-row" id="${terminal}-${title.toLowerCase()}-row">
+    <span class="txt"></span>
+    <span class="txt bold-fluo"></span>
+    <span class="txt"></span>
+    <input type="${type}" name="${terminal}-${title.toLowerCase()}" id="${terminal}-${title.toLowerCase()}" class="auth-input"
+        autofocus>
+    <span class="txt"></span>
+    <span class="measurer"></span>
+</span>
+<br>`
+
+let loginFields = [
+    {name: "Nickname", type: "text"},
+    {name: "Password", type: "password"}
+];
+let registerFields = [
+    {name: "Firstname", type: "text"},
+    {name: "Lastname", type: "text"},
+    {name: "Nickname", type: "text"},
+    {name: "Email", type: "email"},
+    {name: "Password", type: "password"},
+    {name: "Age", type: "number"},
+    {name: "Gender", type: "text"}
+];
+
+function makeFields(terminal, data) {
+    let dom = "";
+    for (const r of data) {
+        dom += terminalRow(terminal, r.name, r.type);
+    }
+    return dom;
+}
+
 const loginTerminal = `
 <div id="login" class="terminal-box">
                 <div class="terminal-head">&lt;LOGIN/&gt;</div>
                 <div class="terminal-body">
                     <form id="login-form">
                         <p id="login-text" class="infos-txt">
-                            <!-- Nickname row -->
-                            <span id="login-intro">
-                                <span class="txt command"></span><br>
-                                <span class="txt"></span><br>
-                                <span class="txt"></span><br>
-                                <span class="txt"></span><br>
-                                <span class="txt warning"></span><br>
-                                <br><br>
-                                <span class="txt command"></span><br>
-                            </span>
-
-                            <!-- Nickname row -->
-                            <span class="auth-row" id="login-username-row">
-                                <span class="txt"></span>
-                                <span class="txt bold-fluo"></span>
-                                <span class="txt"></span>
-                                <input type="text" name="login-username" id="login-username" class="auth-input"
-                                    autofocus>
-                                <span class="txt"></span>
-                                <span class="measurer"></span>
-                            </span>
-                            <br>
-
-                            <!-- Password row -->
-                            <span class="auth-row" id="login-password-row">
-                                <span class="txt"></span>
-                                <span class="txt bold-fluo"></span>
-                                <span class="txt"></span>
-                                <input type="password" name="login-password" id="login-password" class="auth-input">
-                                <span class="txt"></span>
-                                <span class="measurer"></span>
-                            </span>
-                            <br>
+                            <!-- Intro row -->
+                            ${introRow("login")}
+                            ${makeFields("login", loginFields)}
                         </p>
                     </form>
                 </div>
@@ -47,41 +62,11 @@ const registerTerminal = `
 <div id="register" class="terminal-box not-displayed">
                 <div class="terminal-head">&lt;REGISTER/&gt;</div>
                 <div class="terminal-body">
-                    <form id="register-form">
+                    <form id="register-form" enctype="multipart/form-data">
                         <p id="register-text" class="infos-txt">
-                            <!-- Nickname row -->
-                            <span id="register-intro">
-                                <span class="txt command"></span><br>
-                                <span class="txt"></span><br>
-                                <span class="txt"></span><br>
-                                <span class="txt"></span><br>
-                                <span class="txt warning"></span><br>
-                                <br><br>
-                                <span class="txt command"></span><br>
-                            </span>
-
-                            <!-- Nickname row -->
-                            <span class="auth-row" id="register-username-row">
-                                <span class="txt"></span>
-                                <span class="txt bold-fluo"></span>
-                                <span class="txt"></span>
-                                <input type="text" name="register-username" id="register-username" class="auth-input"
-                                    autofocus>
-                                <span class="txt"></span>
-                                <span class="measurer"></span>
-                            </span>
-                            <br>
-
-                            <!-- Password row -->
-                            <span class="auth-row" id="register-password-row">
-                                <span class="txt"></span>
-                                <span class="txt bold-fluo"></span>
-                                <span class="txt"></span>
-                                <input type="password" name="register-password" id="register-password" class="auth-input">
-                                <span class="txt"></span>
-                                <span class="measurer"></span>
-                            </span>
-                            <br>
+                            <!-- Intro row -->
+                            ${introRow("register")}
+                            ${makeFields("register", registerFields)}
                         </p>
                     </form>
                 </div>

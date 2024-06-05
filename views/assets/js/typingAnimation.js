@@ -13,7 +13,7 @@ let loginTxtsData = [{
         ]
     },
     {
-        zone: "#login-username-row",
+        zone: "#login-nickname-row",
         className: "lgn",
         txtsList: [
             "Enter your ",
@@ -37,11 +37,11 @@ let registerTxtsData = [{
         ]
     },
     {
-        zone: "#register-username-row",
+        zone: "#register-firstname-row",
         className: "rgst",
         txtsList: [
             "Enter your ",
-            "nickname or email",
+            "first name",
             ": ",
             " "
         ]
@@ -62,8 +62,7 @@ window.onload = async () => {
     await expandAuthRight();
     await startActiveTerminal(activeForm, txtDataToLoad());
     await enableAllInputs();
-    resizeInput();
-    firstFieldFocus("#login-form");
+    firstFieldFocus(`#${activeForm}-form`);
     formToggle();
 };
 
@@ -222,6 +221,8 @@ function startActiveTerminal(terminal, txtData) {
                 resolve();
             }, 500)
         });
+        resizeInput();
+        firstFieldFocus(`#${terminal}-form`);
         resolve();
     });
 }
@@ -280,7 +281,7 @@ function formToggle() {
 }
 
 function btnBgPosition() {
-    document.querySelectorAll(".btn-bg").forEach(el=>{
+    document.querySelectorAll(".btn-bg").forEach(el => {
         if (el.parentNode.id === "login-btn") {
             el.style.right = "0"
         } else {

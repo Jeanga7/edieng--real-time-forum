@@ -8,12 +8,10 @@ import (
 )
 
 func FetchPosts(w http.ResponseWriter, r *http.Request) {
-	var Posts []models.Model
-	params := r.URL.Query()
+	// var Posts []models.Model
+	// params := r.URL.Query()
 
-	if toShow := params.Get("posts"); len(toShow) > 0 && toShow == "all" {
-		Posts = models.Post.Fetch()
-	}
+	Posts := models.Post.Fetch()
 
 	usersData := func() []map[string]interface{} {
 		allValues := []map[string]interface{}{}
