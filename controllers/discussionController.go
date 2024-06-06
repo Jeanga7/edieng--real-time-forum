@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"forum/models"
 	"log"
 	"net/http"
@@ -189,8 +190,6 @@ func SaveDiscussion(content, sender, receiver, date string) error {
 			return err
 		}
 
-		// fmt.Println("test", string(messagesJSON))
-
 		newDiscussion := models.Discussions
 		newDiscussion.Values = map[string]interface{}{
 			"idSender":   sender,
@@ -221,29 +220,31 @@ func AddNotif(notifId interface{}, sender, receiver string, number int) error {
 }
 
 func AppendMessageToDiscussion(discussionId interface{}, message, sender, receiver, date string) error {
-	discussion := models.Discussions.Fetch([]interface{}{"id"}, []interface{}{discussionId})
-	if len(discussion) > 0 {
-		var messages []Message
-		err := json.Unmarshal([]byte(discussion[0].Values["messages"].(string)), &messages)
-		if err != nil {
-			return err
-		}
+	if message != "" {
+		discussion := models.Discussions.Fetch([]interface{}{"id"}, []interface{}{discussionId})
+		if len(discussion) > 0 {
+			var messages []Message
+			err := json.Unmarshal([]byte(discussion[0].Values["messages"].(string)), &messages)
+			if err != nil {
+				return err
+			}
 
-		newMessage := Message{
-			MessageContent: message,
-			Sender:         sender,
-			Destinataire:   receiver,
-			Date:           date,
-		}
-		messages = append(messages, newMessage)
+			newMessage := Message{
+				MessageContent: message,
+				Sender:         sender,
+				Destinataire:   receiver,
+				Date:           date,
+			}
+			messages = append(messages, newMessage)
 
-		messagesJSON, err := json.Marshal(messages)
-		if err != nil {
-			return err
-		}
+			messagesJSON, err := json.Marshal(messages)
+			if err != nil {
+				return err
+			}
 
-		data := map[string]interface{}{"messages": string(messagesJSON)}
-		models.Discussions.Update(data, "id", discussionId)
+			data := map[string]interface{}{"messages": string(messagesJSON)}
+			models.Discussions.Update(data, "id", discussionId)
+		}
 	}
 	return nil
 }
@@ -274,6 +275,7 @@ func GetNotificationId(User1, User2 string) interface{} {
 }
 
 func BroadcastNewUser(username string) {
+	fmt.Println("username", username)
 	newUserMessage := Message{
 		Type:   "new_user",
 		Sender: username,
