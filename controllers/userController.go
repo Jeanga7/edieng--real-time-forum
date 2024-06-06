@@ -92,7 +92,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 		if err == nil {
 			CreateSession(w, r, fmt.Sprintf("%s", user[0].Values["id"]))
-
+			fmt.Println("nouveau")
 			helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted)
 			return
 
@@ -203,7 +203,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	// Si non, créez un nouvel utilisateur
 	newUser := models.User
 	newUser.Values = map[string]interface{}{
-		"name":     name,
+		"name":     strings.Title(name),
 		"username": username,
 		"email":    email,
 		"password": helpers.HashPassword(password),

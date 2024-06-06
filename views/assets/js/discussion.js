@@ -23,8 +23,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     });
 
     document.querySelector("#close-chat").addEventListener('click', () => {
-        // var divs = document.getElementById(currentdiscussion)
-        // divs.style.backgroundColor = "green"
         document.querySelectorAll('.discussion').forEach(user => {
             user.setAttribute("Ischatopened", false)
         });
