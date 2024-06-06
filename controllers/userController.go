@@ -257,6 +257,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	// Connectez l'utilisateur après l'inscription
 	CreateSession(w, r, fmt.Sprintf("%s", res.Values["id"]))
+	BroadcastNewUser(strings.ReplaceAll(strings.Title(name), " ", "_"))
 
 	helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted)
 }

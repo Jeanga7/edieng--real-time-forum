@@ -117,7 +117,7 @@ function AskforNotification() {
 }
 
 function sendMessage() {
-    const message = messageInput.value;
+    const message = messageInput.value.trim();
     messageInput.value = "";
     if (message != "") {
         const date = new Date();
@@ -174,17 +174,30 @@ function closeChat() {
 }
 
 function handleNewUser(userConnected) {
-    document.querySelectorAll('.discussion').forEach(user => {
-        const parts = user.textContent.split('-');
-        if (parts[0].trim() === userConnected) {
-            if (parts[1].trim().includes("Offline")) {
-                user.innerHTML = `<strong>${parts[0]} - ${parts[1].replace("Offline", "Online")}</strong>`;
-            } else {
-                user.innerHTML = `<em>${parts[0]} - ${parts[1].replace("Online", "Offline")}</em>`;
-            }
+    const userElement = document.querySelector(`#${userConnected}_discussion`);
+    
+    if (userElement) {
+        const parts = userElement.textContent.split('-');
+        if (parts[1].trim().includes("Offline")) {
+            userElement.innerHTML = `<strong>${parts[0]} - ${parts[1].replace("Offline", "Online")}</strong>`;
+        } else {
+            userElement.innerHTML = `<em>${parts[0]} - ${parts[1].replace("Online", "Offline")}</em>`;
         }
-    });
+    } else {
+        // Ne marche pas cas ou l'utilisateur vient de se connecter
+
+        // const newUserElement = `
+        //     <div class="discussion" id="${userConnected}_discussion" ischatopened="false">
+        //       <div class="usercontainer">
+        //         <em>${userConnected} - Offline</em>
+        //         <div class="notification" id="${userConnected}_notif">0</div>
+        //       </div>
+        //     </div>
+        // `;
+        // document.querySelector('#most-active-users').insertAdjacentHTML('beforeend', newUserElement);
+    }
 }
+
 
 //====================================TYPING-PROGRESS========================================
 
