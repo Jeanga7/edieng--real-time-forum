@@ -45,20 +45,21 @@ function openWs() {
     ws.onmessage = (e) => {
         const message = JSON.parse(e.data);
 
-        console.log("message", message);
+        // console.log("message", message);
         if (message.type === 'history') {
             loadHistory(message.messages);
         } else if (message.type == "typing") {
-            if (currentdiscussion === message.sender){
+            if (currentdiscussion === message.sender) {
                 document.getElementById('typingIndicator').style.opacity = 1;
                 setTimeout(() => {
                     document.getElementById('typingIndicator').style.opacity = 0;
                 }, 1000);
             }
-            
+
+        } else if (message.type == "new_user") {
+            handleNewUser(message.sender)
         } else {
             console.log("NOOOOOOOOOOOOOOON");
-
             if (currentdiscussion == message.sender) {
                 displayMessage(message.message, message.date, message.destinataire);
             }
@@ -172,11 +173,22 @@ function closeChat() {
     document.getElementById("chat-messages").innerHTML = '';
 }
 
+function handleNewUser(userConnected) {
+    document.querySelectorAll('.discussion').forEach(user => {
+        const parts = user.textContent.split('-');
+        if (parts[0].trim() === userConnected) {
+            if (parts[1].trim().includes("Offline")) {
+                user.innerHTML = `<strong>${parts[0]} - ${parts[1].replace("Offline", "Online")}</strong>`;
+            } else {
+                user.innerHTML = `<em>${parts[0]} - ${parts[1].replace("Online", "Offline")}</em>`;
+            }
+        }
+    });
+}
 
 //====================================TYPING-PROGRESS========================================
 
 messageInput.addEventListener('keydown', () => {
-    // document.getElementById('typingIndicator').style.opacity = 1;
     const data3 = {
         sender: currentUser,
         destinataire: currentdiscussion,
@@ -185,8 +197,3 @@ messageInput.addEventListener('keydown', () => {
     ws.send(JSON.stringify(data3));
 });
 
-// messageInput.addEventListener('keyup', () => {
-//     setTimeout(() => {
-//         document.getElementById('typingIndicator').style.opacity = 0;
-//     }, 1000);
-// });
