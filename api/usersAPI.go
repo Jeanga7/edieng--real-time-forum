@@ -12,7 +12,7 @@ func FetchUsers(w http.ResponseWriter, r *http.Request) {
 	// Fetch All Users
 	var users []models.Model
 
-	listOfPossibleParams := []string{"id", "email", "name", "username", "login", "firstname", "lastname", "age", "gender"}
+	listOfPossibleParams := []string{"id", "email", "name", "username", "login", "firstname", "lastname", "password", "age", "gender"}
 
 	nbParams := 0
 	for _, v := range listOfPossibleParams {
