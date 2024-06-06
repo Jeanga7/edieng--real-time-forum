@@ -52,10 +52,12 @@ function openWs() {
             loadHistory(message.messages);
         } else if (message.type == "typing") {
             console.log("dougouna");
-            document.getElementById('typingIndicator').style.opacity = 1;
-            setTimeout(() => {
-                document.getElementById('typingIndicator').style.opacity = 0;
-            }, 1000);
+            if (currentdiscussion === message.sender){
+                document.getElementById('typingIndicator').style.opacity = 1;
+                setTimeout(() => {
+                    document.getElementById('typingIndicator').style.opacity = 0;
+                }, 1000);
+            }
             
         } else {
             console.log("NOOOOOOOOOOOOOOON");
