@@ -1,4 +1,4 @@
-document.querySelectorAll(".like-dislike").forEach((el) => {
+document.querySelectorAll(".like-dislike").forEach(el => {
     el.addEventListener("click", function () {
         if (el.classList.contains("like")) {
             like(el);                 

@@ -1,98 +1,95 @@
-// Login Check
-let printed = {}
-let checked = {}
+// Initialization
+let printed = {};
+let checked = {};
+let loaded = false;
+
+let capitalize = (str) => str.charAt(0).toUpperCase() + str.substr(1);
+
+async function ValidateField(selector, varName, data, checked, printed) {
+    let field = document.querySelector(selector);
+    field.focus();
+    let val = field.value;
+    data.append(varName, val)
+    if (val.length > 0 && !checked[varName]) {
+        loaded = true;
+        await new Promise((resolve) => {
+            fetch('/api/users', {
+                    method: 'POST',
+                    body: data
+                })
+                .then(r => r.json())
+                .then(async (d) => {
+                    let logTxt = document.querySelector("#logs-text");
+                    let color = "success";
+                    let res = `${capitalize(varName)} OK.`;
+                    let found = d.length === 0;
+                    if (found) {
+                        color = "danger";
+                        res = `Bad ${varName}. Try again.`;
+                    }
+                    logTxt.innerHTML +=
+                        `<span class="txt ${color}"></span><br>`;
+
+                    let txts = logTxt.querySelectorAll(".txt");
+                    await typing(txts[txts.length - 1], res, "logs");
+                    if (!found) {
+                        printed[varName] = true;
+                        checked[varName] = true;
+                        resolve();
+                    }
+                });
+        });
+    }
+    return [data, checked, printed]
+}
+
+
+async function ValidateNextField(prev, next, prevFiedSelector, nextFieldSelector, rowSelector, typingClass, data, checked, printed) {
+    if (checked[prev]) {
+        if (!printed[next]) {
+            document.querySelector(prevFiedSelector).readOnly = true;
+            let txtsList = [
+                "Enter your ",
+                next,
+                ": ",
+                " "
+            ];
+            await typeInTxts(rowSelector, txtsList, typingClass);
+            printed[next] = true;
+        }
+
+        return await ValidateField(nextFieldSelector, next, data, checked, printed);
+    }
+}
+
+async function hideAuth() {
+    document.querySelector("#welcome").classList.add("slide-top-left");
+    document.querySelector("#logs").classList.add("slide-bottom-left");
+    document.querySelector("#auth-right").classList.add("slide-right");
+    await new Promise((resolve) => {
+        setTimeout(() => {
+            document.querySelector("#container").innerHTML = "";
+            resolve();
+        }, 1800)
+    });
+}
+
+
 document.addEventListener("keydown", async (e) => {
     if (e.code === "Enter") {
         e.preventDefault();
 
-        // Verify username
-        let username = document.querySelector("#login-username").value;
-        if (username.length > 0 && !checked["username"]) {
-            await new Promise((resolve) => {
-                fetch('/api/users?login=' + username, {
-                        method: 'POST'
-                    })
-                    .then(r => r.json())
-                    .then(async (d) => {
-                        let logTxt = document.querySelector("#logs-text");
-                        let color = "success";
-                        let res = "Username OK.";
-                        let found = d.length === 0;
-                        if (found) {
-                            color = "danger";
-                            res = "Bad username. Try again.";
-                        }
-                        logTxt.innerHTML +=
-                            `<span class="txt ${color}"></span><br>`;
+        // Verify nickname
+        let data = new FormData();
+        [data, checked, printed] = await ValidateField("#login-nickname", "login", data, checked, printed);
 
-                        let txts = logTxt.querySelectorAll(".txt");
-                        await typing(txts[txts.length - 1], res, "logs");
-                        if (!found) {
-                            resolve();
-                            printed["username"] = true;
-                            checked["username"] = true;
-                        }
-                    });
-            });
-        }
+        if (loaded) {
+            // Verify password
+            [data, checked, printed] = await ValidateNextField("login", "password", "#login-nickname", "#login-password", "#login-password-row", "lgn", data, checked, printed);
 
-        // Verify password
-        if (checked["username"]) {
-            if (!printed["password"]) {
-                document.querySelector("#login-username").readOnly = true;
-                let txtsList = [
-                    "Enter your ",
-                    "password",
-                    ": ",
-                    " "
-                ];
-                await typeInTxts("#login-password-row", txtsList, "lgn");
-                printed["password"] = true;
+            if (checked["login"] && checked["password"]) {
+                hideAuth();
             }
-
-            let pwd = document.querySelector("#login-password");
-            pwd.focus();
-            let password = pwd.value;
-            if (password.length > 0 && !checked["password"]) {
-                await new Promise((resolve) => {
-                    fetch(`/api/users?login=${username}&password=${password}`, {
-                            method: 'POST'
-                        })
-                        .then(r => r.json())
-                        .then(async (d) => {
-                            let logTxt = document.querySelector("#logs-text");
-                            let color = "success"
-                            let res = "Password OK."
-                            let found = d.length === 0
-                            if (found) {
-                                color = "danger"
-                                res = "Bad password. Try again."
-                            }
-                            logTxt.innerHTML +=
-                                `<span class="txt ${color}"></span><br>`;
-
-                            let txts = logTxt.querySelectorAll(".txt");
-                            await typing(txts[txts.length - 1], res, "logs");
-                            if (!found) {
-                                resolve();
-                                printed["password"] = true
-                                checked["password"] = true
-                            }
-                        });
-                });
-            }
-        }
-
-        if (checked["username"] && checked["password"]) {
-            document.querySelector("#welcome").classList.add("slide-top-left");
-            document.querySelector("#logs").classList.add("slide-bottom-left");
-            document.querySelector("#auth-right").classList.add("slide-right");
-            await new Promise((resolve) => {
-                setTimeout(() => {
-                    document.querySelector("#container").innerHTML = "";
-                    resolve();
-                }, 1800)
-            });
         }
     }
 });

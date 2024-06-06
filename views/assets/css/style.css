@@ -68,7 +68,20 @@ body {
 
 }
 
+.usercontainer{
+    display: flex;
+}
+
 .discussion{
+    width: 80%;
+    height: auto;
+    background-color: green;
+    cursor: pointer;
+}
+
+.notification{
+    width: 20%;
+    height: auto;
     background-color: green;
     cursor: pointer;
 }
@@ -227,8 +240,24 @@ body {
     margin-right: auto;
 }
 
-.dayeu{
+.smsDate{
     color: grey;
     font-size: small;
     margin: auto;
+}
+
+.typing-indicator {
+    /* position: fixed; */
+    /* top: 80px;
+    right: 20px; */
+    color: #000;
+    width: auto;
+    background-color: #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bolder;
+    opacity: 0; 
+    z-index: 1000;
+    transition: opacity 0.3s ease-in-out; 
 }

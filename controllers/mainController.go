@@ -7,6 +7,7 @@ import (
 	"forum/models"
 	"log"
 	"net/http"
+	"sort"
 	"strings"
 	"text/template"
 )
@@ -29,7 +30,9 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	All_users, Users := GetUsers(Sessions, Usernames)
+	All_users, Users := GetUsers(Sessions, strings.Title(Usernames))
+
+	SortedUsers := SortUsers(All_users, Sessions, strings.Title(Usernames))
 
 	Posts := models.Post.Fetch()
 	Likes := models.Like.Fetch()
@@ -75,7 +78,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		Posts:      posts,
 		IsLogged:   isLogged,
 		UserData:   data,
-		AllUser:    All_users,
+		AllUser:    SortedUsers,
 		Categories: GetAllCategories(w, r),
 	}
 
@@ -88,6 +91,39 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		tmpl.Execute(w, allData)
 		global.Status = 200
 	}
+}
+
+func SortUsers(All_users []helpers.User, Sessions []models.Model, username string) []helpers.User {
+	SortedUsers := make([]helpers.User, len(All_users))
+	for i, user := range All_users {
+		SortedUsers[i].Username = strings.Title(strings.Join(strings.Split(user.Username, " "), "_"))
+		for _, s := range Sessions {
+			var id = GetIdByUsername(user.Username)
+			if id == s.Values["idUser"].(string) {
+				SortedUsers[i].Status = "Online"
+			}
+		}
+	}
+
+	sort.Slice(SortedUsers, func(i, j int) bool {
+		return SortedUsers[i].Username < SortedUsers[j].Username
+	})
+
+	filteredUsers := []helpers.User{}
+	for _, user := range SortedUsers {
+		if user.Username != strings.Title(strings.Join(strings.Split(username, " "), "_")) {
+			filteredUsers = append(filteredUsers, user)
+		}
+	}
+	return filteredUsers
+}
+
+func GetIdByUsername(username string) string {
+	conn := models.User.Fetch([]interface{}{"name"}, []interface{}{username})
+	if len(conn) > 0 {
+		return conn[0].Values["id"].(string)
+	}
+	return ""
 }
 
 func FindUsersOnline(r *http.Request) (string, []models.Model, bool, interface{}) {
@@ -127,14 +163,9 @@ func GetUsers(Sessions []models.Model, Usernames string) ([]helpers.User, []mode
 	for _, v := range Users {
 		var user helpers.User
 		user.Username = v.Values["name"].(string)
-		for _, s := range Sessions {
-			var id = v.Values["id"].(string)
-			if id == s.Values["idUser"].(string) {
 
-				user.Status = "Online"
-			}
-		}
 		if user.Username != Usernames {
+			user.Username = strings.Replace(user.Username, " ", "_", -1)
 			All_users = append(All_users, user)
 		}
 	}

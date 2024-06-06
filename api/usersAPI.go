@@ -1,9 +1,7 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
-	"forum/helpers"
 	"forum/models"
 	"net/http"
 
@@ -14,20 +12,27 @@ func FetchUsers(w http.ResponseWriter, r *http.Request) {
 	// Fetch All Users
 	var users []models.Model
 
-	params := r.URL.Query()
+	listOfPossibleParams := []string{"id", "email", "name", "username", "login", "firstname", "lastname", "password", "age", "gender"}
+
+	nbParams := 0
+	for _, v := range listOfPossibleParams {
+		if len(r.FormValue(v)) > 0 {
+			nbParams++
+		}
+	}
 	paramName := ""
 	expectedParams := true
 
-	if len(params) == 1 {
-		if len(params.Get("id")) > 0 {
+	if nbParams == 1 {
+		if len(r.FormValue("id")) > 0 {
 			paramName = "id"
-		} else if len(params.Get("email")) > 0 {
+		} else if len(r.FormValue("email")) > 0 {
 			paramName = "email"
-		} else if len(params.Get("name")) > 0 {
+		} else if len(r.FormValue("name")) > 0 {
 			paramName = "name"
-		} else if len(params.Get("username")) > 0 {
+		} else if len(r.FormValue("username")) > 0 {
 			paramName = "username"
-		} else if len(params.Get("login")) > 0 {
+		} else if len(r.FormValue("login")) > 0 {
 			paramName = "login"
 		} else {
 			expectedParams = false
@@ -35,55 +40,34 @@ func FetchUsers(w http.ResponseWriter, r *http.Request) {
 
 		if expectedParams {
 			if paramName == "login" {
-				users = models.User.Fetch([]interface{}{"username"}, []interface{}{params.Get("login")})
+				users = models.User.Fetch([]interface{}{"username"}, []interface{}{r.FormValue("login")})
 				if len(users) == 0 {
-					users = models.User.Fetch([]interface{}{"email"}, []interface{}{params.Get("login")})
+					users = models.User.Fetch([]interface{}{"email"}, []interface{}{r.FormValue("login")})
 				}
 			} else {
-				users = models.User.Fetch([]interface{}{paramName}, []interface{}{params.Get(paramName)})
+				users = models.User.Fetch([]interface{}{paramName}, []interface{}{r.FormValue(paramName)})
 			}
 		} else {
 			users = models.User.Fetch()
 		}
 
-	} else if len(params) == 2 && len(params.Get("login")) > 0 && len(params.Get("password")) > 0 {
-		users = models.User.Fetch([]interface{}{"username"}, []interface{}{params.Get("login")})
+	} else if nbParams == 2 && len(r.FormValue("login")) > 0 && len(r.FormValue("password")) > 0 {
+		users = models.User.Fetch([]interface{}{"username"}, []interface{}{r.FormValue("login")})
 		if len(users) == 0 {
-			users = models.User.Fetch([]interface{}{"email"}, []interface{}{params.Get("login")})
+			users = models.User.Fetch([]interface{}{"email"}, []interface{}{r.FormValue("login")})
 		}
 
 		if len(users) > 0 {
 			hashedPassword := fmt.Sprintf("%s", users[0].Values["password"])
-	
-			err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(params.Get("password")))
+
+			err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(r.FormValue("password")))
 			if err != nil {
 				users = []models.Model{}
-			}			
+			}
 		}
 	}
 
-	usersData := func() []map[string]interface{} {
-		allValues := []map[string]interface{}{}
-		for _, u := range users {
-			var data = make(map[string]interface{})
-			data["id"] = u.Values["id"]
-			data["name"] = u.Values["name"]
-			data["username"] = u.Values["username"]
-			data["email"] = u.Values["email"]
-			data["picture"] = u.Values["picture"]
-			data["creationDate"] = u.Values["creationDate"]
-			allValues = append(allValues, data)
-		}
-		return allValues
-	}()
-
-	res, err := json.Marshal(usersData)
-	helpers.ErrorSimple(err)
-
-	// Header
-	w.Header().Set("Content-Type", "application/json")
-
-	// Response
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
+	fields := []string{"id", "name", "username", "email", "picture", "creationDate"}
+	usersData := TransformModels(users, fields)
+	WriteJSONResponse(w, usersData)
 }

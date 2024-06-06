@@ -1,17 +1,69 @@
 const speed = 15;
+var activeForm = "login";
+let loginTxtsData = [{
+        zone: "#login-intro",
+        className: "lgn",
+        txtsList: [
+            "$> help",
+            "These infos are needed for login :",
+            " - nickname or email",
+            " - password",
+            "User should be registered first before trying to login.",
+            "$> login"
+        ]
+    },
+    {
+        zone: "#login-nickname-row",
+        className: "lgn",
+        txtsList: [
+            "Enter your ",
+            "nickname or email",
+            ": ",
+            " "
+        ]
+    }
+];
+
+let registerTxtsData = [{
+        zone: "#register-intro",
+        className: "rgst",
+        txtsList: [
+            "$> help",
+            "These infos are needed for register :",
+            " - nickname or email",
+            " - password",
+            "User should be registered first before trying to register.",
+            "$> register"
+        ]
+    },
+    {
+        zone: "#register-firstname-row",
+        className: "rgst",
+        txtsList: [
+            "Enter your ",
+            "first name",
+            ": ",
+            " "
+        ]
+    }
+];
+
+var txtDataToLoad = () => activeForm === "login" ? loginTxtsData : registerTxtsData
+var otherBtn = () => activeForm === "login" ? document.querySelector("#register-btn") : document.querySelector("#login-btn")
 
 window.onload = async () => {
     await loadLoginDOM();
+    btnBgPosition();
     await hidePreloader();
     await disableAllInputs();
     await startWelcomeTerminal();
     await startLogsTerminal();
     await shrinkLeftBox();
     await expandAuthRight();
-    await startLoginTerminal();
+    await startActiveTerminal(activeForm, txtDataToLoad());
     await enableAllInputs();
-    resizeInput();
-    firstFieldFocus("#login-form");
+    firstFieldFocus(`#${activeForm}-form`);
+    formToggle();
 };
 
 function disableAllInputs() {
@@ -144,37 +196,33 @@ function expandAuthRight() {
     });
 }
 
-function startLoginTerminal() {
+function startActiveTerminal(terminal, txtData) {
     return new Promise(async (resolve) => {
         // Terminal Pop-up
-        let w = document.querySelector("#login");
-        w.style.opacity = "1";
-        w.style.height = "95%";
-        w.style.width = "100%";
+        let w = document.querySelector("#" + terminal);
+        w.style.overflow = "hidden";
+
+        await new Promise((resolve) => {
+            setTimeout(async () => {
+                w.style.opacity = "1";
+                w.style.height = "100%";
+                w.style.width = "100%";
+                resolve();
+            }, 200)
+        });
+
 
         // Typing
         await new Promise((resolve) => {
             setTimeout(async () => {
-                let txtsList = [
-                    "$> help",
-                    "These infos are needed for login :",
-                    " - nickname or email",
-                    " - password",
-                    "User should be registered first before trying to login.",
-                    "$> login"
-                ];
-                await typeInTxts("#login-intro", txtsList, "lgn");
-
-                txtsList = [
-                    "Enter your ",
-                    "nickname or email",
-                    ": ",
-                    " "
-                ];
-                await typeInTxts("#login-username-row", txtsList, "lgn");
+                for (const d of txtData) {
+                    await typeInTxts(d.zone, d.txtsList, d.className);
+                }
                 resolve();
             }, 500)
         });
+        resizeInput();
+        firstFieldFocus(`#${terminal}-form`);
         resolve();
     });
 }
@@ -204,4 +252,40 @@ function resizeInput() {
 
 function firstFieldFocus(selector) {
     document.querySelectorAll(`${selector} input`)[0].focus();
+}
+
+function formToggle() {
+    document.querySelectorAll("#register-btn,#login-btn").forEach(el => {
+        el.addEventListener("click", async (e) => {
+            if (!e.target.classList.contains("active")) {
+                let authBox = document.querySelector("#" + activeForm);
+                await new Promise((resolve) => {
+                    authBox.classList.add("instant-slide-top");
+                    resolve();
+                })
+                await new Promise((resolve) => {
+                    setTimeout(async () => {
+                        authBox.remove();
+                        document.querySelector("#terminal-zone").innerHTML = activeForm === "login" ? registerTerminal : loginTerminal;
+                        activeForm = activeForm === "login" ? "register" : "login";
+                        document.querySelector("#" + activeForm).classList.remove("not-displayed");
+                        e.target.classList.add("active")
+                        otherBtn().classList.remove("active")
+                        await startActiveTerminal(activeForm, txtDataToLoad());
+                        resolve();
+                    }, 750);
+                })
+            }
+        });
+    });
+}
+
+function btnBgPosition() {
+    document.querySelectorAll(".btn-bg").forEach(el => {
+        if (el.parentNode.id === "login-btn") {
+            el.style.right = "0"
+        } else {
+            el.style.left = "0"
+        }
+    })
 }
