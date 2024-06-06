@@ -45,11 +45,10 @@ function openWs() {
     ws.onmessage = (e) => {
         const message = JSON.parse(e.data);
 
-        // console.log("message", message);
+        console.log("message", message);
         if (message.type === 'history') {
             loadHistory(message.messages);
         } else if (message.type == "typing") {
-            console.log("dougouna");
             if (currentdiscussion === message.sender){
                 document.getElementById('typingIndicator').style.opacity = 1;
                 setTimeout(() => {

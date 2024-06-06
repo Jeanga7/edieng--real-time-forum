@@ -272,3 +272,18 @@ func GetNotificationId(User1, User2 string) interface{} {
 	}
 	return ""
 }
+
+func BroadcastNewUser(username string) {
+	newUserMessage := Message{
+		Type:   "new_user",
+		Sender: username,
+	}
+	for client := range clients {
+		err := client.WriteJSON(newUserMessage)
+		if err != nil {
+			log.Printf("Error broadcasting new user to client: %v", err)
+			client.Close()
+			delete(clients, client)
+		}
+	}
+}

@@ -24,15 +24,15 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	IsLogged, _ := Auth(r, w)
 	if IsLogged {
 		// Contenu HTML stocké dans une variable
-        htmlContent := `<html><script>window.location.href = "/";</script></html>`
+		htmlContent := `<html><script>window.location.href = "/";</script></html>`
 
-        // Création d'une nouvelle instance de template
-        tmpl, err := template.New("monTemplate").Parse(htmlContent)
-        helpers.ErrorSimple(err)
+		// Création d'une nouvelle instance de template
+		tmpl, err := template.New("monTemplate").Parse(htmlContent)
+		helpers.ErrorSimple(err)
 
-        // Exécution du template et écriture dans la réponse HTTP
-        err = tmpl.Execute(w, nil)
-        helpers.ErrorSimple(err)
+		// Exécution du template et écriture dans la réponse HTTP
+		err = tmpl.Execute(w, nil)
+		helpers.ErrorSimple(err)
 
 		return
 	}
@@ -92,7 +92,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 		if err == nil {
 			CreateSession(w, r, fmt.Sprintf("%s", user[0].Values["id"]))
-			fmt.Println("nouveau")
+			BroadcastNewUser(user[0].Values["name"].(string))
 			helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted)
 			return
 
@@ -132,15 +132,15 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	IsLogged, _ := Auth(r, w)
 	if IsLogged {
 		// Contenu HTML stocké dans une variable
-        htmlContent := `<html><script>window.location.href = "/";</script></html>`
+		htmlContent := `<html><script>window.location.href = "/";</script></html>`
 
-        // Création d'une nouvelle instance de template
-        tmpl, err := template.New("monTemplate").Parse(htmlContent)
-        helpers.ErrorSimple(err)
+		// Création d'une nouvelle instance de template
+		tmpl, err := template.New("monTemplate").Parse(htmlContent)
+		helpers.ErrorSimple(err)
 
-        // Exécution du template et écriture dans la réponse HTTP
-        err = tmpl.Execute(w, nil)
-        helpers.ErrorSimple(err)
+		// Exécution du template et écriture dans la réponse HTTP
+		err = tmpl.Execute(w, nil)
+		helpers.ErrorSimple(err)
 
 		return
 	}
@@ -198,12 +198,11 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	helpers.ErrorSimple(err)
 
 	picture, handler, _ := r.FormFile("picture")
-	// fmt.Println(picture)
 
 	// Si non, créez un nouvel utilisateur
 	newUser := models.User
 	newUser.Values = map[string]interface{}{
-		"name":     strings.Title(name),
+		"name":     strings.ReplaceAll(strings.Title(name), " ", "_"),
 		"username": username,
 		"email":    email,
 		"password": helpers.HashPassword(password),
@@ -278,7 +277,7 @@ func Auth(r *http.Request, w http.ResponseWriter) (bool, []models.Model) {
 		users := models.User.Fetch([]interface{}{"Id"}, []interface{}{userID})
 		if len(users) > 0 {
 			IdUser = users[0].Values["id"].(string)
-			
+
 			return true, users
 		} else {
 			return false, nil
@@ -291,15 +290,15 @@ func NewLogin(w http.ResponseWriter, r *http.Request) {
 	IsLogged, _ := Auth(r, w)
 	if IsLogged {
 		// Contenu HTML stocké dans une variable
-        htmlContent := `<html><script>window.location.href = "/";</script></html>`
+		htmlContent := `<html><script>window.location.href = "/";</script></html>`
 
-        // Création d'une nouvelle instance de template
-        tmpl, err := template.New("monTemplate").Parse(htmlContent)
-        helpers.ErrorSimple(err)
+		// Création d'une nouvelle instance de template
+		tmpl, err := template.New("monTemplate").Parse(htmlContent)
+		helpers.ErrorSimple(err)
 
-        // Exécution du template et écriture dans la réponse HTTP
-        err = tmpl.Execute(w, nil)
-        helpers.ErrorSimple(err)
+		// Exécution du template et écriture dans la réponse HTTP
+		err = tmpl.Execute(w, nil)
+		helpers.ErrorSimple(err)
 
 		return
 	}
