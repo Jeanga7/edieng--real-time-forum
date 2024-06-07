@@ -71,7 +71,6 @@ function openWs() {
             console.log(t);
             if (t === "false") {
                 updateNotification(message.sender, message.Notif.notification)
-                // Function to determine sorting order based on the number of notifications
                 function compareDiscussionOrder(a, b) {
                     let t = a.getAttribute('id')
                     let v = b.getAttribute('id')
@@ -79,26 +78,20 @@ function openWs() {
                     var notifB = parseInt(document.getElementById(v.replace("_discussion", "_notif")).textContent);
                     console.log("*", t.replace("_discussion", "_notif"));
                     console.log(notifA, notifB);
-                    // Sort discussions based on the number of notifications
                     return notifB - notifA;
                 }
 
-                // Get all the div elements with class "discussion"
                 var discussions = document.querySelectorAll('.discussion');
 
-                // Convert NodeList to an array for easier manipulation
                 var discussionsArray = Array.from(discussions);
 
-                // Sort the array based on the number of notifications
                 discussionsArray.sort(function (a, b) {
                     return compareDiscussionOrder(a, b);
                 });
 
-                // Clear the parent container
                 var parentContainer = document.getElementById('most-active-users');
                 parentContainer.innerHTML = '';
 
-                // Append the sorted elements back to the parent container
                 discussionsArray.forEach(function (discussion) {
                     parentContainer.appendChild(discussion);
                 });
@@ -247,58 +240,3 @@ messageInput.addEventListener('keydown', () => {
     };
     ws.send(JSON.stringify(data3));
 });
-
-
-
-/////// fetch by 10 ////////////////::
-
-// Global variable to keep track of the current page of messages
-let currentPage = 1;
-// Variable to keep track of whether messages are being loaded
-let loadingMessages = false;
-
-// Function to load more messages
-function loadMoreMessages() {
-    if (loadingMessages) return; // If messages are already being loaded, exit
-    loadingMessages = true; // Set loading flag to true
-
-    // Simulate an asynchronous call to fetch more messages
-    // Replace this with your actual API call to fetch more messages
-    setTimeout(function () {
-        const additionalMessages = []; // Fetch additional messages here
-
-        // If there are additional messages, append them to the chat
-        if (additionalMessages.length > 0) {
-            additionalMessages.forEach(msg => {
-                updateNotification(msg.sender, "0");
-                displayMessage(msg.message, msg.date, msg.destinataire);
-            });
-            currentPage++; // Increment the current page
-        }
-
-        loadingMessages = false; // Reset loading flag
-    }, 500); // Debounce time (500ms)
-}
-
-// Function to load initial messages
-function loadInitialMessages(initialMessages) {
-    // Simulate loading initial messages
-    // const initialMessages = []; // Fetch initial messages here
-
-    // Display initial messages
-    initialMessages.slice(-10).forEach(msg => {
-        updateNotification(msg.sender, "0");
-        displayMessage(msg.message, msg.date, msg.destinataire);
-    });
-
-    // Attach scroll event listener to the chat-div
-    const chatDiv = document.getElementById("chat-messages");
-    chatDiv.addEventListener("scroll", function () {
-        // If user has scrolled to the top of the chat-div, load more messages
-        if (chatDiv.scrollTop === 0) {
-            loadMoreMessages();
-        }
-    });
-}
-
-// Call loadInitialMessages when entering the chat-div
