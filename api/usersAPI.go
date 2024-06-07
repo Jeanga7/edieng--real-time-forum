@@ -125,85 +125,36 @@ func ValidateFields(w http.ResponseWriter, r *http.Request) {
 	} else if form == "register" {
 		validField := make(map[string]bool)
 		validUser := true
-		firstname := html.EscapeString(r.FormValue("firstname"))
-		if len(firstname) > 0 {
-			if !helpers.ValidateInput("name", firstname) {
-				helpers.JSONResponse(w, errors.New("INVALID FIRSTNAME"), http.StatusBadRequest)
-				return
-			} else {
-				validField["firstname"] = true
-			}
+
+		userData := map[string]map[string]interface{}{}
+
+		for _, p := range ListOfPossibleParams {
+			userData[p], userData[p] = map[string]interface{}{}, map[string]interface{}{}
 		}
 
-		lastname := html.EscapeString(r.FormValue("lastname"))
-		if len(lastname) > 0 {
-			if !helpers.ValidateInput("name", lastname) {
-				helpers.JSONResponse(w, errors.New("INVALID LASTNAME"), http.StatusBadRequest)
-				return
-			} else {
-				validField["lastname"] = true
-			}
-		}
+		userData["firstname"]["value"], userData["firstname"]["type"] = html.EscapeString(r.FormValue("firstname")), "name"
+		userData["lastname"]["value"], userData["lastname"]["type"] = html.EscapeString(r.FormValue("lastname")), "name"
+		userData["nickname"]["value"], userData["nickname"]["type"] = html.EscapeString(r.FormValue("nickname")), "nickname"
+		userData["email"]["value"], userData["email"]["type"] = html.EscapeString(r.FormValue("email")), "email"
+		userData["password"]["value"], userData["password"]["type"] = html.EscapeString(r.FormValue("password")), "password"
+		userData["age"]["value"], userData["age"]["type"] = html.EscapeString(r.FormValue("age")), "age"
+		userData["gender"]["value"], userData["gender"]["type"] = html.EscapeString(r.FormValue("gender")), "gender"
 
-		nickname := html.EscapeString(r.FormValue("nickname"))
-		if len(nickname) > 0 {
-			if !helpers.ValidateInput("nickname", nickname) {
-				helpers.JSONResponse(w, errors.New("INVALID NICKNAME"), http.StatusBadRequest)
+		for f, v := range userData {
+			if !CheckField(w, v["value"].(string), f, v["type"].(string), validField) {
 				return
-			} else {
-				validField["nickname"] = true
-			}
-		}
-
-		email := html.EscapeString(r.FormValue("email"))
-		if len(email) > 0 {
-			if !helpers.ValidateInput("email", email) {
-				helpers.JSONResponse(w, errors.New("INVALID EMAIL"), http.StatusBadRequest)
-				return
-			} else {
-				validField["email"] = true
-			}
-		}
-
-		password := html.EscapeString(r.FormValue("password"))
-		if len(password) > 0 {
-			if !helpers.ValidateInput("password", password) || len(password) < 8 || len(password) > 20 {
-				helpers.JSONResponse(w, errors.New("INVALID PASSWORD"), http.StatusBadRequest)
-				return
-			} else {
-				validField["password"] = true
-			}
-		}
-
-		age := html.EscapeString(r.FormValue("age"))
-		if len(age) > 0 {
-			if !helpers.ValidateInput("age", age) {
-				helpers.JSONResponse(w, errors.New("INVALID AGE"), http.StatusBadRequest)
-				return
-			} else {
-				validField["age"] = true
-			}
-		}
-
-		gender := html.EscapeString(r.FormValue("gender"))
-		if len(gender) > 0 {
-			if !helpers.ValidateInput("gender", gender) {
-				helpers.JSONResponse(w, errors.New("INVALID GENDER"), http.StatusBadRequest)
-				return
-			} else {
-				validField["gender"] = true
 			}
 		}
 
 		// Vérifiez si l'email ou le nom d'utilisateur est déjà utilisé
-		resEmail := models.User.Fetch([]interface{}{"email"}, []interface{}{email})
+		resEmail := models.User.Fetch([]interface{}{"email"}, []interface{}{userData["email"]["value"]})
 		if len(resEmail) > 0 {
 			// Renvoyez une erreur si l'email ou le nom d'utilisateur est déjà utilisé
 			helpers.JSONResponse(w, errors.New("EMAIL ALREADY USED"), http.StatusConflict)
 			return
 		}
 
-		resNickname := models.User.Fetch([]interface{}{"nickname"}, []interface{}{nickname})
+		resNickname := models.User.Fetch([]interface{}{"nickname"}, []interface{}{userData["nickname"]["value"]})
 		if len(resNickname) > 0 {
 			// Renvoyez une erreur si l'email ou le nom d'utilisateur est déjà utilisé
 			helpers.JSONResponse(w, errors.New("NICKNAME ALREADY USED"), http.StatusConflict)
@@ -225,13 +176,13 @@ func ValidateFields(w http.ResponseWriter, r *http.Request) {
 			// Si non, créez un nouvel utilisateur
 			newUser := models.User
 			newUser.Values = map[string]interface{}{
-				"firstname": strings.ReplaceAll(strings.Title(firstname), " ", "_"),
-				"lastname":  strings.ReplaceAll(strings.Title(lastname), " ", "_"),
-				"nickname":  nickname,
-				"email":     email,
-				"age":       age,
-				"gender":    gender,
-				"password":  helpers.HashPassword(password),
+				"firstname": strings.ReplaceAll(strings.Title(userData["firstname"]["value"].(string)), " ", "_"),
+				"lastname":  strings.ReplaceAll(strings.Title(userData["lastname"]["value"].(string)), " ", "_"),
+				"nickname":  userData["nickname"]["value"].(string),
+				"email":     userData["email"]["value"].(string),
+				"age":       userData["age"]["value"].(int),
+				"gender":    userData["gender"]["value"].(string),
+				"password":  helpers.HashPassword(userData["password"]["value"].(string)),
 			}
 
 			if picture == nil {
@@ -279,11 +230,23 @@ func ValidateFields(w http.ResponseWriter, r *http.Request) {
 
 			// Connectez l'utilisateur après l'inscription
 			controllers.CreateSession(w, r, fmt.Sprintf("%s", res.Values["id"]))
-			controllers.BroadcastNewUser(strings.ReplaceAll(strings.Title(firstname), " ", "_"))
+			controllers.BroadcastNewUser(strings.ReplaceAll(strings.Title(userData["firstname"]["value"].(string)), " ", "_"))
 
 			helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted)
 		} else {
 			helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted)
 		}
 	}
+}
+
+func CheckField(w http.ResponseWriter, fieldVar, fieldName, fieldType string, validField map[string]bool) bool {
+	if len(fieldVar) > 0 {
+		if !helpers.ValidateInput(fieldType, fieldVar) {
+			helpers.JSONResponse(w, errors.New("INVALID "+strings.ToUpper(fieldName)), http.StatusBadRequest)
+			return false
+		} else {
+			validField[fieldName] = true
+		}
+	}
+	return true
 }
