@@ -165,6 +165,7 @@ func GetUsers(Sessions []models.Model, Usernames string) ([]helpers.User, []mode
 		user.Username = v.Values["name"].(string)
 
 		if user.Username != Usernames {
+			user.Username = strings.Replace(user.Username, " ", "_", -1)
 			All_users = append(All_users, user)
 		}
 	}

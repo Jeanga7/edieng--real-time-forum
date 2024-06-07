@@ -47,7 +47,9 @@ function openWs() {
 
         // console.log("message", message);
         if (message.type === 'history') {
-            loadHistory(message.messages);
+             loadHistory(message.messages);
+            
+
         } else if (message.type == "typing") {
             if (currentdiscussion === message.sender) {
                 document.getElementById('typingIndicator').style.opacity = 1;
@@ -69,6 +71,31 @@ function openWs() {
             console.log(t);
             if (t === "false") {
                 updateNotification(message.sender, message.Notif.notification)
+                function compareDiscussionOrder(a, b) {
+                    let t = a.getAttribute('id')
+                    let v = b.getAttribute('id')
+                    var notifA = parseInt(document.getElementById(t.replace("_discussion", "_notif")).textContent);
+                    var notifB = parseInt(document.getElementById(v.replace("_discussion", "_notif")).textContent);
+                    console.log("*", t.replace("_discussion", "_notif"));
+                    console.log(notifA, notifB);
+                    return notifB - notifA;
+                }
+
+                var discussions = document.querySelectorAll('.discussion');
+
+                var discussionsArray = Array.from(discussions);
+
+                discussionsArray.sort(function (a, b) {
+                    return compareDiscussionOrder(a, b);
+                });
+
+                var parentContainer = document.getElementById('most-active-users');
+                parentContainer.innerHTML = '';
+
+                discussionsArray.forEach(function (discussion) {
+                    parentContainer.appendChild(discussion);
+                });
+
             }
         }
     };
@@ -175,7 +202,7 @@ function closeChat() {
 
 function handleNewUser(userConnected) {
     const userElement = document.querySelector(`#${userConnected}_discussion`);
-    
+
     if (userElement) {
         const parts = userElement.textContent.split('-');
         if (parts[1].trim().includes("Offline")) {
@@ -201,6 +228,10 @@ function handleNewUser(userConnected) {
 
 //====================================TYPING-PROGRESS========================================
 
+
+
+
+
 messageInput.addEventListener('keydown', () => {
     const data3 = {
         sender: currentUser,
@@ -209,4 +240,3 @@ messageInput.addEventListener('keydown', () => {
     };
     ws.send(JSON.stringify(data3));
 });
-
