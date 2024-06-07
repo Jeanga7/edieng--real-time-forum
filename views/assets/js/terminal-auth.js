@@ -2,41 +2,43 @@
 let printed = {};
 let checked = {};
 let loaded = false;
+let loginRoute = '/api/auth';
 
 let capitalize = (str) => str.charAt(0).toUpperCase() + str.substr(1);
 
-async function ValidateField(selector, varName, data, checked, printed) {
+async function ValidateField(route, selector, varName, data, checked, printed) {
     let field = document.querySelector(selector);
     field.focus();
     let val = field.value;
     data.append(varName, val)
     if (val.length > 0 && !checked[varName]) {
-        loaded = true;
         await new Promise((resolve) => {
-            fetch('/api/users', {
+            fetch(route, {
                     method: 'POST',
                     body: data
                 })
                 .then(r => r.json())
                 .then(async (d) => {
                     let logTxt = document.querySelector("#logs-text");
-                    let color = "success";
                     let res = `${capitalize(varName)} OK.`;
-                    let found = d.length === 0;
-                    if (found) {
-                        color = "danger";
-                        res = `Bad ${varName}. Try again.`;
-                    }
-                    logTxt.innerHTML +=
-                        `<span class="txt ${color}"></span><br>`;
+                    let color = "success";
+                    let found = d.value === "SUCCESS";
 
-                    let txts = logTxt.querySelectorAll(".txt");
-                    await typing(txts[txts.length - 1], res, "logs");
                     if (!found) {
+                        color = "danger";
+                        res = d.value;
+                    } else {
                         printed[varName] = true;
                         checked[varName] = true;
-                        resolve();
+                        loaded = true;
                     }
+
+                    logTxt.innerHTML +=
+                        `<span class="txt ${color}"></span><br>`;
+                    let txts = logTxt.querySelectorAll(".txt");
+                    await typing(txts[txts.length - 1], res, "logs");
+
+                    resolve();
                 });
         });
     }
@@ -44,7 +46,7 @@ async function ValidateField(selector, varName, data, checked, printed) {
 }
 
 
-async function ValidateNextField(prev, next, prevFiedSelector, nextFieldSelector, rowSelector, typingClass, data, checked, printed) {
+async function ValidateNextField(route, prev, next, prevFiedSelector, nextFieldSelector, rowSelector, typingClass, data, checked, printed) {
     if (checked[prev]) {
         if (!printed[next]) {
             document.querySelector(prevFiedSelector).readOnly = true;
@@ -58,7 +60,7 @@ async function ValidateNextField(prev, next, prevFiedSelector, nextFieldSelector
             printed[next] = true;
         }
 
-        return await ValidateField(nextFieldSelector, next, data, checked, printed);
+        return await ValidateField(route, nextFieldSelector, next, data, checked, printed);
     }
 }
 
@@ -81,11 +83,12 @@ document.addEventListener("keydown", async (e) => {
 
         // Verify nickname
         let data = new FormData();
-        [data, checked, printed] = await ValidateField("#login-nickname", "login", data, checked, printed);
+        data.append("form", activeForm);
+        [data, checked, printed] = await ValidateField(loginRoute, "#login-nickname", "login", data, checked, printed);
 
         if (loaded) {
             // Verify password
-            [data, checked, printed] = await ValidateNextField("login", "password", "#login-nickname", "#login-password", "#login-password-row", "lgn", data, checked, printed);
+            [data, checked, printed] = await ValidateNextField(loginRoute, "login", "password", "#login-nickname", "#login-password", "#login-password-row", "lgn", data, checked, printed);
 
             if (checked["login"] && checked["password"]) {
                 hideAuth();

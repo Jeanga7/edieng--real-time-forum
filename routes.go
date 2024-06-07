@@ -39,6 +39,8 @@ func Routes(mux *http.ServeMux) {
 	// API Routes
 	mux.HandleFunc("/api/users", api.FetchUsers)
 
+	mux.HandleFunc("/api/auth", api.ValidateFields)
+
 	mux.HandleFunc("/api/posts", api.FetchPosts)
 
 	mux.HandleFunc("/api/category", api.FetchCategory)

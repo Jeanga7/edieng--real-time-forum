@@ -61,19 +61,19 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	if strings.Contains(UsernameOrEmail, "@") {
 		if !helpers.ValidateInput("email", UsernameOrEmail) {
-			helpers.ErrorHandler(w, errors.New("INVALID EMAIL"), "INVALID EMAIL", http.StatusBadRequest)
+			helpers.JSONResponse(w, errors.New("INVALID EMAIL"), http.StatusBadRequest)
 			return
 		}
 	} else {
 		if !helpers.ValidateInput("username", UsernameOrEmail) {
-			helpers.ErrorHandler(w, errors.New("INVALID USERNAME"), "INVALID USERNAME", http.StatusBadRequest)
+			helpers.JSONResponse(w, errors.New("INVALID USERNAME"), http.StatusBadRequest)
 			return
 		}
 	}
 
 	password := html.EscapeString(r.FormValue("password"))
 	if !helpers.ValidateInput("password", password) {
-		helpers.ErrorHandler(w, errors.New("INVALID PASSWORD"), "INVALID PASSWORD", http.StatusBadRequest)
+		helpers.JSONResponse(w, errors.New("INVALID PASSWORD"), http.StatusBadRequest)
 		return
 	}
 
@@ -97,12 +97,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			return
 
 		} else {
-			helpers.ErrorHandler(w, errors.New("INVALID PASSWORD"), "INVALID PASSWORD", http.StatusNotFound)
+			helpers.JSONResponse(w, errors.New("INVALID PASSWORD"), http.StatusNotFound)
 			return
 		}
 
 	} else {
-		helpers.ErrorHandler(w, errors.New("USER NOT FOUND"), "USER NOT FOUND", http.StatusNotFound)
+		helpers.JSONResponse(w, errors.New("USER NOT FOUND"), http.StatusNotFound)
 		return
 	}
 }
@@ -167,25 +167,25 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	name := html.EscapeString(r.FormValue("name"))
 	if !helpers.ValidateInput("name", name) {
-		helpers.ErrorHandler(w, errors.New("INVALID NAME"), "INVALID NAME", http.StatusBadRequest)
+		helpers.JSONResponse(w, errors.New("INVALID NAME"), http.StatusBadRequest)
 		return
 	}
 
 	email := html.EscapeString(r.FormValue("email"))
 	if !helpers.ValidateInput("email", email) {
-		helpers.ErrorHandler(w, errors.New("INVALID EMAIL"), "INVALID EMAIL", http.StatusBadRequest)
+		helpers.JSONResponse(w, errors.New("INVALID EMAIL"), http.StatusBadRequest)
 		return
 	}
 
 	username := html.EscapeString(r.FormValue("username"))
 	if !helpers.ValidateInput("username", username) {
-		helpers.ErrorHandler(w, errors.New("INVALID USERNAME"), "INVALID USERNAME", http.StatusBadRequest)
+		helpers.JSONResponse(w, errors.New("INVALID USERNAME"), http.StatusBadRequest)
 		return
 	}
 
 	password := html.EscapeString(r.FormValue("password"))
 	if !helpers.ValidateInput("password", password) || len(password) < 8 || len(password) > 20 {
-		helpers.ErrorHandler(w, errors.New("INVALID PASSWORD"), "INVALID PASSWORD", http.StatusBadRequest)
+		helpers.JSONResponse(w, errors.New("INVALID PASSWORD"), http.StatusBadRequest)
 		return
 	}
 
@@ -194,7 +194,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	resUsername := models.User.Fetch([]interface{}{"username"}, []interface{}{username})
 	if len(resEmail) > 0 || len(resUsername) > 0 {
 		// Renvoyez une erreur si l'email ou le nom d'utilisateur est déjà utilisé
-		helpers.ErrorHandler(w, errors.New("USERNAME OR EMAIL ALREADY USED"), "USERNAME OR EMAIL ALREADY USED", http.StatusConflict)
+		helpers.JSONResponse(w, errors.New("USERNAME OR EMAIL ALREADY USED"), http.StatusConflict)
 		return
 	}
 
@@ -225,7 +225,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		contentType := http.DetectContentType(fileBytes)
 
 		if contentType != "image/png" && contentType != "image/jpeg" && contentType != "image/gif" {
-			helpers.ErrorHandler(w, errors.New("UNSUPPORTED FILE FORMAT"), contentType, http.StatusBadRequest)
+			helpers.JSONResponse(w, errors.New("UNSUPPORTED FILE FORMAT"), http.StatusBadRequest)
 			return
 		}
 
@@ -293,28 +293,8 @@ func Auth(r *http.Request, w http.ResponseWriter) (bool, []models.Model) {
 
 func NewLogin(w http.ResponseWriter, r *http.Request) {
 	IsLogged, _ := Auth(r, w)
-	if IsLogged {
-		// Contenu HTML stocké dans une variable
-		htmlContent := `<html><script>window.location.href = "/";</script></html>`
-
-		// Création d'une nouvelle instance de template
-		tmpl, err := template.New("monTemplate").Parse(htmlContent)
-		helpers.ErrorSimple(err)
-
-		// Exécution du template et écriture dans la réponse HTTP
-		err = tmpl.Execute(w, nil)
-		helpers.ErrorSimple(err)
-
-		return
-	}
 	global.W = w
-
 	if !IsLogged {
-		if r.Method == http.MethodPost {
-			Login(w, r)
-			return
-		}
-
 		tmpl, err := template.ParseFiles("./views/login.html")
 		helpers.ErrorSimple(err)
 		tmpl.Execute(w, nil)
