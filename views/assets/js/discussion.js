@@ -8,6 +8,7 @@ let currentDestinataire;
 
 document.addEventListener('DOMContentLoaded', () => {
     openWs();
+    loadUsers()
 
     document.querySelectorAll('.discussion').forEach(user => {
         const username = user.textContent.split(' - ')[0].trim();
@@ -184,7 +185,6 @@ function sendMessage() {
             type: "message"
         };
 
-        // console.log("je suis here", data.destinataire);
         ws.send(JSON.stringify(data));
         displayMessage(message, dateTime, currentDestinataire);
     }
@@ -238,17 +238,7 @@ function handleNewUser(userConnected) {
             userElement.innerHTML = `<em>${parts[0]} - ${parts[1].replace("Online", "Offline")}</em>`;
         }
     } else {
-        // Ne marche pas cas ou l'utilisateur vient de se connecter
-
-        // const newUserElement = `
-        //     <div class="discussion" id="${userConnected}_discussion" ischatopened="false">
-        //       <div class="usercontainer">
-        //         <em>${userConnected} - Offline</em>
-        //         <div class="notification" id="${userConnected}_notif">0</div>
-        //       </div>
-        //     </div>
-        // `;
-        // document.querySelector('#most-active-users').insertAdjacentHTML('beforeend', newUserElement);
+        loadUsers()
     }
 }
 
@@ -262,16 +252,57 @@ function setDivDate(date, sender) {
     });
 }
 
-// // order by the number of notifications
-// function compareDiscussionOrder(a, b) {
-//     // let t = a.getAttribute('id')
-//     // let v = b.getAttribute('id')
-//     var notifA = parseInt(document.getElementById(t.replace("_discussion", "_notif")).textContent);
-//     var notifB = parseInt(document.getElementById(v.replace("_discussion", "_notif")).textContent);
-//     // console.log("*", t.replace("_discussion", "_notif"));
-//     // console.log(notifA, notifB);
-//     return notifB - notifA;
-// }
+let firstCall = true;
+
+function loadUsers() {
+    fetch('/api/AllUsers')
+        .then(response => response.json())
+        .then(users => {
+            const usersContainer = document.getElementById('most-active-users');
+            usersContainer.innerHTML = '';
+
+            users.forEach((user, index) => {
+                const userDiv = document.createElement('div');
+                userDiv.className = 'discussion';
+                userDiv.id = `${user.Username}_discussion`;
+                userDiv.setAttribute('ischatopened', 'false');
+                userDiv.setAttribute('date', user.LastMsgDate);
+
+                const userContainer = document.createElement('div');
+                userContainer.className = 'usercontainer';
+
+                const userStatus = document.createElement(user.Status === 'Online' ? 'strong' : 'em')
+
+                if (!firstCall && index === users.length - 1) {
+                    console.log('dernier user')
+                    userStatus.textContent = `${user.Username} - Online`;
+                    userStatus.tagName = 'strong';
+                } else {
+                    console.log('C est pas dernier user')
+                    userStatus.textContent = `${user.Username} - ${user.Status !== 'Online' ? 'Offline' : user.Status}`;
+                }
+                const notificationDiv = document.createElement('div');
+                notificationDiv.className = 'notification';
+                notificationDiv.id = `${user.Username}_notif`;
+                notificationDiv.textContent = user.NbrNotifications;
+
+
+
+                userContainer.appendChild(userStatus);
+                userContainer.appendChild(notificationDiv);
+                userDiv.appendChild(userContainer);
+                usersContainer.appendChild(userDiv);
+            });
+
+            if (firstCall) {
+                firstCall = false;
+            }
+        })
+        .catch(error => console.error('Error loading users:', error));
+}
+
+
+
 //====================================TYPING-PROGRESS========================================
 
 messageInput.addEventListener('keydown', () => {

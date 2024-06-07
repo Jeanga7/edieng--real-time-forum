@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"forum/api"
 	"forum/controllers"
 	"net/http"
+	"strings"
 )
 
 func Routes(mux *http.ServeMux) {
@@ -44,7 +46,7 @@ func Routes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/category", api.FetchCategory)
 
 	mux.HandleFunc("/api/session", api.FetchSessions)
-	
+
 	mux.HandleFunc("/api/comments", api.FetchComments)
 
 	mux.HandleFunc("/api/discussions", api.FetchDiscussions)
@@ -52,4 +54,20 @@ func Routes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/likes", api.FetchLike)
 
 	mux.HandleFunc("/api/dislikes", api.FetchDislike)
+
+	mux.HandleFunc("/api/AllUsers", GetAllSortedUsers)
+}
+
+func GetAllSortedUsers(w http.ResponseWriter, r *http.Request) {
+	Usernames, Sessions, shouldReturn, _ := controllers.FindUsersOnline(r)
+	if shouldReturn {
+		return
+	}
+
+	All_users, _ := controllers.GetUsers(strings.Title(Usernames))
+
+	SortedUsers := controllers.SortUsers(All_users, Sessions, strings.Title(Usernames))
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(SortedUsers)
 }

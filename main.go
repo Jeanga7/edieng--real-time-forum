@@ -17,9 +17,7 @@ func main() {
 	database.OpenDB()
 	if args := os.Args; len(args) > 1 && args[1] == "--reset" {
 		resetApp()
-		// fmt.Println(database.FetchDataJoin([]string{"posts", "users"}, []string{"*"}, "posts.authorId=users.id")[0])
 	}
-	// fmt.Println("Hello world !")
 	defer database.DB.Close()
 
 	fmt.Println("Server Online... : http://localhost" + port)
