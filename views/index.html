@@ -215,12 +215,12 @@
                         {{if eq .Status "Online"}}
                         <div class="usercontainer">
                             <strong>{{.Username}} - {{.Status}}</strong>
-                            <div class="notification" id={{.Username}}_notif>0</div>
+                            <div class="notification" id={{.Username}}_notif>{{.NbrNotifications}}</div>
                         </div>
                         {{else}}
                         <div class="usercontainer">
                             <em>{{.Username}} - Offline</em>
-                            <div class="notification" id={{.Username}}_notif>0</div>
+                            <div class="notification" id={{.Username}}_notif>{{.NbrNotifications}}</div>
                         </div>
                         {{end}}
                     </div>

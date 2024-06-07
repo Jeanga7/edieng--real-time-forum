@@ -37,6 +37,21 @@ function openWs() {
 
     ws.onopen = () => {
         console.log("Connected to WebSocket...");
+
+        var discussions = document.querySelectorAll('.discussion');
+
+        var discussionsArray = Array.from(discussions);
+
+        discussionsArray.sort(function (a, b) {
+            return compareDiscussionOrder(a, b);
+        });
+
+        var parentContainer = document.getElementById('most-active-users');
+        parentContainer.innerHTML = '';
+
+        discussionsArray.forEach(function (discussion) {
+            parentContainer.appendChild(discussion);
+        });
         AskforNotification()
     };
 
@@ -69,17 +84,9 @@ function openWs() {
             var div = document.getElementById(message.sender + "_discussion")
             var t = div.getAttribute("ischatopened")
             console.log(t);
-            if (t === "false") {
+            if (t === "false" && message.message != "") {
                 updateNotification(message.sender, message.Notif.notification)
-                function compareDiscussionOrder(a, b) {
-                    let t = a.getAttribute('id')
-                    let v = b.getAttribute('id')
-                    var notifA = parseInt(document.getElementById(t.replace("_discussion", "_notif")).textContent);
-                    var notifB = parseInt(document.getElementById(v.replace("_discussion", "_notif")).textContent);
-                    console.log("*", t.replace("_discussion", "_notif"));
-                    console.log(notifA, notifB);
-                    return notifB - notifA;
-                }
+               
 
                 var discussions = document.querySelectorAll('.discussion');
 
@@ -189,7 +196,7 @@ function loadHistory(messages) {
     const chatMessages = document.getElementById("chat-messages");
     chatMessages.innerHTML = '';
     messages.forEach(msg => {
-        updateNotification(msg.sender, "0")
+        updateNotification(msg.sender, 0)
         displayMessage(msg.message, msg.date, msg.destinataire);
     });
 }
@@ -240,3 +247,14 @@ messageInput.addEventListener('keydown', () => {
     };
     ws.send(JSON.stringify(data3));
 });
+
+// order by the number of notifications
+function compareDiscussionOrder(a, b) {
+    let t = a.getAttribute('id')
+    let v = b.getAttribute('id')
+    var notifA = parseInt(document.getElementById(t.replace("_discussion", "_notif")).textContent);
+    var notifB = parseInt(document.getElementById(v.replace("_discussion", "_notif")).textContent);
+    console.log("*", t.replace("_discussion", "_notif"));
+    console.log(notifA, notifB);
+    return notifB - notifA;
+}

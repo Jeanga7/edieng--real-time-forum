@@ -2,12 +2,14 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"forum/global"
 	"forum/helpers"
 	"forum/models"
 	"log"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 	"text/template"
 )
@@ -30,7 +32,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	All_users, Users := GetUsers(Sessions, strings.Title(Usernames))
+	All_users, Users := GetUsers(strings.Title(Usernames))
 
 	SortedUsers := SortUsers(All_users, Sessions, strings.Title(Usernames))
 
@@ -112,6 +114,17 @@ func SortUsers(All_users []helpers.User, Sessions []models.Model, username strin
 	filteredUsers := []helpers.User{}
 	for _, user := range SortedUsers {
 		if user.Username != strings.Title(strings.Join(strings.Split(username, " "), "_")) {
+			notificationId := GetNotificationId(user.Username, username)
+			notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
+			if len(notification) > 0 {
+				currentCount, err := strconv.Atoi(notification[0].Values["notifications"].(string))
+				if err != nil {
+					fmt.Println(err)
+				}
+				user.NbrNotifications = currentCount
+			} else {
+				user.NbrNotifications = 0
+			}
 			filteredUsers = append(filteredUsers, user)
 		}
 	}
@@ -157,7 +170,7 @@ func GetUsernameById(userID interface{}) string {
 	return Usernames
 }
 
-func GetUsers(Sessions []models.Model, Usernames string) ([]helpers.User, []models.Model) {
+func GetUsers(Usernames string) ([]helpers.User, []models.Model) {
 	var All_users []helpers.User
 	Users := models.User.Fetch()
 	for _, v := range Users {
@@ -166,6 +179,7 @@ func GetUsers(Sessions []models.Model, Usernames string) ([]helpers.User, []mode
 
 		if user.Username != Usernames {
 			user.Username = strings.Replace(user.Username, " ", "_", -1)
+
 			All_users = append(All_users, user)
 		}
 	}
