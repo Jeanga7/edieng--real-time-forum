@@ -47,8 +47,8 @@ function openWs() {
 
         // console.log("message", message);
         if (message.type === 'history') {
-            // loadHistory(message.messages);
-            loadInitialMessages(message.messages);
+             loadHistory(message.messages);
+            
 
         } else if (message.type == "typing") {
             if (currentdiscussion === message.sender) {
