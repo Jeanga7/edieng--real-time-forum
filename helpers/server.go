@@ -17,8 +17,10 @@ var DummyText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris
 var Storage = "./views/assets/img/posts"
 
 type User struct {
-	Username string
-	Status string
+	Username         string
+	Status           string
+	NbrNotifications int
+	LastMsgDate      string
 }
 
 type FinalData struct {

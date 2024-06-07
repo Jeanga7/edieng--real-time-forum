@@ -51,9 +51,6 @@ func HandleMessages(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error reading initial message:", err)
 		return
 	}
-	// if initialMessage.Type == "notification" {
-	// 	fmt.Println("dès le début......")
-	// }
 
 	clients[conn] = name
 	for {
@@ -86,17 +83,16 @@ func HandleMessages(w http.ResponseWriter, r *http.Request) {
 			}
 		} else {
 			if msg.Type != "typing" {
-				if msg.MessageContent != ""{
+				if msg.MessageContent != "" {
+					notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
+					if len(notification) > 0 {
+						currentCount, err := strconv.Atoi(notification[0].Values["notifications"].(string))
+						if err != nil {
+							return
+						}
 
-				notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
-				if len(notification) > 0 {
-					currentCount, err := strconv.Atoi(notification[0].Values["notifications"].(string))
-					if err != nil {
-						return
-					}
-
-					number := currentCount + 1
-					AddNotif(notificationId, msg.Sender, name, number)
+						number := currentCount + 1
+						AddNotif(notificationId, msg.Sender, name, number)
 					}
 				}
 			}
@@ -118,15 +114,16 @@ func HandleTheMessages() {
 		for client, username := range clients {
 			if username == msg.Destinataire {
 				if msg.Type != "typing" {
-
-					notificationId := GetNotificationId(msg.Sender, msg.Destinataire)
-					notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
-					if len(notification) > 0 {
-						currentCount, err := strconv.Atoi(notification[0].Values["notifications"].(string))
-						if err != nil {
-							return
+					if msg.MessageContent != "" {
+						notificationId := GetNotificationId(msg.Sender, msg.Destinataire)
+						notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
+						if len(notification) > 0 {
+							currentCount, err := strconv.Atoi(notification[0].Values["notifications"].(string))
+							if err != nil {
+								return
+							}
+							msg.Notif.NombreNotifications = strconv.Itoa(currentCount)
 						}
-						msg.Notif.NombreNotifications = strconv.Itoa(currentCount)
 					}
 				}
 				err := client.WriteJSON(msg)
@@ -154,7 +151,6 @@ func SendPreviousMessages(conn *websocket.Conn, sender, receiver string) {
 					log.Println("Error unmarshalling messages:", err)
 					continue
 				}
-
 				myDiscussions = append(myDiscussions, messages...)
 			}
 		}
@@ -208,7 +204,7 @@ func CreateNotification(sender string, receiver string) {
 	notif.Values = map[string]interface{}{
 		"idSender":      sender,
 		"idReceiver":    receiver,
-		"notifications": "1",
+		"notifications": "0",
 	}
 	notif.Create()
 }

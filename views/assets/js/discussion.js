@@ -6,7 +6,7 @@ let currentdiscussion;
 let ws;
 let currentDestinataire;
 
-document.addEventListener('DOMContentLoaded', (event) => {
+document.addEventListener('DOMContentLoaded', () => {
     openWs();
 
     document.querySelectorAll('.discussion').forEach(user => {
@@ -37,6 +37,23 @@ function openWs() {
 
     ws.onopen = () => {
         console.log("Connected to WebSocket...");
+
+        var discussions = document.querySelectorAll('.discussion');
+
+        var discussionsArray = Array.from(discussions);
+
+        discussionsArray.sort((a, b) => {
+            const dateA = a.getAttribute('date');
+            const dateB = b.getAttribute('date');
+            return compareDiscussionOrder(dateA, dateB);
+        });
+
+        var parentContainer = document.getElementById('most-active-users');
+        parentContainer.innerHTML = '';
+
+        discussionsArray.forEach(function (discussion) {
+            parentContainer.appendChild(discussion);
+        });
         AskforNotification()
     };
 
@@ -44,12 +61,10 @@ function openWs() {
 
     ws.onmessage = (e) => {
         const message = JSON.parse(e.data);
+        // console.log("message", message.sender);
 
-        // console.log("message", message);
         if (message.type === 'history') {
-             loadHistory(message.messages);
-            
-
+            loadHistory(message.messages);
         } else if (message.type == "typing") {
             if (currentdiscussion === message.sender) {
                 document.getElementById('typingIndicator').style.opacity = 1;
@@ -62,31 +77,28 @@ function openWs() {
             handleNewUser(message.sender)
         } else {
             console.log("NOOOOOOOOOOOOOOON");
+            setDivDate(message.date, message.sender)
+
             if (currentdiscussion == message.sender) {
                 displayMessage(message.message, message.date, message.destinataire);
             }
-            console.log(message);
+            // console.log(message);
             var div = document.getElementById(message.sender + "_discussion")
-            var t = div.getAttribute("ischatopened")
-            console.log(t);
-            if (t === "false") {
+            var ischatopened = div.getAttribute("ischatopened")
+            // console.log(ischatopened);
+            if (ischatopened === "false" && message.message != "") {
                 updateNotification(message.sender, message.Notif.notification)
-                function compareDiscussionOrder(a, b) {
-                    let t = a.getAttribute('id')
-                    let v = b.getAttribute('id')
-                    var notifA = parseInt(document.getElementById(t.replace("_discussion", "_notif")).textContent);
-                    var notifB = parseInt(document.getElementById(v.replace("_discussion", "_notif")).textContent);
-                    console.log("*", t.replace("_discussion", "_notif"));
-                    console.log(notifA, notifB);
-                    return notifB - notifA;
-                }
+
 
                 var discussions = document.querySelectorAll('.discussion');
-
                 var discussionsArray = Array.from(discussions);
 
-                discussionsArray.sort(function (a, b) {
-                    return compareDiscussionOrder(a, b);
+                // console.log("discussionsArray",discussionsArray);
+
+                discussionsArray.sort((a, b) => {
+                    const dateA = a.getAttribute('date');
+                    const dateB = b.getAttribute('date');
+                    return compareDiscussionOrder(dateA, dateB);
                 });
 
                 var parentContainer = document.getElementById('most-active-users');
@@ -100,6 +112,24 @@ function openWs() {
         }
     };
 
+}
+
+function parseDate(dateStr) {
+    console.log("date", dateStr);
+    if (dateStr) {
+        const [datePart, timePart] = dateStr.split(' ');
+
+        const [day, month, year] = datePart.split('/').map(Number);
+        const [hours, minutes, seconds] = timePart.split(':').map(Number);
+        return new Date(year, month - 1, day, hours, minutes, seconds);
+    }
+}
+
+function compareDiscussionOrder(dateStr1, dateStr2) {
+    const date1 = parseDate(dateStr1);
+    const date2 = parseDate(dateStr2);
+
+    return date2 - date1;
 }
 
 function updateNotification(sender, count) {
@@ -129,9 +159,6 @@ function sendInitialMessage(username) {
         date: "",
         type: "fetch"
     };
-
-    ///
-
     ws.send(JSON.stringify(data));
 }
 
@@ -189,7 +216,7 @@ function loadHistory(messages) {
     const chatMessages = document.getElementById("chat-messages");
     chatMessages.innerHTML = '';
     messages.forEach(msg => {
-        updateNotification(msg.sender, "0")
+        updateNotification(msg.sender, 0)
         displayMessage(msg.message, msg.date, msg.destinataire);
     });
 }
@@ -225,12 +252,27 @@ function handleNewUser(userConnected) {
     }
 }
 
+function setDivDate(date, sender) {
+    document.querySelectorAll('.discussion').forEach(user => {
+        // console.log(user.getAttribute('id').split("_discussion")[0]);
+        if (user.getAttribute('id').split("_discussion")[0] === sender) {
+            user.setAttribute("date", date)
+        }
 
+    });
+}
+
+// // order by the number of notifications
+// function compareDiscussionOrder(a, b) {
+//     // let t = a.getAttribute('id')
+//     // let v = b.getAttribute('id')
+//     var notifA = parseInt(document.getElementById(t.replace("_discussion", "_notif")).textContent);
+//     var notifB = parseInt(document.getElementById(v.replace("_discussion", "_notif")).textContent);
+//     // console.log("*", t.replace("_discussion", "_notif"));
+//     // console.log(notifA, notifB);
+//     return notifB - notifA;
+// }
 //====================================TYPING-PROGRESS========================================
-
-
-
-
 
 messageInput.addEventListener('keydown', () => {
     const data3 = {

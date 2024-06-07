@@ -211,16 +211,16 @@
                 <h2 class="card-title">Users</h2>
                 <div id="most-active-users">
                     {{range .AllUser}}
-                    <div class="discussion" id={{.Username}}_discussion ischatopened="false" >
+                    <div class="discussion" id={{.Username}}_discussion ischatopened="false" date="{{.LastMsgDate}}" >
                         {{if eq .Status "Online"}}
                         <div class="usercontainer">
                             <strong>{{.Username}} - {{.Status}}</strong>
-                            <div class="notification" id={{.Username}}_notif>0</div>
+                            <div class="notification" id={{.Username}}_notif>{{.NbrNotifications}}</div>
                         </div>
                         {{else}}
                         <div class="usercontainer">
                             <em>{{.Username}} - Offline</em>
-                            <div class="notification" id={{.Username}}_notif>0</div>
+                            <div class="notification" id={{.Username}}_notif>{{.NbrNotifications}}</div>
                         </div>
                         {{end}}
                     </div>
