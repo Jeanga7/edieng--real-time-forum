@@ -60,8 +60,8 @@
                 <div id="user-infos">
                     <div id="user-picture" style="background-image: url('assets/img/profile/{{.UserData.picture}}');">
                     </div>
-                    <span id="user-full-name">{{.UserData.name}}</span>
-                    <span id="username">@{{.UserData.username}}</span>
+                    <span id="user-full-name">{{.UserData.firstname}} {{.UserData.lastname}}</span>
+                    <span id="nickname">@{{.UserData.nickname}}</span>
                 </div>
                 <div id="user-stats">
                     <div class="stats-block" onclick="window.location.href = '/?filter=MyPosts'">
@@ -120,7 +120,7 @@
                             style="background-image: url('assets/img/profile/{{.AuthorPicture}}');"></span>
                         <div class="post-author-names">
                             <span class="post-author-fullname">{{.AuthorName}}</span>
-                            <span class="post-author-username">@{{.AuthorUsername}}</span>
+                            <span class="post-author-nickname">@{{.AuthorNickname}}</span>
                         </div>
                     </div>
                     <div class="post-menu"><i class="fas fa-ellipsis"></i></div>
@@ -157,7 +157,7 @@
                                 class="comment-author-pic"></span>
                             <div class="comment-author-infos">
                                 <span class="comment-author-name">{{.AuthorName}}</span>
-                                <span class="comment-author-username">@{{.AuthorUsername}}</span>
+                                <span class="comment-author-nickname">@{{.AuthorNickname}}</span>
                             </div>
                         </div>
 
@@ -211,16 +211,16 @@
                 <h2 class="card-title">Users</h2>
                 <div id="most-active-users">
                     {{range .AllUser}}
-                    <div class="discussion" id={{.Username}}_discussion ischatopened="false" date="0" >
+                    <div class="discussion" id={{.Nickname}}_discussion ischatopened="false" date="0" >
                         {{if eq .Status "Online"}}
                         <div class="usercontainer">
-                            <strong>{{.Username}} - {{.Status}}</strong>
-                            <div class="notification" id={{.Username}}_notif>{{.NbrNotifications}}</div>
+                            <strong>{{.Nickname}} - {{.Status}}</strong>
+                            <div class="notification" id={{.Nickname}}_notif>{{.NbrNotifications}}</div>
                         </div>
                         {{else}}
                         <div class="usercontainer">
-                            <em>{{.Username}} - Offline</em>
-                            <div class="notification" id={{.Username}}_notif>{{.NbrNotifications}}</div>
+                            <em>{{.Nickname}} - Offline</em>
+                            <div class="notification" id={{.Nickname}}_notif>{{.NbrNotifications}}</div>
                         </div>
                         {{end}}
                     </div>

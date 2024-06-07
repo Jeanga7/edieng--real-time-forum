@@ -1,8 +1,7 @@
 // Initialization
 let printed = {};
 let checked = {};
-let loaded = false;
-let loginRoute = '/api/auth';
+let authRoute = '/api/auth';
 
 let capitalize = (str) => str.charAt(0).toUpperCase() + str.substr(1);
 
@@ -30,7 +29,7 @@ async function ValidateField(route, selector, varName, data, checked, printed) {
                     } else {
                         printed[varName] = true;
                         checked[varName] = true;
-                        loaded = true;
+                        fieldLoaded = true;
                     }
 
                     logTxt.innerHTML +=
@@ -46,7 +45,7 @@ async function ValidateField(route, selector, varName, data, checked, printed) {
 }
 
 
-async function ValidateNextField(route, prev, next, prevFiedSelector, nextFieldSelector, rowSelector, typingClass, data, checked, printed) {
+async function ValidateNextField(route, prev, next, prevFiedSelector, nextFieldSelector, rowSelector, data, checked, printed) {
     if (checked[prev]) {
         if (!printed[next]) {
             document.querySelector(prevFiedSelector).readOnly = true;
@@ -56,6 +55,7 @@ async function ValidateNextField(route, prev, next, prevFiedSelector, nextFieldS
                 ": ",
                 " "
             ];
+            let typingClass = activeForm === "login" ? "lgn" : "rgst"
             await typeInTxts(rowSelector, txtsList, typingClass);
             printed[next] = true;
         }
@@ -84,14 +84,27 @@ document.addEventListener("keydown", async (e) => {
         // Verify nickname
         let data = new FormData();
         data.append("form", activeForm);
-        [data, checked, printed] = await ValidateField(loginRoute, "#login-nickname", "login", data, checked, printed);
+        if (activeForm === "login") {
+            [data, checked, printed] = await ValidateField(authRoute, "#login-nickname", "login", data, checked, printed);
 
-        if (loaded) {
-            // Verify password
-            [data, checked, printed] = await ValidateNextField(loginRoute, "login", "password", "#login-nickname", "#login-password", "#login-password-row", "lgn", data, checked, printed);
+            if (fieldLoaded) {
+                // Verify password
+                [data, checked, printed] = await ValidateNextField(authRoute, "login", "password", "#login-nickname", "#login-password", "#login-password-row", data, checked, printed);
 
-            if (checked["login"] && checked["password"]) {
-                hideAuth();
+                if (checked["login"] && checked["password"]) {
+                    hideAuth();
+                }
+            }
+        } else if (activeForm === "register") {
+            [data, checked, printed] = await ValidateField(authRoute, "#register-firstname", "firstname", data, checked, printed);
+
+            if (fieldLoaded) {
+                // Verify lastname
+                [data, checked, printed] = await ValidateNextField(authRoute, "firstname", "lastname", "#register-firstname", "#register-lastname", "#register-lastname-row", data, checked, printed);
+
+                if (checked["firstname"] && checked["lastname"]) {
+                    hideAuth();
+                }
             }
         }
     }

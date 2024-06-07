@@ -52,14 +52,14 @@ function fieldErrorHandler(value, el) {
     case "INVALID EMAIL":
       errorField(el, "email");
       break;
-    case "INVALID USERNAME":
-      errorField(el, "username");
+    case "INVALID NICKNAME":
+      errorField(el, "nickname");
       break;
-    case "USERNAME OR EMAIL ALREADY USED":
-        errorField(el, "username");
+    case "NICKNAME OR EMAIL ALREADY USED":
+        errorField(el, "nickname");
         break;
     case "USER NOT FOUND":
-        errorField(el, "username");
+        errorField(el, "nickname");
         break;
     case "INVALID PASSWORD":
       errorField(el, "password");

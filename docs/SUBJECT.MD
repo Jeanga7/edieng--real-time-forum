@@ -31,7 +31,7 @@ Instructions for user registration:
 
 - Must ask for email
   - When the email is already taken return an error response.
-- Must ask for username
+- Must ask for nickname
 - Must ask for password
   - The password must be encrypted when stored (this is a Bonus task)
 

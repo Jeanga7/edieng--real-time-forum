@@ -150,7 +150,7 @@ body {
     font-size: 1.2em;
     letter-spacing: 1px;
 }
-#username {
+#nickname {
     font-weight: 300;
     font-size: 0.8em;
     letter-spacing: 0.8px;
@@ -283,7 +283,7 @@ body {
     font-weight: 0.9;
     letter-spacing: 0.5px;
 }
-.post-author-username {
+.post-author-nickname {
     font-size: 0.75em;
 }
 .post-menu {
@@ -632,7 +632,7 @@ body {
     flex-direction: column;
     margin-left: 8px;
 }
-.comment-author-username {
+.comment-author-nickname {
     font-size: 0.7em;
 }
 .comment-content {

@@ -18,14 +18,14 @@ For the chat system we will have 2 blocks :
 - Not in contact users: User with who you've not interacted with yet
 Create an API for messages:
 - Table: discussions
-- Create an hash for a discussion between two users with their usernames
+- Create an hash for a discussion between two users with their nicknames
 - Every exchange message has an numerical id
 - The discussion contains all messages exchanged between two users
 - Messages will be loaded by 10 and starting with the last one 
 - When scrolled 10 more messages should be available
 Message Format:
 - A date that shows when the message was sent
-- The username of the user that sent the message
+- The nickname of the user that sent the message
 
 Notifications
 - When a user sends a message the receiver should receive a notification  of the new message (in real time)

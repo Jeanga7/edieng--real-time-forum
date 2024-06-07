@@ -222,14 +222,14 @@ function postErrorHandler(value) {
   }
 
 
-  function createCommentHTML(authorName, authorUsername, commentContent) {
+  function createCommentHTML(authorName, authorNickname, commentContent) {
     return `
         <div class="comment">
             <div class="comment-author">
                 <span style="background-image: url(assets/img/profile/spidey.png)" class="comment-author-pic"></span>
                 <div class="comment-author-infos">
                     <span class="comment-author-name">${authorName}</span>
-                    <span class="comment-author-username">${authorUsername}</span>
+                    <span class="comment-author-nickname">${authorNickname}</span>
                 </div>
             </div>
             <div class="comment-content ellipsis">

@@ -10,11 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
     openWs();
 
     document.querySelectorAll('.discussion').forEach(user => {
-        const username = user.textContent.split(' - ')[0].trim();
+        const nickname = user.textContent.split(' - ')[0].trim();
         user.addEventListener('click', () => {
             user.setAttribute("Ischatopened", true)
-            currentdiscussion = username
-            startChat(username);
+            currentdiscussion = nickname
+            startChat(nickname);
         });
     });
 
@@ -131,19 +131,19 @@ function updateNotification(sender, count) {
     }
 }
 
-function startChat(username) {
-    currentDestinataire = username;
-    document.getElementById('chat-user-name').textContent = username;
+function startChat(nickname) {
+    currentDestinataire = nickname;
+    document.getElementById('chat-user-name').textContent = nickname;
     document.getElementById('chat-container').style.display = 'block';
     document.getElementById('chat-messages').innerHTML = '';
-    sendInitialMessage(username);
+    sendInitialMessage(nickname);
 }
 
-function sendInitialMessage(username) {
+function sendInitialMessage(nickname) {
     const data = {
         message: "",
         sender: currentUser,
-        destinataire: username,
+        destinataire: nickname,
         date: "",
         type: "fetch"
     };

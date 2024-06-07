@@ -109,7 +109,7 @@ func (model *Model) Update(data map[string]interface{}, condAttr string, condVal
 func (model *Model) Delete(attr ...string) {
 	// Cette fonction peut être appelée avec 3 arguments les éléments
 	// d'une condition (column, operator, value)
-	// Exemple : model.Delete("username", "=", "hulk")
+	// Exemple : model.Delete("nickname", "=", "hulk")
 	// Lorsqu'elle est appelée sans argument, toutes les entrées de la
 	// table du model sont supprimées
 	// Vérifier si des attributs ont été fournis

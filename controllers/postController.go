@@ -59,8 +59,8 @@ func ReadPost(w http.ResponseWriter, r *http.Request) []helpers.ForumPost {
 				var newValues helpers.ForumPost
 				newValues.Id = helpers.InterfaceToString(post.Values["id"])
 				newValues.AuthorId = helpers.InterfaceToString(post.Values["authorId"])
-				newValues.AuthorName = helpers.InterfaceToString(author.Values["name"])
-				newValues.AuthorUsername = helpers.InterfaceToString(author.Values["username"])
+				newValues.AuthorName = helpers.InterfaceToString(author.Values["firstname"].(string) + " " + author.Values["lastname"].(string))
+				newValues.AuthorNickname = helpers.InterfaceToString(author.Values["nickname"])
 				newValues.Title = helpers.InterfaceToString(post.Values["title"])
 				newValues.Content = helpers.InterfaceToString(post.Values["content"])
 				newValues.Categories = helpers.InterfaceToString(post.Values["categoriesNames"])
@@ -123,16 +123,19 @@ func FillPostSearched(params url.Values, posts []models.Model) []models.Model {
 	wantedTitle := models.Post.FetchLike([]interface{}{"title"}, []interface{}{"%" + wanted + "%"})
 	wantedContent := models.Post.FetchLike([]interface{}{"content"}, []interface{}{"%" + wanted + "%"})
 
-	Name := models.User.FetchLike([]interface{}{"name"}, []interface{}{"%" + wanted + "%"})
-	Userame := models.User.FetchLike([]interface{}{"username"}, []interface{}{"%" + wanted + "%"})
+	Name := models.User.FetchLike([]interface{}{"firstname"}, []interface{}{"%" + wanted + "%"})
+	if len(Name) == 0 {
+		Name = models.User.FetchLike([]interface{}{"lastname"}, []interface{}{"%" + wanted + "%"})
+	}
+	Username := models.User.FetchLike([]interface{}{"nickname"}, []interface{}{"%" + wanted + "%"})
 
 	var tabWantedNames [][]models.Model
 	for _, v := range Name {
 		tabWantedNames = append(tabWantedNames, models.Post.FetchLike([]interface{}{"authorId"}, []interface{}{"%" + v.Values["id"].(string) + "%"}))
 	}
-	var tabWantedUsernames [][]models.Model
-	for _, v := range Userame {
-		tabWantedUsernames = append(tabWantedUsernames, models.Post.FetchLike([]interface{}{"authorId"}, []interface{}{"%" + v.Values["id"].(string) + "%"}))
+	var tabWantedNicknames [][]models.Model
+	for _, v := range Username {
+		tabWantedNicknames = append(tabWantedNicknames, models.Post.FetchLike([]interface{}{"authorId"}, []interface{}{"%" + v.Values["id"].(string) + "%"}))
 	}
 	if len(wantedCategories) > 0 {
 		posts = append(posts, wantedCategories...)
@@ -151,9 +154,9 @@ func FillPostSearched(params url.Values, posts []models.Model) []models.Model {
 		}
 	}
 
-	for _, tabWantedUsername := range tabWantedUsernames {
-		if len(tabWantedUsername) > 0 {
-			posts = append(posts, tabWantedUsername...)
+	for _, tabWantedNickname := range tabWantedNicknames {
+		if len(tabWantedNickname) > 0 {
+			posts = append(posts, tabWantedNickname...)
 		}
 	}
 
@@ -200,9 +203,9 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		helpers.JSONResponse(w, errors.New("FILE FORMAT ERROR"), http.StatusBadRequest)
 		return
 	}
-	
+
 	if picture != nil {
-		defer picture.Close()		
+		defer picture.Close()
 	}
 
 	const maxSize = 20 << 20 // 20 MB

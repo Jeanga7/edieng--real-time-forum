@@ -112,8 +112,8 @@ func HandleTheMessages() {
 		msg := <-message
 		// fmt.Println("hello", msg)
 
-		for client, username := range clients {
-			if username == msg.Destinataire {
+		for client, nickname := range clients {
+			if nickname == msg.Destinataire {
 				if msg.Type != "typing" {
 					if msg.MessageContent != "" {
 						notificationId := GetNotificationId(msg.Sender, msg.Destinataire)
@@ -273,11 +273,11 @@ func GetNotificationId(User1, User2 string) interface{} {
 	return ""
 }
 
-func BroadcastNewUser(username string) {
-	fmt.Println("username", username)
+func BroadcastNewUser(nickname string) {
+	fmt.Println("nickname", nickname)
 	newUserMessage := Message{
 		Type:   "new_user",
-		Sender: username,
+		Sender: nickname,
 	}
 	for client := range clients {
 		err := client.WriteJSON(newUserMessage)

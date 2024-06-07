@@ -27,14 +27,14 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	global.W = w
 	// IsLogged = false
 	// return
-	Usernames, Sessions, shouldReturn, _ := FindUsersOnline(r)
+	Nicknames, Sessions, shouldReturn, _ := FindUsersOnline(r)
 	if shouldReturn {
 		return
 	}
 
-	All_users, Users := GetUsers(strings.Title(Usernames))
+	All_users, Users := GetUsers(strings.Title(Nicknames))
 
-	SortedUsers := SortUsers(All_users, Sessions, strings.Title(Usernames))
+	SortedUsers := SortUsers(All_users, Sessions, strings.Title(Nicknames))
 
 	Posts := models.Post.Fetch()
 	Likes := models.Like.Fetch()
@@ -95,12 +95,12 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func SortUsers(All_users []helpers.User, Sessions []models.Model, username string) []helpers.User {
+func SortUsers(All_users []helpers.User, Sessions []models.Model, nickname string) []helpers.User {
 	SortedUsers := make([]helpers.User, len(All_users))
 	for i, user := range All_users {
-		SortedUsers[i].Username = strings.Title(strings.Join(strings.Split(user.Username, " "), "_"))
+		SortedUsers[i].Nickname = strings.Title(strings.Join(strings.Split(user.Nickname, " "), "_"))
 		for _, s := range Sessions {
-			var id = GetIdByUsername(user.Username)
+			var id = GetIdByNickname(user.Nickname)
 			if id == s.Values["idUser"].(string) {
 				SortedUsers[i].Status = "Online"
 			}
@@ -108,13 +108,13 @@ func SortUsers(All_users []helpers.User, Sessions []models.Model, username strin
 	}
 
 	sort.Slice(SortedUsers, func(i, j int) bool {
-		return SortedUsers[i].Username < SortedUsers[j].Username
+		return SortedUsers[i].Nickname < SortedUsers[j].Nickname
 	})
 
 	filteredUsers := []helpers.User{}
 	for _, user := range SortedUsers {
-		if user.Username != strings.Title(strings.Join(strings.Split(username, " "), "_")) {
-			notificationId := GetNotificationId(user.Username, username)
+		if user.Nickname != strings.Title(strings.Join(strings.Split(nickname, " "), "_")) {
+			notificationId := GetNotificationId(user.Nickname, nickname)
 			notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
 			if len(notification) > 0 {
 				currentCount, err := strconv.Atoi(notification[0].Values["notifications"].(string))
@@ -131,8 +131,8 @@ func SortUsers(All_users []helpers.User, Sessions []models.Model, username strin
 	return filteredUsers
 }
 
-func GetIdByUsername(username string) string {
-	conn := models.User.Fetch([]interface{}{"name"}, []interface{}{username})
+func GetIdByNickname(nickname string) string {
+	conn := models.User.Fetch([]interface{}{"nickname"}, []interface{}{nickname})
 	if len(conn) > 0 {
 		return conn[0].Values["id"].(string)
 	}
@@ -140,7 +140,7 @@ func GetIdByUsername(username string) string {
 }
 
 func FindUsersOnline(r *http.Request) (string, []models.Model, bool, interface{}) {
-	var Usernames string
+	var Nicknames string
 	var userID interface{}
 	Sessions := models.Session.Fetch()
 	Cookie, err := r.Cookie("sessionID")
@@ -155,30 +155,30 @@ func FindUsersOnline(r *http.Request) (string, []models.Model, bool, interface{}
 				log.Println("seesion introuvable")
 				return "", nil, true, "noId"
 			}
-			Usernames = GetUsernameById(userID)
+			Nicknames = GetNicknameById(userID)
 		}
 	}
-	return Usernames, Sessions, false, userID
+	return Nicknames, Sessions, false, userID
 }
 
-func GetUsernameById(userID interface{}) string {
-	var Usernames string
+func GetNicknameById(userID interface{}) string {
+	var Nicknames string
 	conn := models.User.Fetch([]interface{}{"Id"}, []interface{}{userID})
 	if len(conn) > 0 {
-		Usernames = conn[0].Values["name"].(string)
+		Nicknames = conn[0].Values["nickname"].(string)
 	}
-	return Usernames
+	return Nicknames
 }
 
-func GetUsers(Usernames string) ([]helpers.User, []models.Model) {
+func GetUsers(Nicknames string) ([]helpers.User, []models.Model) {
 	var All_users []helpers.User
 	Users := models.User.Fetch()
 	for _, v := range Users {
 		var user helpers.User
-		user.Username = v.Values["name"].(string)
+		user.Nickname = v.Values["nickname"].(string)
 
-		if user.Username != Usernames {
-			user.Username = strings.Replace(user.Username, " ", "_", -1)
+		if user.Nickname != Nicknames {
+			user.Nickname = strings.Replace(user.Nickname, " ", "_", -1)
 
 			All_users = append(All_users, user)
 		}
@@ -192,7 +192,7 @@ func MostActiveUser(stats map[string]int, UserAllData map[string]map[string]inte
 	for id, stat := range stats {
 		if userData, ok := UserAllData[id]; ok && userData != nil {
 			usersData = append(usersData, ActiveUsersData{
-				UserName: userData["name"].(string),
+				UserName: userData["nickname"].(string),
 				Actions:  stat,
 			})
 		}
@@ -259,7 +259,7 @@ func GetUsersStats(Posts []models.Model, Likes []models.Model, Dislikes []models
 		stats[v.Values["authorId"].(string)]++
 	}
 	for _, v := range Users {
-		// fmt.Println("this is my name", v.Values["name"])
+		// fmt.Println("this is my name", v.Values["nickname"])
 		UserAllData[v.Values["id"].(string)] = v.Values
 	}
 

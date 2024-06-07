@@ -57,16 +57,16 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	UsernameOrEmail := html.EscapeString(r.FormValue("username/email"))
+	NicknameOrEmail := html.EscapeString(r.FormValue("nickname/email"))
 
-	if strings.Contains(UsernameOrEmail, "@") {
-		if !helpers.ValidateInput("email", UsernameOrEmail) {
+	if strings.Contains(NicknameOrEmail, "@") {
+		if !helpers.ValidateInput("email", NicknameOrEmail) {
 			helpers.JSONResponse(w, errors.New("INVALID EMAIL"), http.StatusBadRequest)
 			return
 		}
 	} else {
-		if !helpers.ValidateInput("username", UsernameOrEmail) {
-			helpers.JSONResponse(w, errors.New("INVALID USERNAME"), http.StatusBadRequest)
+		if !helpers.ValidateInput("nickname", NicknameOrEmail) {
+			helpers.JSONResponse(w, errors.New("INVALID NICKNAME"), http.StatusBadRequest)
 			return
 		}
 	}
@@ -77,8 +77,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	UserEmail := models.User.Fetch([]interface{}{"email"}, []interface{}{UsernameOrEmail})
-	UserName := models.User.Fetch([]interface{}{"username"}, []interface{}{UsernameOrEmail})
+	UserEmail := models.User.Fetch([]interface{}{"email"}, []interface{}{NicknameOrEmail})
+	UserName := models.User.Fetch([]interface{}{"nickname"}, []interface{}{NicknameOrEmail})
 	var user []models.Model
 	if len(UserEmail) == 1 {
 		user = UserEmail
@@ -92,7 +92,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 		if err == nil {
 			CreateSession(w, r, fmt.Sprintf("%s", user[0].Values["id"]))
-			BroadcastNewUser(user[0].Values["name"].(string))
+			BroadcastNewUser(user[0].Values["firstname"].(string) + " " + user[0].Values["lastname"].(string))
 			helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted)
 			return
 
@@ -125,7 +125,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 
 	IdUser := models.Session.Fetch([]interface{}{"id"}, []interface{}{sessionID})
 	if len(IdUser) > 0 {
-		BroadcastNewUser(GetUsernameById(IdUser[0].Values["idUser"]))
+		BroadcastNewUser(GetNicknameById(IdUser[0].Values["idUser"]))
 	}
 	DeleteSession(w, r, sessionID)
 	http.Redirect(w, r, "/login", http.StatusFound)
@@ -177,9 +177,9 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	username := html.EscapeString(r.FormValue("username"))
-	if !helpers.ValidateInput("username", username) {
-		helpers.JSONResponse(w, errors.New("INVALID USERNAME"), http.StatusBadRequest)
+	nickname := html.EscapeString(r.FormValue("nickname"))
+	if !helpers.ValidateInput("nickname", nickname) {
+		helpers.JSONResponse(w, errors.New("INVALID NICKNAME"), http.StatusBadRequest)
 		return
 	}
 
@@ -191,10 +191,10 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	// Vérifiez si l'email ou le nom d'utilisateur est déjà utilisé
 	resEmail := models.User.Fetch([]interface{}{"email"}, []interface{}{email})
-	resUsername := models.User.Fetch([]interface{}{"username"}, []interface{}{username})
-	if len(resEmail) > 0 || len(resUsername) > 0 {
+	resNickname := models.User.Fetch([]interface{}{"nickname"}, []interface{}{nickname})
+	if len(resEmail) > 0 || len(resNickname) > 0 {
 		// Renvoyez une erreur si l'email ou le nom d'utilisateur est déjà utilisé
-		helpers.JSONResponse(w, errors.New("USERNAME OR EMAIL ALREADY USED"), http.StatusConflict)
+		helpers.JSONResponse(w, errors.New("NICKNAME OR EMAIL ALREADY USED"), http.StatusConflict)
 		return
 	}
 
@@ -206,8 +206,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	// Si non, créez un nouvel utilisateur
 	newUser := models.User
 	newUser.Values = map[string]interface{}{
-		"name":     strings.ReplaceAll(strings.Title(name), " ", "_"),
-		"username": username,
+		"firstname":     strings.ReplaceAll(strings.Title(name), " ", "_"),
+		"nickname": nickname,
 		"email":    email,
 		"password": helpers.HashPassword(password),
 	}

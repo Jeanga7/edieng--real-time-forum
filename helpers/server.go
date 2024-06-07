@@ -17,7 +17,7 @@ var DummyText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris
 var Storage = "./views/assets/img/posts"
 
 type User struct {
-	Username         string
+	Nickname         string
 	Status           string
 	NbrNotifications int
 }
@@ -34,7 +34,7 @@ type ForumPost struct {
 	Id             string
 	AuthorId       string
 	AuthorName     string
-	AuthorUsername string
+	AuthorNickname string
 	AuthorPicture  string
 	Title          string
 	Content        string
@@ -52,7 +52,7 @@ type ForumPost struct {
 type PostComment struct {
 	Id             string
 	AuthorName     string
-	AuthorUsername string
+	AuthorNickname string
 	AuthorPicture  string
 	Content        string
 	Likes          int
@@ -67,11 +67,13 @@ var rules = ValidationRules{
 	"name":     regexp.MustCompile(`^.{2,20}$`),
 	"email":    regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,25}$`),
 	"password": regexp.MustCompile(`^.{8,30}$`),
-	"username": regexp.MustCompile(`^[a-zA-Z0-9_-]{3,20}$`),
+	"nickname": regexp.MustCompile(`^[a-zA-Z0-9_-]{3,20}$`),
 	"content":  regexp.MustCompile(`^.{0,500}$`),
 	"comment":  regexp.MustCompile(`^.{1,500}$`),
 	"category": regexp.MustCompile(`^[a-zA-Z0-9]{1,15}$`),
 	"title":    regexp.MustCompile(`^.{2,100}$`),
+	"age":      regexp.MustCompile(`^[1-9]\d{1,2}$`),
+	"gender":      regexp.MustCompile(`^(m|f|M|F)$`),
 }
 
 func ValidateInput(champ, value string) bool {

@@ -272,6 +272,7 @@ function formToggle() {
                         e.target.classList.add("active")
                         otherBtn().classList.remove("active")
                         await startActiveTerminal(activeForm, txtDataToLoad());
+                        fieldLoaded = false;
                         resolve();
                     }, 750);
                 })

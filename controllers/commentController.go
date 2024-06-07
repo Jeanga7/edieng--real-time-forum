@@ -43,8 +43,8 @@ func GetPostComments(comments []models.Model) []helpers.PostComment {
 		authors := models.User.Fetch([]interface{}{"id"}, []interface{}{authorID})
 		if len(authors) > 0 {
 			author := authors[0]
-			newComment.AuthorName = helpers.InterfaceToString(author.Values["name"])
-			newComment.AuthorUsername = helpers.InterfaceToString(author.Values["username"])
+			newComment.AuthorName = helpers.InterfaceToString(author.Values["firstname"].(string) + " " + author.Values["lastname"].(string))
+			newComment.AuthorNickname = helpers.InterfaceToString(author.Values["nickname"])
 			newComment.AuthorPicture = helpers.DefaultIfNil(author.Values["picture"])
 		}
 
