@@ -51,9 +51,6 @@ func HandleMessages(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error reading initial message:", err)
 		return
 	}
-	// if initialMessage.Type == "notification" {
-	// 	fmt.Println("dès le début......")
-	// }
 
 	clients[conn] = name
 	for {
@@ -155,7 +152,6 @@ func SendPreviousMessages(conn *websocket.Conn, sender, receiver string) {
 					log.Println("Error unmarshalling messages:", err)
 					continue
 				}
-
 				myDiscussions = append(myDiscussions, messages...)
 			}
 		}

@@ -6,7 +6,7 @@ let currentdiscussion;
 let ws;
 let currentDestinataire;
 
-document.addEventListener('DOMContentLoaded', (event) => {
+document.addEventListener('DOMContentLoaded', () => {
     openWs();
 
     document.querySelectorAll('.discussion').forEach(user => {
@@ -59,12 +59,11 @@ function openWs() {
 
     ws.onmessage = (e) => {
         const message = JSON.parse(e.data);
+        // console.log("message", message.sender);
+        setDivDate(message.date, message.sender)
 
-        // console.log("message", message);
         if (message.type === 'history') {
-             loadHistory(message.messages);
-            
-
+            loadHistory(message.messages);
         } else if (message.type == "typing") {
             if (currentdiscussion === message.sender) {
                 document.getElementById('typingIndicator').style.opacity = 1;
@@ -80,19 +79,21 @@ function openWs() {
             if (currentdiscussion == message.sender) {
                 displayMessage(message.message, message.date, message.destinataire);
             }
-            console.log(message);
+            // console.log(message);
             var div = document.getElementById(message.sender + "_discussion")
             var t = div.getAttribute("ischatopened")
             console.log(t);
             if (t === "false" && message.message != "") {
                 updateNotification(message.sender, message.Notif.notification)
-               
+
 
                 var discussions = document.querySelectorAll('.discussion');
-
                 var discussionsArray = Array.from(discussions);
 
+                // console.log("discussionsArray",discussionsArray);
+
                 discussionsArray.sort(function (a, b) {
+                    // console.log("a", a);
                     return compareDiscussionOrder(a, b);
                 });
 
@@ -108,6 +109,16 @@ function openWs() {
     };
 
 }
+
+// function compareDiscussionOrder(a, b) {
+//     let ischatopened = a.getAttribute('id')
+//     let v = b.getAttribute('id')
+//     var notifA = parseInt(document.getElementById(ischatopened.replace("_discussion", "_notif")).textContent);
+//     var notifB = parseInt(document.getElementById(v.replace("_discussion", "_notif")).textContent);
+//     // console.log("*", ischatopened.replace("_discussion", "_notif"));
+//     // console.log(notifA, notifB);
+//     return notifB - notifA;
+// }
 
 function updateNotification(sender, count) {
     if (sender.includes(" ")) {
@@ -136,9 +147,6 @@ function sendInitialMessage(username) {
         date: "",
         type: "fetch"
     };
-
-    ///
-
     ws.send(JSON.stringify(data));
 }
 
@@ -232,12 +240,14 @@ function handleNewUser(userConnected) {
     }
 }
 
+function setDivDate(date, sender) {
+    document.querySelectorAll('.discussion').forEach(user => {
+        console.log(user);
+        // user.setAttribute("date", date)
+    });
+}
 
 //====================================TYPING-PROGRESS========================================
-
-
-
-
 
 messageInput.addEventListener('keydown', () => {
     const data3 = {
