@@ -86,6 +86,7 @@ func HandleMessages(w http.ResponseWriter, r *http.Request) {
 			}
 		} else {
 			if msg.Type != "typing" {
+				if msg.MessageContent != ""{
 
 				notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
 				if len(notification) > 0 {
@@ -96,6 +97,7 @@ func HandleMessages(w http.ResponseWriter, r *http.Request) {
 
 					number := currentCount + 1
 					AddNotif(notificationId, msg.Sender, name, number)
+					}
 				}
 			}
 		}
