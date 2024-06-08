@@ -78,6 +78,7 @@ body {
 }
 
 .terminal-box {
+    position: relative;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
@@ -90,6 +91,7 @@ body {
     flex-grow: 1;
     overflow-y: auto;
 }
+
 #terminal-zone {
     height: 100%;
     width: 100%;
@@ -99,12 +101,15 @@ body {
 .terminal-head {
     color: black;
     text-align: center;
-    position: relative;
-    top: -4px;
+    position: -webkit-sticky;
+    /* Safari */
+    position: sticky;
+    top: 0;
     background-color: var(--fluo);
     font-weight: 600;
     padding: 2px 0;
     box-sizing: border-box;
+    display: block;
 }
 
 .terminal-body {
@@ -381,4 +386,20 @@ span.auth-btn.active {
 
 span.auth-btn.active span.btn-bg {
     width: 100%;
+}
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
 }

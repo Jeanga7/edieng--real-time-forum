@@ -8,10 +8,7 @@ import (
 	"forum/helpers"
 	"forum/models"
 	"html"
-	"io"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"golang.org/x/crypto/bcrypt"
@@ -168,62 +165,15 @@ func ValidateFields(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if validUser {
-			err := r.ParseMultipartForm(10 << 20)
-			helpers.ErrorSimple(err)
-
-			picture, handler, _ := r.FormFile("picture")
-
-			// Si non, créez un nouvel utilisateur
 			newUser := models.User
 			newUser.Values = map[string]interface{}{
 				"firstname": strings.ReplaceAll(strings.Title(userData["firstname"]["value"].(string)), " ", "_"),
 				"lastname":  strings.ReplaceAll(strings.Title(userData["lastname"]["value"].(string)), " ", "_"),
 				"nickname":  userData["nickname"]["value"].(string),
 				"email":     userData["email"]["value"].(string),
-				"age":       userData["age"]["value"].(int),
+				"age":       userData["age"]["value"],
 				"gender":    userData["gender"]["value"].(string),
 				"password":  helpers.HashPassword(userData["password"]["value"].(string)),
-			}
-
-			if picture == nil {
-				newUser.Values["picture"] = "default-user.png"
-			} else {
-				fileBytes, err := io.ReadAll(picture)
-				if err != nil {
-					helpers.ErrorSimple(err)
-					helpers.JSONResponse(w, errors.New("FAILED TO READ IMAGE CONTENT"), http.StatusInternalServerError)
-					return
-				}
-
-				contentType := http.DetectContentType(fileBytes)
-
-				if contentType != "image/png" && contentType != "image/jpeg" && contentType != "image/gif" {
-					helpers.JSONResponse(w, errors.New("UNSUPPORTED FILE FORMAT"), http.StatusBadRequest)
-					return
-				}
-
-				os.MkdirAll("./views/assets/img/profile", os.ModePerm)
-
-				fileName := fmt.Sprintf("%s-%s", helpers.UUID(), handler.Filename)
-				picturePath := filepath.Join("./views/assets/img/profile", fileName)
-
-				out, err := os.Create(picturePath)
-				if err != nil {
-					helpers.ErrorSimple(err)
-					helpers.JSONResponse(w, errors.New("FAILED TO CREATE IMAGE FILE"), http.StatusInternalServerError)
-					return
-				}
-				defer out.Close()
-
-				_, err = out.Write(fileBytes)
-				if err != nil {
-					helpers.ErrorSimple(err)
-					helpers.JSONResponse(w, errors.New("FAILED TO WRITE IMAGE CONTENT"), http.StatusInternalServerError)
-					return
-				}
-
-				newUser.Values["picture"] = fileName
-
 			}
 
 			res := newUser.Create()
@@ -231,7 +181,6 @@ func ValidateFields(w http.ResponseWriter, r *http.Request) {
 			// Connectez l'utilisateur après l'inscription
 			controllers.CreateSession(w, r, fmt.Sprintf("%s", res.Values["id"]))
 			controllers.BroadcastNewUser(strings.ReplaceAll(strings.Title(userData["firstname"]["value"].(string)), " ", "_"))
-
 			helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted)
 		} else {
 			helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted)

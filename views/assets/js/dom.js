@@ -1,12 +1,15 @@
-let introRow = (title) => `<!-- Intro row -->
+function generateSpans(t) {
+    let res = "";
+    t[0].txtsList.forEach(el=>{
+        res += `<span class="txt ${el.c ?? ""}"></span>`;
+        res += el.eol ? "<br>" : "";
+    });
+    return res;
+}
+
+let introRow = (title, txtsList) => `<!-- Intro row -->
 <span id="${title}-intro">
-    <span class="txt command"></span><br>
-    <span class="txt"></span><br>
-    <span class="txt"></span><br>
-    <span class="txt"></span><br>
-    <span class="txt warning"></span><br>
-    <br><br>
-    <span class="txt command"></span><br>
+    ${generateSpans(txtsList)}
 </span>`
 
 let terminalRow = (terminal, title, type) => `<!-- ${title} row -->
@@ -14,8 +17,7 @@ let terminalRow = (terminal, title, type) => `<!-- ${title} row -->
     <span class="txt"></span>
     <span class="txt bold-fluo"></span>
     <span class="txt"></span>
-    <input type="${type}" name="${terminal}-${title.toLowerCase()}" id="${terminal}-${title.toLowerCase()}" class="auth-input"
-        autofocus>
+    <input type="${type}" name="${terminal}-${title.toLowerCase()}" id="${terminal}-${title.toLowerCase()}" class="auth-input">
     <span class="txt"></span>
     <span class="measurer"></span>
 </span>
@@ -50,7 +52,7 @@ const loginTerminal = `
                     <form id="login-form">
                         <p id="login-text" class="infos-txt">
                             <!-- Intro row -->
-                            ${introRow("login")}
+                            ${introRow("login", loginTxtsData)}
                             ${makeFields("login", loginFields)}
                         </p>
                     </form>
@@ -65,7 +67,7 @@ const registerTerminal = `
                     <form id="register-form" enctype="multipart/form-data">
                         <p id="register-text" class="infos-txt">
                             <!-- Intro row -->
-                            ${introRow("register")}
+                            ${introRow("register", registerTxtsData)}
                             ${makeFields("register", registerFields)}
                         </p>
                     </form>

@@ -73,7 +73,7 @@ var rules = ValidationRules{
 	"category": regexp.MustCompile(`^[a-zA-Z0-9]{1,15}$`),
 	"title":    regexp.MustCompile(`^.{2,100}$`),
 	"age":      regexp.MustCompile(`^[1-9]\d{1,2}$`),
-	"gender":      regexp.MustCompile(`^(m|f|M|F)$`),
+	"gender":   regexp.MustCompile(`^[mfMF]$`),
 }
 
 func ValidateInput(champ, value string) bool {

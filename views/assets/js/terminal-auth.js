@@ -36,7 +36,8 @@ async function ValidateField(route, selector, varName, data, checked, printed) {
                         `<span class="txt ${color}"></span><br>`;
                     let txts = logTxt.querySelectorAll(".txt");
                     await typing(txts[txts.length - 1], res, "logs");
-
+                    let logsZone = document.querySelector("#logs");
+                    logsZone.scrollTop = logsZone.scrollHeight;
                     resolve();
                 });
         });
@@ -50,11 +51,11 @@ async function ValidateNextField(route, prev, next, prevFiedSelector, nextFieldS
         if (!printed[next]) {
             document.querySelector(prevFiedSelector).readOnly = true;
             let txtsList = [
-                "Enter your ",
-                next,
-                ": ",
-                " "
-            ];
+                {txt: "Enter your ", c: null, eol: false},
+                {txt: next, c: "bold-fluo", eol: false},
+                {txt: ": ", c: null, eol: false},
+                {txt: " ", c: null, eol: false},
+            ]
             let typingClass = activeForm === "login" ? "lgn" : "rgst"
             await typeInTxts(rowSelector, txtsList, typingClass);
             printed[next] = true;
@@ -96,15 +97,24 @@ document.addEventListener("keydown", async (e) => {
                 }
             }
         } else if (activeForm === "register") {
-            [data, checked, printed] = await ValidateField(authRoute, "#register-firstname", "firstname", data, checked, printed);
+            let prev = ""
+            let fieldset = ["firstname", "lastname", "nickname", "email", "password", "age", "gender"];
 
-            if (fieldLoaded) {
-                // Verify lastname
-                [data, checked, printed] = await ValidateNextField(authRoute, "firstname", "lastname", "#register-firstname", "#register-lastname", "#register-lastname-row", data, checked, printed);
-
-                if (checked["firstname"] && checked["lastname"]) {
-                    hideAuth();
+            for (let i = 0; i < fieldset.length; i++) {
+                const field = fieldset[i];
+                checked[field] = false;
+                if (i === 0) {
+                    [data, checked, printed] = await ValidateField(authRoute, `#register-${field}`, field, data, checked, printed);
+                } else if (fieldLoaded && document.querySelector(`#register-${prev}`).value.length > 0) {
+                    [data, checked, printed] = await ValidateNextField(authRoute, prev, field, `#register-${prev}`, `#register-${field}`, `#register-${field}-row`, data, checked, printed);
                 }
+                prev = field;
+            }
+
+            let allChecked = fieldset.reduce((res, check) => res && checked[check], true);
+
+            if (allChecked) {
+                hideAuth();
             }
         }
     }

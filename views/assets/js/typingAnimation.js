@@ -1,53 +1,3 @@
-const speed = 15;
-var activeForm = "login";
-let loginTxtsData = [{
-        zone: "#login-intro",
-        className: "lgn",
-        txtsList: [
-            "$> help",
-            "These infos are needed for login :",
-            " - nickname or email",
-            " - password",
-            "User should be registered first before trying to login.",
-            "$> login"
-        ]
-    },
-    {
-        zone: "#login-nickname-row",
-        className: "lgn",
-        txtsList: [
-            "Enter your ",
-            "nickname or email",
-            ": ",
-            " "
-        ]
-    }
-];
-
-let registerTxtsData = [{
-        zone: "#register-intro",
-        className: "rgst",
-        txtsList: [
-            "$> help",
-            "These infos are needed for register :",
-            " - nickname or email",
-            " - password",
-            "User should be registered first before trying to register.",
-            "$> register"
-        ]
-    },
-    {
-        zone: "#register-firstname-row",
-        className: "rgst",
-        txtsList: [
-            "Enter your ",
-            "first name",
-            ": ",
-            " "
-        ]
-    }
-];
-
 var txtDataToLoad = () => activeForm === "login" ? loginTxtsData : registerTxtsData
 var otherBtn = () => activeForm === "login" ? document.querySelector("#register-btn") : document.querySelector("#login-btn")
 
@@ -138,8 +88,7 @@ function startWelcomeTerminal() {
         // Typing
         await new Promise((resolve) => {
             setTimeout(async () => {
-                let txtsList = ["Hello ", "talent", " !", "Welcome to our", "Real Time Forum", "."];
-                await typeInTxts("#welcome-text", txtsList, "wlc", 50);
+                await typeInTxts("#welcome-text", welcomeTxt, "wlc", 50);
                 resolve();
             }, 500)
         });
@@ -169,8 +118,7 @@ function startLogsTerminal() {
         // Typing
         await new Promise((resolve) => {
             setTimeout(async () => {
-                let txtsList = ["$> Page loaded successfully"];
-                await typeInTxts("#logs-text", txtsList, "logs");
+                await typeInTxts("#logs-text", logsTxt, "logs");
                 resolve();
             }, 500)
         });
@@ -211,7 +159,6 @@ function startActiveTerminal(terminal, txtData) {
             }, 200)
         });
 
-
         // Typing
         await new Promise((resolve) => {
             setTimeout(async () => {
@@ -230,8 +177,8 @@ function startActiveTerminal(terminal, txtData) {
 async function typeInTxts(selector, txtsList, className, s = speed) {
     let elementsList = document.querySelectorAll(`${selector} .txt`);
 
-    for (let x = 0; x < elementsList.length; x++) {
-        await typing(elementsList[x], txtsList[x], className, s);
+    for (let x = 0; x < txtsList.length; x++) {
+        await typing(elementsList[x], txtsList[x].txt, className, s);
     }
 }
 
