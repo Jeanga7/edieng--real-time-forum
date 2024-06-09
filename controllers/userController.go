@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"forum/global"
@@ -206,10 +207,10 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	// Si non, créez un nouvel utilisateur
 	newUser := models.User
 	newUser.Values = map[string]interface{}{
-		"firstname":     strings.ReplaceAll(strings.Title(name), " ", "_"),
-		"nickname": nickname,
-		"email":    email,
-		"password": helpers.HashPassword(password),
+		"firstname": strings.ReplaceAll(strings.Title(name), " ", "_"),
+		"nickname":  nickname,
+		"email":     email,
+		"password":  helpers.HashPassword(password),
 	}
 
 	if picture == nil {
@@ -292,11 +293,67 @@ func Auth(r *http.Request, w http.ResponseWriter) (bool, []models.Model) {
 }
 
 func NewLogin(w http.ResponseWriter, r *http.Request) {
-	IsLogged, _ := Auth(r, w)
 	global.W = w
-	if !IsLogged {
-		tmpl, err := template.ParseFiles("./views/login.html")
-		helpers.ErrorSimple(err)
-		tmpl.Execute(w, nil)
+
+	Nicknames, Sessions, shouldReturn, _ := FindUsersOnline(r)
+	if shouldReturn {
+		return
 	}
+
+	All_users, Users := GetUsers(strings.Title(Nicknames))
+
+	SortedUsers := SortUsers(All_users, Sessions, strings.Title(Nicknames))
+
+	Posts := models.Post.Fetch()
+	Likes := models.Like.Fetch()
+	Dislikes := models.Dislike.Fetch()
+	Comments := models.Comment.Fetch()
+
+	UserAllData := make(map[string]map[string]interface{})
+
+	stats := GetUsersStats(Posts, Likes, Dislikes, Comments, Users, UserAllData)
+
+	// Récupérer les posts depuis la base de données
+	isLogged, res := Auth(r, w)
+	posts := CheckPostsToShow(r, w)
+
+	var userData []map[string]interface{}
+	for _, u := range res {
+		userData = append(userData, u.Values)
+	}
+
+	var data = make(map[string]interface{})
+
+	if len(userData) > 0 {
+		data = userData[0]
+		if data["picture"] == "" {
+			data["picture"] = "default-user.png"
+		}
+		data["numPosts"] = len(MyPosts)
+		data["numLikes"] = len(LikedPost) + NumCommentLike
+		data["numDislikes"] = len(DisLikedPost) + NumCommentDisLike
+		data["numComments"] = CountComment
+	}
+
+	categoriesStats := GetCategoriesStats(posts)
+	jsonCategoriesStats, err := json.Marshal(categoriesStats)
+	helpers.ErrorSimple(err)
+
+	usersStats := MostActiveUser(stats, UserAllData)
+
+	data["usersStats"] = usersStats
+	data["categoriesStats"] = string(jsonCategoriesStats)
+
+	allData := helpers.FinalData{
+		Posts:      posts,
+		IsLogged:   isLogged,
+		UserData:   data,
+		AllUser:    SortedUsers,
+		Categories: GetAllCategories(w, r),
+	}
+
+	tmpl, err := template.ParseFiles("./views/login.html")
+	helpers.ErrorSimple(err)
+
+	tmpl.Execute(w, allData)
 }

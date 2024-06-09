@@ -1,6 +1,14 @@
+// Initialization
 const speed = 15;
 let fieldLoaded = false;
 var activeForm = "login";
+
+let printed = {};
+let checked = {};
+let authRoute = '/api/auth';
+
+let capitalize = (str) => str.charAt(0).toUpperCase() + str.substr(1);
+
 let loginTxtsData = [{
         zone: "#login-intro",
         className: "lgn",
@@ -74,5 +82,38 @@ let welcomeTxt = [
 ];
 
 let logsTxt = [
-    {txt: "$> Page loaded successfully", c: null, eol: false}
+    {txt: "$> Page loaded successfully", c: null, eol: true}
+];
+
+let loginFields = [
+    {name: "Nickname", type: "text"},
+    {name: "Password", type: "password"}
+];
+
+let registerFields = [
+    {name: "Firstname", type: "text"},
+    {name: "Lastname", type: "text"},
+    {name: "Nickname", type: "text"},
+    {name: "Email", type: "email"},
+    {name: "Password", type: "password"},
+    {name: "Age", type: "number"},
+    {name: "Gender", type: "text"}
+];
+
+let userInfosTxt = [
+    {txt: "$> rtf --user-infos", c: "command", eol: true}
+];
+
+let categoriesTxt = [
+    {txt: "$> rtf --categories", c: "command", eol: true},
+    {txt: "", c: null, eol: true},
+    {txt: "List of categories:", c: null, eol: true},
+];
+
+let allUsersTxt = [
+    {txt: "$> rtf --all-users", c: "command", eol: true},
+];
+
+let netcatTxt = [
+    {txt: `$> nc --connect "Tony Stark"`, c: "command", eol: true},
 ];

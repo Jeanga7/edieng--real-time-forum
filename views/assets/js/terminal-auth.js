@@ -1,10 +1,3 @@
-// Initialization
-let printed = {};
-let checked = {};
-let authRoute = '/api/auth';
-
-let capitalize = (str) => str.charAt(0).toUpperCase() + str.substr(1);
-
 async function ValidateField(route, selector, varName, data, checked, printed) {
     let field = document.querySelector(selector);
     field.focus();
@@ -50,11 +43,26 @@ async function ValidateNextField(route, prev, next, prevFiedSelector, nextFieldS
     if (checked[prev]) {
         if (!printed[next]) {
             document.querySelector(prevFiedSelector).readOnly = true;
-            let txtsList = [
-                {txt: "Enter your ", c: null, eol: false},
-                {txt: next, c: "bold-fluo", eol: false},
-                {txt: ": ", c: null, eol: false},
-                {txt: " ", c: null, eol: false},
+            let txtsList = [{
+                    txt: "Enter your ",
+                    c: null,
+                    eol: false
+                },
+                {
+                    txt: next,
+                    c: "bold-fluo",
+                    eol: false
+                },
+                {
+                    txt: ": ",
+                    c: null,
+                    eol: false
+                },
+                {
+                    txt: " ",
+                    c: null,
+                    eol: false
+                },
             ]
             let typingClass = activeForm === "login" ? "lgn" : "rgst"
             await typeInTxts(rowSelector, txtsList, typingClass);
@@ -65,13 +73,14 @@ async function ValidateNextField(route, prev, next, prevFiedSelector, nextFieldS
     }
 }
 
-async function hideAuth() {
-    document.querySelector("#welcome").classList.add("slide-top-left");
-    document.querySelector("#logs").classList.add("slide-bottom-left");
-    document.querySelector("#auth-right").classList.add("slide-right");
-    await new Promise((resolve) => {
-        setTimeout(() => {
-            document.querySelector("#container").innerHTML = "";
+async function switchToFeeds() {
+    return new Promise((resolve) => {
+        document.querySelector("#welcome").classList.add("slide-top-left");
+        document.querySelector("#logs").classList.add("slide-bottom-left");
+        document.querySelector("#auth-right").classList.add("slide-right");
+        setTimeout(async () => {
+            document.querySelector("#container").innerHTML = feedsView;
+            await startFeedsTerminals();
             resolve();
         }, 1800)
     });
@@ -93,7 +102,7 @@ document.addEventListener("keydown", async (e) => {
                 [data, checked, printed] = await ValidateNextField(authRoute, "login", "password", "#login-nickname", "#login-password", "#login-password-row", data, checked, printed);
 
                 if (checked["login"] && checked["password"]) {
-                    hideAuth();
+                    await switchToFeeds();
                 }
             }
         } else if (activeForm === "register") {
@@ -114,7 +123,7 @@ document.addEventListener("keydown", async (e) => {
             let allChecked = fieldset.reduce((res, check) => res && checked[check], true);
 
             if (allChecked) {
-                hideAuth();
+                await switchToFeeds();
             }
         }
     }

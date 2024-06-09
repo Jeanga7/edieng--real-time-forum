@@ -1,8 +1,16 @@
 var txtDataToLoad = () => activeForm === "login" ? loginTxtsData : registerTxtsData
 var otherBtn = () => activeForm === "login" ? document.querySelector("#register-btn") : document.querySelector("#login-btn")
 
-window.onload = async () => {
-    await loadLoginDOM();
+window.onload = () => {
+    if (!loggedIn) {
+        authLayer();
+    } else {
+        feedsLayer();
+    }
+};
+
+async function authLayer() {
+    await loadDOM();
     btnBgPosition();
     await hidePreloader();
     await disableAllInputs();
@@ -12,15 +20,21 @@ window.onload = async () => {
     await expandAuthRight();
     await startActiveTerminal(activeForm, txtDataToLoad());
     await enableAllInputs();
-    firstFieldFocus(`#${activeForm}-form`);
+    firstFieldFocus(`#${activeForm}`);
     formToggle();
-};
+}
+
+async function feedsLayer() {
+    await loadDOM();
+    await hidePreloader();
+    await startFeedsTerminals();
+}
 
 function disableAllInputs() {
     return new Promise((resolve) => {
         document.querySelectorAll("input").forEach(e => {
             e.disabled = true;
-        })
+        });
         resolve();
     });
 }
@@ -29,7 +43,7 @@ function enableAllInputs() {
     return new Promise((resolve) => {
         document.querySelectorAll(".auth-input").forEach(e => {
             e.disabled = false;
-        })
+        });
         resolve();
     });
 }
@@ -70,10 +84,33 @@ function hidePreloader() {
     });
 }
 
-function loadLoginDOM() {
+function loadDOM() {
     return new Promise((resolve) => {
-        document.querySelector("#container").innerHTML = loginView;
+        document.querySelector("#container").innerHTML = loggedIn ? feedsView : loginView;
         resolve();
+    });
+}
+
+function startFeedsTerminals() {
+    return new Promise((resolve) => {
+        setTimeout(async()=>{
+            // Terminal Pop-up
+            let w = document.querySelectorAll(".terminal-box").forEach(t=>{
+                t.style.opacity = "1";
+                t.style.height = "100%";
+                t.style.width = "100%";
+            });
+    
+            // Typing
+            await new Promise((resolve) => {
+                setTimeout(() => {
+                    typeInTxts("#user-infos-text", userInfosTxt, "ui", 10);
+                    typeInTxts("#categories-text", categoriesTxt, "cat", 10);
+                    resolve();
+                }, 500)
+            });
+            resolve();
+        }, 500);
     });
 }
 
@@ -169,7 +206,7 @@ function startActiveTerminal(terminal, txtData) {
             }, 500)
         });
         resizeInput();
-        firstFieldFocus(`#${terminal}-form`);
+        firstFieldFocus(`#${terminal}`);
         resolve();
     });
 }
