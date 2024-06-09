@@ -1,7 +1,7 @@
 // FUNCTIONS
 function loopSpans(txtsList) {
     let res = "";
-    txtsList.forEach(el=>{
+    txtsList.forEach(el => {
         res += `<span class="txt ${el.c ?? ""}"></span>`;
         res += el.eol ? "<br>" : "";
     });
@@ -87,16 +87,21 @@ const categoriesTerminal = makeTerminal("categories", categoriesRows, "infos-txt
 let allUsersRows = loopSpans(allUsersTxt);
 const allUsersTerminal = makeTerminal("all-users", allUsersRows, "infos-txt")
 
+let allPostsRows = loopSpans(allPostsTxt);
+const allPostsTerminal = makeTerminal("all-posts", allPostsRows, "infos-txt")
+
 let netcatRows = loopSpans(netcatTxt);
 const netcatTerminal = makeTerminal("netcat", netcatRows, "infos-txt")
 
-var feedsView = /*html*/`
+var feedsView = /*html*/ `
 <div id="feeds-grid">
     <div id="feeds-left" class="feeds-col">
         ${userInfosTerminal}
         ${categoriesTerminal}
     </div>
-    <div id="feeds-middle" class="feeds-col"></div>
+    <div id="feeds-middle" class="feeds-col">
+        ${allPostsTerminal}
+    </div>
     <div id="feeds-right" class="feeds-col">
         ${allUsersTerminal}
         ${netcatTerminal}

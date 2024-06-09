@@ -114,6 +114,10 @@ let allUsersTxt = [
     {txt: "$> rtf --all-users", c: "command", eol: true},
 ];
 
+let allPostsTxt = [
+    {txt: "$> rtf --all-posts", c: "command", eol: true},
+];
+
 let netcatTxt = [
     {txt: `$> nc --connect "Tony Stark"`, c: "command", eol: true},
 ];

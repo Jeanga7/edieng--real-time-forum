@@ -413,6 +413,7 @@ input[type=number] {
     height: 100%;
     display: grid;
     grid-template-columns: 1fr 2fr 1fr;
+    column-gap: var(--gap);
 }
 
 .feeds-col {

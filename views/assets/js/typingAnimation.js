@@ -100,12 +100,17 @@ function startFeedsTerminals() {
                 t.style.height = "100%";
                 t.style.width = "100%";
             });
+
+            document.querySelector("#user-infos").style.right = "0";
+            document.querySelector("#user-infos").style.top = "0";
     
             // Typing
             await new Promise((resolve) => {
                 setTimeout(() => {
                     typeInTxts("#user-infos-text", userInfosTxt, "ui", 10);
                     typeInTxts("#categories-text", categoriesTxt, "cat", 10);
+                    typeInTxts("#all-users-text", allUsersTxt, "au", 10);
+                    typeInTxts("#all-posts-text", allPostsTxt, "ap", 10);
                     resolve();
                 }, 500)
             });
