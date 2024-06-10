@@ -7,17 +7,8 @@ let ws;
 let currentDestinataire;
 
 document.addEventListener('DOMContentLoaded', () => {
-    openWs();
     loadUsers()
-
-    document.querySelectorAll('.discussion').forEach(user => {
-        const username = user.textContent.split(' - ')[0].trim();
-        user.addEventListener('click', () => {
-            user.setAttribute("Ischatopened", true)
-            currentdiscussion = username
-            startChat(username);
-        });
-    });
+    openWs();
 
     document.querySelector("#send-message").addEventListener("click", () => {
         sendMessage();
@@ -116,7 +107,7 @@ function openWs() {
 }
 
 function parseDate(dateStr) {
-    console.log("date", dateStr);
+    // console.log("date", dateStr);
     if (dateStr) {
         const [datePart, timePart] = dateStr.split(' ');
 
@@ -244,7 +235,6 @@ function handleNewUser(userConnected) {
 
 function setDivDate(date, sender) {
     document.querySelectorAll('.discussion').forEach(user => {
-        // console.log(user.getAttribute('id').split("_discussion")[0]);
         if (user.getAttribute('id').split("_discussion")[0] === sender) {
             user.setAttribute("date", date)
         }
@@ -274,19 +264,17 @@ function loadUsers() {
                 const userStatus = document.createElement(user.Status === 'Online' ? 'strong' : 'em')
 
                 if (!firstCall && index === users.length - 1) {
-                    console.log('dernier user')
+                    // console.log('dernier user')
                     userStatus.textContent = `${user.Username} - Online`;
-                    userStatus.tagName = 'strong';
+                    // userStatus.tagName = 'strong';
                 } else {
-                    console.log('C est pas dernier user')
+                    // console.log('C est pas dernier user')
                     userStatus.textContent = `${user.Username} - ${user.Status !== 'Online' ? 'Offline' : user.Status}`;
                 }
                 const notificationDiv = document.createElement('div');
                 notificationDiv.className = 'notification';
                 notificationDiv.id = `${user.Username}_notif`;
                 notificationDiv.textContent = user.NbrNotifications;
-
-
 
                 userContainer.appendChild(userStatus);
                 userContainer.appendChild(notificationDiv);
@@ -297,6 +285,15 @@ function loadUsers() {
             if (firstCall) {
                 firstCall = false;
             }
+
+            document.querySelectorAll('.discussion').forEach(user => {
+                const username = user.textContent.split(' - ')[0].trim();
+                user.addEventListener('click', () => {
+                    user.setAttribute("ischatopened", true);
+                    currentdiscussion = username;
+                    startChat(username);
+                });
+            });
         })
         .catch(error => console.error('Error loading users:', error));
 }

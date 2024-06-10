@@ -148,6 +148,8 @@ body {
 }
 
 #close-chat {
+    position: fixed;
+    right: 20px;
     font-weight: bold;
     cursor: pointer;
     color: #0f7002;
