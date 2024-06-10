@@ -72,7 +72,7 @@ function openWs() {
             setDivDate(message.date, message.sender)
 
             if (currentdiscussion == message.sender) {
-                displayMessage(message.message, message.date, message.destinataire);
+                displayMessage(message.message, message.date, message.destinataire, false);
             }
             // console.log(message);
             var div = document.getElementById(message.sender + "_discussion")
@@ -80,7 +80,6 @@ function openWs() {
             // console.log(ischatopened);
             if (ischatopened === "false" && message.message != "") {
                 updateNotification(message.sender, message.Notif.notification)
-
 
                 var discussions = document.querySelectorAll('.discussion');
                 var discussionsArray = Array.from(discussions);
@@ -177,11 +176,11 @@ function sendMessage() {
         };
 
         ws.send(JSON.stringify(data));
-        displayMessage(message, dateTime, currentDestinataire);
+        displayMessage(message, dateTime, currentDestinataire, false);
     }
 }
 
-function displayMessage(message, date, destinataire) {
+function displayMessage(message, date, destinataire, prepend) {
     if (message != "") {
         const chatMessages = document.getElementById("chat-messages");
         const messageDiv = document.createElement("div");
@@ -196,20 +195,80 @@ function displayMessage(message, date, destinataire) {
         }
         messageDiv.textContent = message;
 
-        chatMessages.appendChild(timeDiv);
-        chatMessages.appendChild(messageDiv);
+        if (prepend) {
+            chatMessages.insertBefore(messageDiv, chatMessages.firstChild);
+            chatMessages.insertBefore(timeDiv, chatMessages.firstChild);
+        } else {
+            chatMessages.appendChild(timeDiv);
+            chatMessages.appendChild(messageDiv);
+        }
 
     }
+}
+
+let messageChunks = [];
+let currentChunkIndex = 0;
+
+function chunks(messages) {
+    messageChunks = [];
+    for (let i = 0; i < messages.length; i += 10) {
+        messageChunks.push(messages.slice(i, i + 10));
+    }
+    currentChunkIndex = 0;
+}
+
+function loadChunk() {
+    if (currentChunkIndex < messageChunks.length) {
+        const chunk = messageChunks[currentChunkIndex];
+
+
+
+        chunk.forEach(msg => {
+            updateNotification(msg.sender, 0);
+            displayMessage(msg.message, msg.date, msg.destinataire, true);
+        });
+
+
+
+        currentChunkIndex++;
+    }
+}
+
+let isChunkLoading = false; 
+function handleScroll() {
+    const chatMessages = document.getElementById("chat-messages");
+    if (chatMessages.scrollTop === 0 && currentChunkIndex < messageChunks.length) {
+        isChunkLoading = true;
+
+        const loadingIndicator = document.createElement("div");
+        loadingIndicator.classList.add("loading-indicator");
+        loadingIndicator.textContent = "Chargement en cours...";
+        chatMessages.prepend(loadingIndicator);
+
+         setTimeout(() => {
+            chatMessages.removeChild(loadingIndicator);
+            loadChunk();
+            isChunkLoading = false;
+        }, 1000);
+    }
+}
+
+function debounce(func, wait) {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => func(...args), wait);
+    };
 }
 
 
 function loadHistory(messages) {
     const chatMessages = document.getElementById("chat-messages");
     chatMessages.innerHTML = '';
-    messages.forEach(msg => {
-        updateNotification(msg.sender, 0)
-        displayMessage(msg.message, msg.date, msg.destinataire);
-    });
+    chunks(messages)
+    loadChunk();
+
+    chatMessages.addEventListener('scroll', debounce(handleScroll, 1000));
 }
 
 function closeChat() {

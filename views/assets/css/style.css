@@ -263,3 +263,9 @@ body {
     z-index: 1000;
     transition: opacity 0.3s ease-in-out; 
 }
+
+.loading-indicator {
+    text-align: center;
+    padding: 10px;
+    background-color: #23ca1e;
+}
