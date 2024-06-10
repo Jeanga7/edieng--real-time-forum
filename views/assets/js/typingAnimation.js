@@ -136,8 +136,7 @@ function startFeedsTerminals() {
                             resolve();
                         })
                 }, 450)
-            })
-            console.log(cats);
+            });
             printInTerminal("#categories-text", cats, "cat", 10);
 
 
