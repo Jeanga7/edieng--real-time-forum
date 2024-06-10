@@ -45,6 +45,8 @@ func Routes(mux *http.ServeMux) {
 
 	mux.HandleFunc("/api/category", api.FetchCategory)
 
+	mux.HandleFunc("/api/categories-list", api.CategoriesList)
+
 	mux.HandleFunc("/api/session", api.FetchSessions)
 	
 	mux.HandleFunc("/api/comments", api.FetchComments)

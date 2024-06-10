@@ -6,6 +6,8 @@ var activeForm = "login";
 let printed = {};
 let checked = {};
 let authRoute = '/api/auth';
+let postsRoute = '/api/posts';
+let categoriesListRoute = '/api/categories-list';
 
 let capitalize = (str) => str.charAt(0).toUpperCase() + str.substr(1);
 
@@ -116,6 +118,7 @@ let allUsersTxt = [
 
 let allPostsTxt = [
     {txt: "$> rtf --all-posts", c: "command", eol: true},
+    {txt: "", c: null, eol: true},
 ];
 
 let netcatTxt = [

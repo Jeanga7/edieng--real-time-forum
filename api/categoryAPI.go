@@ -18,3 +18,9 @@ func FetchCategory(w http.ResponseWriter, r *http.Request) {
 
 	WriteJSONResponse(w, usersData)
 }
+
+func CategoriesList(w http.ResponseWriter, r *http.Request) {
+	categories := models.Category.Fetch()
+	cats := TransformModels(categories, models.Category.Columns)
+	WriteJSONResponse(w, cats)
+}

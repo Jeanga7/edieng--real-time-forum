@@ -8,6 +8,16 @@ function loopSpans(txtsList) {
     return res;
 }
 
+async function printInTerminal(selector, data, typingClass, s=speed) {
+    let t = document.querySelector(selector);
+    for (let i = 0; i < data.length; i++) {
+        const d = data[i];
+        t.innerHTML += `<span class="txt ${d.c}"></span>` + (d.eol ? "<br>" : "");
+        let txts = t.querySelectorAll(".txt");
+        await typing(txts[txts.length - 1], d.txt, typingClass, s);        
+    }
+}
+
 let generateSpans = (t) => loopSpans(t[0].txtsList);
 
 let cliRow = (title, txtsList, section) => `

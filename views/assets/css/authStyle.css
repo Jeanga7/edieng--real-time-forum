@@ -52,6 +52,7 @@ body {
     transition: var(--standard-transition);
     display: flex;
     flex-direction: row;
+    column-gap: var(--gap);
 }
 
 .auth-block {

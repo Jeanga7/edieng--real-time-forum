@@ -18,6 +18,7 @@ async function authLayer() {
     await startLogsTerminal();
     await shrinkLeftBox();
     await expandAuthRight();
+    document.querySelector("#auth-right").style.flexGrow = "1";
     await startActiveTerminal(activeForm, txtDataToLoad());
     await enableAllInputs();
     firstFieldFocus(`#${activeForm}`);
@@ -93,9 +94,9 @@ function loadDOM() {
 
 function startFeedsTerminals() {
     return new Promise((resolve) => {
-        setTimeout(async()=>{
+        setTimeout(async () => {
             // Terminal Pop-up
-            let w = document.querySelectorAll(".terminal-box").forEach(t=>{
+            let w = document.querySelectorAll(".terminal-box").forEach(t => {
                 t.style.opacity = "1";
                 t.style.height = "100%";
                 t.style.width = "100%";
@@ -103,10 +104,10 @@ function startFeedsTerminals() {
 
             document.querySelector("#user-infos").style.right = "0";
             document.querySelector("#user-infos").style.top = "0";
-    
+
             // Typing
             await new Promise((resolve) => {
-                setTimeout(() => {
+                setTimeout(async () => {
                     typeInTxts("#user-infos-text", userInfosTxt, "ui", 10);
                     typeInTxts("#categories-text", categoriesTxt, "cat", 10);
                     typeInTxts("#all-users-text", allUsersTxt, "au", 10);
@@ -114,6 +115,32 @@ function startFeedsTerminals() {
                     resolve();
                 }, 500)
             });
+
+            // Categories List
+            let cats = [];
+            await new Promise((resolve) => {
+                setTimeout(() => {
+                    fetch(categoriesListRoute, {
+                            method: 'GET'
+                        })
+                        .then(r => r.json())
+                        .then(d => {
+
+                            d.forEach(c => {
+                                cats.push({
+                                    txt: "   - "+c.name,
+                                    c: "warning",
+                                    eol: true
+                                })
+                            })
+                            resolve();
+                        })
+                }, 450)
+            })
+            console.log(cats);
+            printInTerminal("#categories-text", cats, "cat", 10);
+
+
             resolve();
         }, 500);
     });
