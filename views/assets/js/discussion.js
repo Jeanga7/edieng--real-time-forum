@@ -56,7 +56,8 @@ function openWs() {
         // console.log("message", message.sender);
 
         if (message.type === 'history') {
-            loadHistory(message.messages);
+            var temp = message.messages.reverse()
+            loadHistory(temp);
         } else if (message.type == "typing") {
             if (currentdiscussion === message.sender) {
                 document.getElementById('typingIndicator').style.opacity = 1;
@@ -130,7 +131,11 @@ function updateNotification(sender, count) {
 
     let notificationElement = document.getElementById(sender + "_notif");
     if (notificationElement) {
-        notificationElement.textContent = parseInt(count);
+        if (count !== 0) {
+            notificationElement.textContent = parseInt(count);
+        } else {
+            notificationElement.textContent = "";
+        }
     }
 }
 
@@ -211,6 +216,7 @@ let currentChunkIndex = 0;
 
 function chunks(messages) {
     messageChunks = [];
+    // messageChunks.slice().reverse()
     for (let i = 0; i < messages.length; i += 10) {
         messageChunks.push(messages.slice(i, i + 10));
     }
@@ -234,10 +240,11 @@ function loadChunk() {
     }
 }
 
-let isChunkLoading = false; 
+let isChunkLoading = false;
 function handleScroll() {
+    // console.log(isChunkLoading);
     const chatMessages = document.getElementById("chat-messages");
-    if (chatMessages.scrollTop === 0 && currentChunkIndex < messageChunks.length) {
+    if (chatMessages.scrollTop === 0 && currentChunkIndex < messageChunks.length && !isChunkLoading) {
         isChunkLoading = true;
 
         const loadingIndicator = document.createElement("div");
@@ -245,11 +252,11 @@ function handleScroll() {
         loadingIndicator.textContent = "Chargement en cours...";
         chatMessages.prepend(loadingIndicator);
 
-         setTimeout(() => {
+        setTimeout(() => {
             chatMessages.removeChild(loadingIndicator);
             loadChunk();
             isChunkLoading = false;
-        }, 1000);
+        }, 500);
     }
 }
 
@@ -264,6 +271,7 @@ function debounce(func, wait) {
 
 function loadHistory(messages) {
     const chatMessages = document.getElementById("chat-messages");
+
     chatMessages.innerHTML = '';
     chunks(messages)
     loadChunk();
@@ -316,7 +324,7 @@ function loadUsers() {
                 userDiv.id = `${user.Username}_discussion`;
                 userDiv.setAttribute('ischatopened', 'false');
                 userDiv.setAttribute('date', user.LastMsgDate);
-
+                console.log("this is user", user.NbrNotifications, typeof (user.NbrNotifications));
                 const userContainer = document.createElement('div');
                 userContainer.className = 'usercontainer';
 
@@ -333,7 +341,11 @@ function loadUsers() {
                 const notificationDiv = document.createElement('div');
                 notificationDiv.className = 'notification';
                 notificationDiv.id = `${user.Username}_notif`;
-                notificationDiv.textContent = user.NbrNotifications;
+                if (user.NbrNotifications == 0) {
+                    notificationDiv.textContent = "";
+                } else {
+                    notificationDiv.textContent = user.NbrNotifications;
+                }
 
                 userContainer.appendChild(userStatus);
                 userContainer.appendChild(notificationDiv);
