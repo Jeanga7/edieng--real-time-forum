@@ -141,10 +141,12 @@ function startFeedsTerminals() {
 
             // Get User Data
             let userInfos = (await fetchUserData(userID))[0];
+            let posts = (await fetchPosts(userID));
             console.log(userInfos);
+            console.log(posts);
 
             ShowUserInfos(userInfos);
-            ShowAllPosts()
+            // ShowAllPosts();
 
             resolve();
         }, 500);
@@ -319,6 +321,20 @@ async function fetchUserData(userId) {
         fetch(userDataRoute, {
                 method: 'POST',
                 body: fd
+            })
+            .then(r => r.json())
+            .then(d => {
+                resolve(d);
+            })
+    });
+}
+
+async function fetchPosts(userId) {
+    return new Promise((resolve) => {
+        let fd = new FormData();
+        fd.append("id", userId);
+        fetch(postsRoute, {
+                method: 'GET'
             })
             .then(r => r.json())
             .then(d => {
