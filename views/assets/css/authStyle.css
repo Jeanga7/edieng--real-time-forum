@@ -96,6 +96,7 @@ body {
     transition: var(--standard-transition);
     flex-grow: 1;
     overflow-y: auto;
+    box-shadow: 0 0 4px var(--fluo);
 }
 /* .terminal-box:hover {
     transform: scale(1.01);
@@ -137,10 +138,13 @@ body {
     text-align: center;
     transition: all 200ms ease-in-out;
 }
-
+.txt {
+    text-shadow: 0 0 4px white;
+}
 .bold-fluo {
     font-weight: bold;
     color: var(--fluo);
+    text-shadow: 0 0 4px var(--fluo);
 }
 
 .cursor {
@@ -190,6 +194,7 @@ body {
     transition: var(--standard-transition);
     overflow: hidden;
     position: relative;
+    box-shadow: 0 0 4px var(--fluo);
 }
 
 span.auth-btn.active {
@@ -205,10 +210,12 @@ span.auth-btn.active {
 
 .danger {
     color: red;
+    text-shadow: 0 0 4px red;
 }
 
 .success {
     color: var(--fluo);
+    text-shadow: 0 0 4px var(--fluo);
 }
 
 .command {
@@ -226,6 +233,7 @@ span.auth-btn.active {
     caret-color: transparent;
     font-family: 'IBM Plex Mono';
     font-size: 1em;
+    text-shadow: 0 0 4px white;
 }
 
 .auth-input:focus {
@@ -536,6 +544,7 @@ input[type=number] {
 .post-text {
     font-size: .65em;
     text-shadow: 0 0 3px white;
+    letter-spacing: 1px;
 }
 hr.post-separator {
     border-width: .8px 0 0 0;
@@ -575,4 +584,27 @@ hr.post-separator {
 }
 #actions {
     flex-grow: 2;
+}
+
+#actions-zone {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: var(--gap);
+    flex-grow: 1;
+}
+#actions-zone span {
+    text-transform: uppercase;
+    padding: 4px 16px;
+    cursor: pointer;
+    font-weight: 500;
+}
+#add-post-btn {
+    background-color: var(--blue2);
+    box-shadow: 0 0 4px var(--blue2);
+}
+#logout-btn {
+    background-color: red;
+    box-shadow: 0 0 4px red;
 }

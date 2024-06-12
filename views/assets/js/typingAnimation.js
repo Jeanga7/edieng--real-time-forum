@@ -140,6 +140,8 @@ function startFeedsTerminals() {
             });
             printInTerminal("#categories-text", cats, "cat", 10);
 
+            AddActionsBtn();
+
             // Get User Data
             let userInfos = (await fetchUserData(userID))[0];
             let posts = (await fetchPosts(userID));
@@ -409,4 +411,14 @@ function ShowAllPosts(posts) {
 
 
     document.querySelector("#all-posts .terminal-body").appendChild(postsZone);
+}
+
+function AddActionsBtn() {
+    let actionsZone = document.createElement("div");
+    actionsZone.id = "actions-zone";
+    actionsZone.innerHTML = /*html*/`
+        <span id="add-post-btn">Add post</span>
+        <span id="logout-btn">Logout</span>
+    `
+    document.querySelector("#actions .terminal-body").appendChild(actionsZone)
 }
