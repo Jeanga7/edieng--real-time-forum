@@ -214,6 +214,11 @@ body {
     background-color: #0056b3;
 }
 
+.smsContainer{
+    display: flex;
+    flex-direction: column;
+}
+
 .sms{
     /* position: absolute; */
     color: black;
@@ -223,7 +228,7 @@ body {
     max-width: 290px;
     background-color: rgb(70, 167, 231);
     border-radius: 10px;
-    margin: 5px;
+    margin: 2px;
     padding: 5px;
     margin-left: auto;
 }
@@ -237,7 +242,7 @@ body {
     max-width: 290px;
     background-color: rgb(61, 119, 158);
     border-radius: 10px;
-    margin: 5px;
+    margin: 2px;
     padding: 5px;
     margin-right: auto;
 }
@@ -246,6 +251,32 @@ body {
     color: grey;
     font-size: small;
     margin: auto;
+}
+
+.smsUsername-sms-received{
+    color: black;
+    font-size: x-small;
+    font-weight: bolder;
+    height: auto;
+    width:fit-content;
+    max-width: 290px;
+    background-color: rgba(194, 176, 176, 0.651);
+    border-radius: 5px;
+    padding: 5px;
+    margin-right: auto;
+}
+
+.smsUsername-sms{
+    color: black;
+    font-size: x-small;
+    font-weight: bolder;
+    height: auto;
+    width:fit-content;
+    max-width: 290px;
+    background-color: rgba(194, 176, 176, 0.651);
+    border-radius: 5px;
+    padding: 5px;
+    margin-left: auto;
 }
 
 .typing-indicator {

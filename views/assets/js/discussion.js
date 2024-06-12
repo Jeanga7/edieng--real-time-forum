@@ -1,6 +1,5 @@
 const currentUser = document.querySelector('#user-full-name').textContent;
 const messageInput = document.getElementById('chat-input');
-// let Ischatopened = false
 let currentdiscussion;
 
 let ws;
@@ -73,7 +72,7 @@ function openWs() {
             setDivDate(message.date, message.sender)
 
             if (currentdiscussion == message.sender) {
-                displayMessage(message.message, message.date, message.destinataire, false);
+                displayMessage(message.message, message.date, message.destinataire, message.sender, false);
             }
             // console.log(message);
             var div = document.getElementById(message.sender + "_discussion")
@@ -181,31 +180,44 @@ function sendMessage() {
         };
 
         ws.send(JSON.stringify(data));
-        displayMessage(message, dateTime, currentDestinataire, false);
+        displayMessage(message, dateTime, currentDestinataire, currentUser, false);
     }
 }
 
-function displayMessage(message, date, destinataire, prepend) {
+function displayMessage(message, date, destinataire, sender, prepend) {
     if (message != "") {
         const chatMessages = document.getElementById("chat-messages");
-        const messageDiv = document.createElement("div");
         const timeDiv = document.createElement("div");
+        const smsContainer = document.createElement("div");
+        const smsDiv = document.createElement("div");
+        const smsUsername = document.createElement("div");
 
+        smsContainer.classList.add("smsContainer")
         timeDiv.classList.add("smsDate");
+        
         timeDiv.textContent = date;
         if (currentUser !== destinataire) {
-            messageDiv.classList.add("sms");
+            smsUsername.classList.add("smsUsername-sms")
+            console.log(sender, message);
+            smsUsername.textContent = sender
+            smsUsername.style.justifyContent = "flex-end"
+            // smsUsername.style.marginRight = "auto"
+            smsDiv.classList.add("sms");
         } else {
-            messageDiv.classList.add("sms-received");
+            smsUsername.classList.add("smsUsername-sms-received")
+            smsUsername.textContent = sender
+            smsDiv.classList.add("sms-received");
         }
-        messageDiv.textContent = message;
 
+        smsDiv.textContent = message;
+        smsContainer.appendChild(smsUsername)
+        smsContainer.appendChild(smsDiv)
         if (prepend) {
-            chatMessages.insertBefore(messageDiv, chatMessages.firstChild);
+            chatMessages.insertBefore(smsContainer, chatMessages.firstChild);
             chatMessages.insertBefore(timeDiv, chatMessages.firstChild);
         } else {
             chatMessages.appendChild(timeDiv);
-            chatMessages.appendChild(messageDiv);
+            chatMessages.appendChild(smsContainer);
         }
 
     }
@@ -231,7 +243,7 @@ function loadChunk() {
 
         chunk.forEach(msg => {
             updateNotification(msg.sender, 0);
-            displayMessage(msg.message, msg.date, msg.destinataire, true);
+            displayMessage(msg.message, msg.date, msg.destinataire, msg.sender, true);
         });
 
 
@@ -324,7 +336,7 @@ function loadUsers() {
                 userDiv.id = `${user.Username}_discussion`;
                 userDiv.setAttribute('ischatopened', 'false');
                 userDiv.setAttribute('date', user.LastMsgDate);
-                console.log("this is user", user.NbrNotifications, typeof (user.NbrNotifications));
+                // console.log("this is user", user.NbrNotifications, typeof (user.NbrNotifications));
                 const userContainer = document.createElement('div');
                 userContainer.className = 'usercontainer';
 
