@@ -1,19 +1,18 @@
 package api
 
 import (
-	"forum/models"
+	"forum/database"
 	"net/http"
 )
 
 func FetchPosts(w http.ResponseWriter, r *http.Request) {
-	// var posts []models.Model
-	// params := r.URL.Query()
+	posts := database.FetchDataJoin([]string{"posts", "users"}, []string{"*"}, "posts.authorId=users.id")
 
-	// if toShow := params.Get("posts"); len(toShow) > 0 && toShow == "all" {
-	posts := models.Post.Fetch()
-	// }
+	for i := range posts {
+		delete(posts[i], "password")
+		delete(posts[i], "id")
+		delete(posts[i], "authorId")
+	}
 
-	fields := []string{"id", "authorId", "title", "content", "categoriesNames", "picture", "creationDate"}
-	usersData := TransformModels(posts, fields)
-	WriteJSONResponse(w, usersData)
+	WriteJSONResponse(w, posts)
 }
