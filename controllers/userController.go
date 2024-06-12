@@ -352,7 +352,7 @@ func NewLogin(w http.ResponseWriter, r *http.Request) {
 		Categories: GetAllCategories(w, r),
 	}
 
-	tmpl, err := template.ParseFiles("./views/login.html")
+	tmpl, err := template.ParseFiles("./views/realtime.html")
 	helpers.ErrorSimple(err)
 
 	tmpl.Execute(w, allData)

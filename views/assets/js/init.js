@@ -6,6 +6,7 @@ var activeForm = "login";
 let printed = {};
 let checked = {};
 let authRoute = '/api/auth';
+let userDataRoute = '/api/users';
 let postsRoute = '/api/posts';
 let categoriesListRoute = '/api/categories-list';
 

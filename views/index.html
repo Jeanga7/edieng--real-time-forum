@@ -16,11 +16,7 @@
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        {
-                {
-                if .IsLogged
-            }
-        }
+        {{ if .IsLogged }}
 
         .reaction-active svg {
             fill: var(--primary);
@@ -29,23 +25,13 @@
             /* Change le trait en bleu */
             stroke-width: 1.5;
             /* Change l'épaisseur du trait en 2 */
-        }
-
-            {
-                {
-                else
-            }
-        }
+        {{ else }}
 
         .add-comment-form {
             display: none;
         }
 
-            {
-                {
-                end
-            }
-        }
+            {{ end }}
     </style>
 
 </head>

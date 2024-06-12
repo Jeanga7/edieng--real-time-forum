@@ -94,6 +94,9 @@ body {
     flex-grow: 1;
     overflow-y: auto;
 }
+/* .terminal-box:hover {
+    transform: scale(1.01);
+} */
 
 #terminal-zone {
     height: 100%;
@@ -437,4 +440,58 @@ input[type=number] {
 #netcat .terminal-head{
     background-color: var(--blue);
     color: white;
+}
+
+#user-infos-zone {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    flex-grow: 1;
+    opacity: 0;
+    transition: var(--standard-transition);
+}
+
+#user-profile-picture {
+    height: 120px;
+    width: 120px;
+    background-size: cover;
+    background-position: center center;
+}
+
+#user-name-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#user-fullname {
+    text-transform: uppercase;
+    font-weight: 500;
+}
+#user-nickname {
+    font-size: 0.8em;
+    font-weight: 300;
+}
+
+#user-stats {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    font-size: 0.7em;
+    width: 100%;
+    padding: 0 12px 12px 12px;
+}
+#user-stats span {
+    text-align: center;
+    font-weight: 400;
+    cursor: pointer;
+}
+#stats-posted {
+    color: #004BBB;
+}
+#stats-reacted {
+    color: #E216CE;
+}
+#stats-replied {
+    color: #FFB800;
 }

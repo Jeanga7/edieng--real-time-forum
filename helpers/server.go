@@ -102,6 +102,15 @@ func RandN(min, max int) int {
 	return rand.Intn(max-min) + min
 }
 
+func RemoveValueFromList(list []string, valueToRemove string) []string {
+	for i := 0; i < len(list); i++ {
+        if list[i] == valueToRemove {
+            list = append(list[:i], list[i+1:]...)
+        }
+    }
+	return list
+}
+
 func HashPassword(password string) string {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	ErrorSimple(err)

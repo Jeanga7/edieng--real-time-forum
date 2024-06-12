@@ -128,7 +128,7 @@ function startFeedsTerminals() {
 
                             d.forEach(c => {
                                 cats.push({
-                                    txt: "   - "+c.name,
+                                    txt: "   - " + c.name,
                                     c: "warning",
                                     eol: true
                                 })
@@ -139,6 +139,12 @@ function startFeedsTerminals() {
             });
             printInTerminal("#categories-text", cats, "cat", 10);
 
+            // Get User Data
+            let userInfos = (await fetchUserData(userID))[0];
+            console.log(userInfos);
+
+            ShowUserInfos(userInfos);
+            ShowAllPosts()
 
             resolve();
         }, 500);
@@ -303,5 +309,57 @@ function btnBgPosition() {
         } else {
             el.style.left = "0"
         }
+    })
+}
+
+async function fetchUserData(userId) {
+    return new Promise((resolve) => {
+        let fd = new FormData();
+        fd.append("id", userId);
+        fetch(userDataRoute, {
+                method: 'POST',
+                body: fd
+            })
+            .then(r => r.json())
+            .then(d => {
+                resolve(d);
+            })
+    });
+}
+
+async function ShowUserInfos(userInfos) {
+    let infosZone = document.createElement("div");
+    infosZone.id = "user-infos-zone"
+
+    // Profile picture
+    let pp = document.createElement("div");
+    pp.id = "user-profile-picture";
+    pp.style.backgroundImage = "url('assets/img/profile/anonymous.png')";
+    infosZone.appendChild(pp);
+
+    // User Name
+    let un = document.createElement("div");
+    un.id = "user-name-zone";
+    let userFullName = userInfos.firstname + " " + userInfos.lastname;
+    un.innerHTML = /*html*/ `
+            <span id="user-fullname">${userFullName}</span>
+            <span id="user-nickname">@${userInfos.nickname}</span>`
+    infosZone.appendChild(un);
+
+    // Statistics
+    let st = document.createElement("div");
+    st.id = "user-stats";
+    st.innerHTML = /*html*/ `
+            <span id="stats-posted">0 posted</span>
+            <span id="stats-reacted">0 reacted</span>
+            <span id="stats-replied">0 replied</span>`
+    infosZone.appendChild(st);
+
+    document.querySelector("#user-infos .terminal-body").appendChild(infosZone);
+    await new Promise((resolve) => {
+        setTimeout(() => {
+            infosZone.style.opacity = "1";
+            resolve();
+        }, 200)
     })
 }

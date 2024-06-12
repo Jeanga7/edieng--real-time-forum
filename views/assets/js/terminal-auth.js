@@ -31,6 +31,10 @@ async function ValidateField(route, selector, varName, data, checked, printed) {
                     await typing(txts[txts.length - 1], res, "logs");
                     let logsZone = document.querySelector("#logs");
                     logsZone.scrollTop = logsZone.scrollHeight;
+                    if (d.more) {                        
+                        responseData = JSON.parse(d.more);
+                        userID = responseData.id;
+                    }
                     resolve();
                 });
         });

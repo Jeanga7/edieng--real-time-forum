@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"forum/controllers"
@@ -21,7 +22,8 @@ func FetchUsers(w http.ResponseWriter, r *http.Request) {
 	var users []models.Model
 
 	nbParams := 0
-	for _, v := range ListOfPossibleParams {
+	cols := append(ListOfPossibleParams, "id")
+	for _, v := range cols {
 		if len(r.FormValue(v)) > 0 {
 			nbParams++
 		}
@@ -30,7 +32,9 @@ func FetchUsers(w http.ResponseWriter, r *http.Request) {
 	expectedParams := true
 
 	if nbParams == 1 {
-		if len(r.FormValue("firstname")) > 0 {
+		if len(r.FormValue("id")) > 0 {
+			paramName = "id"
+		} else if len(r.FormValue("firstname")) > 0 {
 			paramName = "firstname"
 		} else if len(r.FormValue("lastname")) > 0 {
 			paramName = "lastname"
@@ -63,7 +67,8 @@ func FetchUsers(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	usersData := TransformModels(users, ListOfPossibleParams)
+	visibleCols := helpers.RemoveValueFromList(ListOfPossibleParams, "password")
+	usersData := TransformModels(users, visibleCols)
 	WriteJSONResponse(w, usersData)
 }
 
@@ -103,9 +108,11 @@ func ValidateFields(w http.ResponseWriter, r *http.Request) {
 
 				err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 				if err == nil {
+					data, err := json.Marshal(user[0].Values)
+					helpers.ErrorSimple(err)
 					controllers.CreateSession(w, r, fmt.Sprintf("%s", user[0].Values["id"]))
 					controllers.BroadcastNewUser(user[0].Values["firstname"].(string) + " " + user[0].Values["lastname"].(string))
-					helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted)
+					helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted, string(data))
 					return
 				} else {
 					helpers.JSONResponse(w, errors.New("INVALID PASSWORD"), http.StatusNotFound)
@@ -179,9 +186,11 @@ func ValidateFields(w http.ResponseWriter, r *http.Request) {
 			res := newUser.Create()
 
 			// Connectez l'utilisateur après l'inscription
+			data, err := json.Marshal(res.Values)
+			helpers.ErrorSimple(err)
 			controllers.CreateSession(w, r, fmt.Sprintf("%s", res.Values["id"]))
 			controllers.BroadcastNewUser(strings.ReplaceAll(strings.Title(userData["firstname"]["value"].(string)), " ", "_"))
-			helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted)
+			helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted, string(data))
 		} else {
 			helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted)
 		}

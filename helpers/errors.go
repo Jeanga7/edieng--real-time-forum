@@ -16,10 +16,14 @@ func ErrorHandler(w http.ResponseWriter, err error, context string, statusCode i
 	}
 }
 
-func JSONResponse(w http.ResponseWriter, err error, statusCode int) {
+func JSONResponse(w http.ResponseWriter, err error, statusCode int, more ...interface{}) {
 	global.W = w
 	response := map[string]string{
 		"value": err.Error(),
+	}
+
+	if len(more) > 0 {
+		response["more"] = more[0].(string)
 	}
 
 	// Convertir la réponse en JSON
