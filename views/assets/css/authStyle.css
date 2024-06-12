@@ -5,6 +5,9 @@
     --blue: #001B7B;
     --standard-transition: all 500ms ease-in-out;
     --gap: 12px;
+    --blue2: #0373dd;
+    --pink: #E216CE;
+    --yellow: #FFB800;
 }
 
 * {
@@ -158,9 +161,10 @@ body {
     }
 }
 
-.infos-txt {
+.infos-txt:not(.warning) {
     font-size: .75em;
     padding: 0 12px;
+    text-shadow: 0 0 4px white;
 }
 
 #auth-btns {
@@ -196,6 +200,7 @@ span.auth-btn.active {
 
 .warning {
     color: orange;
+    text-shadow: 0 0 4px orange;
 }
 
 .danger {
@@ -453,8 +458,8 @@ input[type=number] {
 }
 
 #user-profile-picture {
-    height: 120px;
-    width: 120px;
+    height: 100px;
+    width: 100px;
     background-size: cover;
     background-position: center center;
 }
@@ -463,6 +468,7 @@ input[type=number] {
     display: flex;
     flex-direction: column;
     align-items: center;
+    text-shadow: 0 0 4px white;
 }
 #user-fullname {
     text-transform: uppercase;
@@ -487,13 +493,16 @@ input[type=number] {
     cursor: pointer;
 }
 #stats-posted {
-    color: #004BBB;
+    color: var(--blue2);
+    text-shadow: 0 0 4px var(--blue2);
 }
 #stats-reacted {
-    color: #E216CE;
+    color: var(--pink);
+    text-shadow: 0 0 4px var(--pink);
 }
 #stats-replied {
-    color: #FFB800;
+    color: var(--yellow);
+    text-shadow: 0 0 4px var(--yellow);
 }
 
 #posts-zone {
@@ -506,30 +515,64 @@ input[type=number] {
 .post {
     display: flex;
     flex-direction: column;
+    padding-bottom: 8px;
 }
 .post-title {
     color: var(--fluo);
     font-size: 2em;
+    text-shadow: 0 0 6px var(--fluo);
 }
 .post-time-author {
     color: var(--fluo);
     font-size: .8em;
+    text-shadow: 0 0 4px var(--fluo);
 }
 .post-image {
-    height: 50vh;
+    height: 48vh;
     width: 100%;
     background-size: cover;
     background-position: center center;
 }
 .post-text {
     font-size: .65em;
+    text-shadow: 0 0 3px white;
 }
 hr.post-separator {
     border-width: .8px 0 0 0;
     border-style: dashed;
-    border-color: white;
+    border-color: var(--fluo);
     width: 100%;
+    box-shadow: 0 0 4px var(--fluo);
 }
 .reaction-btns-zone {
     margin-top: 12px;
+    font-size: .8em;
+    font-weight: 500;
+    display: flex;
+    flex-direction: row;
+    gap: var(--gap);
+}
+.reaction-btns-zone span {
+    cursor: pointer;
+}
+.like-btn {
+    color: var(--fluo);
+    text-shadow: 0 0 4px var(--fluo);
+}
+.dislike-btn {
+    color: red;
+    text-shadow: 0 0 4px red;
+}
+.comment-btn {
+    color: var(--blue2);
+    text-shadow: 0 0 4px var(--blue2);
+}
+#user-infos {
+    flex-grow: 4;
+}
+#categories {
+    flex-grow: 3;
+}
+#actions {
+    flex-grow: 2;
 }

@@ -94,6 +94,9 @@ const userInfosTerminal = makeTerminal("user-infos", userInfosRows, "infos-txt")
 let categoriesRows = loopSpans(categoriesTxt);
 const categoriesTerminal = makeTerminal("categories", categoriesRows, "infos-txt")
 
+let actionsRows = loopSpans(actionsTxt);
+const actionsTerminal = makeTerminal("actions", actionsRows, "infos-txt")
+
 let allUsersRows = loopSpans(allUsersTxt);
 const allUsersTerminal = makeTerminal("all-users", allUsersRows, "infos-txt")
 
@@ -108,6 +111,7 @@ var feedsView = /*html*/ `
     <div id="feeds-left" class="feeds-col">
         ${userInfosTerminal}
         ${categoriesTerminal}
+        ${actionsTerminal}
     </div>
     <div id="feeds-middle" class="feeds-col">
         ${allPostsTerminal}

@@ -98,7 +98,7 @@ function startFeedsTerminals() {
             // Terminal Pop-up
             let w = document.querySelectorAll(".terminal-box").forEach(t => {
                 t.style.opacity = "1";
-                t.style.height = "100%";
+                // t.style.height = "100%";
                 t.style.width = "100%";
             });
 
@@ -110,6 +110,7 @@ function startFeedsTerminals() {
                 setTimeout(async () => {
                     typeInTxts("#user-infos-text", userInfosTxt, "ui", 10);
                     typeInTxts("#categories-text", categoriesTxt, "cat", 10);
+                    typeInTxts("#actions-text", actionsTxt, "ac", 10);
                     typeInTxts("#all-users-text", allUsersTxt, "au", 10);
                     typeInTxts("#all-posts-text", allPostsTxt, "ap", 10);
                     resolve();
@@ -135,7 +136,7 @@ function startFeedsTerminals() {
                             })
                             resolve();
                         })
-                }, 450)
+                }, 500)
             });
             printInTerminal("#categories-text", cats, "cat", 10);
 
@@ -384,25 +385,28 @@ function ShowAllPosts(posts) {
     let postsZone = document.createElement("div");
     postsZone.id = "posts-zone";
 
-    // Post
-    let post = document.createElement("div");
-    post.className = "post";
-    postImage = "text" ? /*html*/`
-        <div class="post-image" style="background-image:url('assets/img/posts/4a41f152-f8ca-42da-8c1c-ffeb21e332d7-thor_chris_hemsworth_hd_thor_the_dark_world-1600x900.jpg');"></div>
-    ` : "";
-    post.innerHTML = /*html*/`
-        <hr class="post-separator">
-        <span class="post-title">Title Post 1</span>
-        <span class="post-time-author">[01-01-2024 22:59] by @ironman</span>
-        <p class="post-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum eget orci porttitor nibh faucibus laoreet. Aenean semper, magna ac dapibus imperdiet, arcu ligula congue lacus, sed auctor sem quam ac ipsum.</p>
-        ${postImage}
-        <div class="reaction-btns-zone">
-            <span class="like-btn">[ ]Like(2)</span>
-            <span class="dislike-btn">[ ]Dislike(0)</span>
-            <span class="comment-btn">x>Comment(0)</span>
-        </div>
-    `
-    postsZone.appendChild(post);
+    posts.forEach(postData=>{
+        // Post
+        let post = document.createElement("div");
+        post.className = "post";
+        postImage = postData.image ? /*html*/`
+            <div class="post-image" style="background-image:url('assets/img/posts/4a41f152-f8ca-42da-8c1c-ffeb21e332d7-thor_chris_hemsworth_hd_thor_the_dark_world-1600x900.jpg');"></div>
+        ` : "";
+        post.innerHTML = /*html*/`
+            <hr class="post-separator">
+            <span class="post-title">${postData.title}</span>
+            <span class="post-time-author">[${postData.creationDate}] by @${postData.nickname}</span>
+            <p class="post-text">${postData.content}</p>
+            ${postImage}
+            <div class="reaction-btns-zone">
+                <span class="like-btn">[ ]Like(2)</span>
+                <span class="dislike-btn">[ ]Dislike(0)</span>
+                <span class="comment-btn">$>Comment(0)</span>
+            </div>
+        `
+        postsZone.appendChild(post);
+    });
+
 
     document.querySelector("#all-posts .terminal-body").appendChild(postsZone);
 }

@@ -113,6 +113,10 @@ let categoriesTxt = [
     {txt: "List of categories:", c: null, eol: true},
 ];
 
+let actionsTxt = [
+    {txt: "$> rtf --actions", c: "command", eol: true},
+];
+
 let allUsersTxt = [
     {txt: "$> rtf --all-users", c: "command", eol: true},
 ];
