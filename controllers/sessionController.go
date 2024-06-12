@@ -10,7 +10,7 @@ import (
 func CreateSession(w http.ResponseWriter, r *http.Request, idUser string) {
 	global.W = w
 	// Define the expiration date of the session (e.g., 1 hour)
-	expiryDate := time.Now().Add(time.Hour*24)
+	expiryDate := time.Now().Add(24 * time.Hour)
 
 	oldSessions := models.Session.Fetch([]interface{}{"idUser"}, []interface{}{idUser})
 	if len(oldSessions) > 0 {

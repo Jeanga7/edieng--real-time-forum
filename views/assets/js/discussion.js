@@ -1,17 +1,18 @@
 const currentUser = document.querySelector('#user-full-name').textContent;
 const messageInput = document.getElementById('chat-input');
 let currentdiscussion;
-
 let ws;
 let currentDestinataire;
+let messageChunks = [];
+let currentChunkIndex = 0;
+let isChunkLoading = false;
+let firstCall = true;
 
 document.addEventListener('DOMContentLoaded', () => {
     loadUsers()
     openWs();
 
-    document.querySelector("#send-message").addEventListener("click", () => {
-        sendMessage();
-    });
+    document.querySelector("#send-message").addEventListener("click", sendMessage);
 
     document.querySelector("#close-chat").addEventListener('click', () => {
         document.querySelectorAll('.discussion').forEach(user => {
@@ -74,17 +75,15 @@ function openWs() {
             if (currentdiscussion == message.sender) {
                 displayMessage(message.message, message.date, message.destinataire, message.sender, false);
             }
-            // console.log(message);
+
             var div = document.getElementById(message.sender + "_discussion")
             var ischatopened = div.getAttribute("ischatopened")
-            // console.log(ischatopened);
+
             if (ischatopened === "false" && message.message != "") {
                 updateNotification(message.sender, message.Notif.notification)
 
                 var discussions = document.querySelectorAll('.discussion');
                 var discussionsArray = Array.from(discussions);
-
-                // console.log("discussionsArray",discussionsArray);
 
                 discussionsArray.sort((a, b) => {
                     const dateA = a.getAttribute('date');
@@ -109,7 +108,6 @@ function parseDate(dateStr) {
     // console.log("date", dateStr);
     if (dateStr) {
         const [datePart, timePart] = dateStr.split(' ');
-
         const [day, month, year] = datePart.split('/').map(Number);
         const [hours, minutes, seconds] = timePart.split(':').map(Number);
         return new Date(year, month - 1, day, hours, minutes, seconds);
@@ -181,54 +179,48 @@ function sendMessage() {
 
         ws.send(JSON.stringify(data));
         displayMessage(message, dateTime, currentDestinataire, currentUser, false);
+        scrollToLastMessage();
     }
 }
 
 function displayMessage(message, date, destinataire, sender, prepend) {
-    if (message != "") {
-        const chatMessages = document.getElementById("chat-messages");
-        const timeDiv = document.createElement("div");
-        const smsContainer = document.createElement("div");
-        const smsDiv = document.createElement("div");
-        const smsUsername = document.createElement("div");
+    if (!message) return
 
-        smsContainer.classList.add("smsContainer")
-        timeDiv.classList.add("smsDate");
-        
-        timeDiv.textContent = date;
-        if (currentUser !== destinataire) {
-            smsUsername.classList.add("smsUsername-sms")
-            console.log(sender, message);
-            smsUsername.textContent = sender
-            smsUsername.style.justifyContent = "flex-end"
-            // smsUsername.style.marginRight = "auto"
-            smsDiv.classList.add("sms");
-        } else {
-            smsUsername.classList.add("smsUsername-sms-received")
-            smsUsername.textContent = sender
-            smsDiv.classList.add("sms-received");
-        }
+    const chatMessages = document.getElementById("chat-messages");
+    const timeDiv = document.createElement("div");
+    const smsContainer = document.createElement("div");
+    const smsDiv = document.createElement("div");
+    const smsUsername = document.createElement("div");
 
-        smsDiv.textContent = message;
-        smsContainer.appendChild(smsUsername)
-        smsContainer.appendChild(smsDiv)
-        if (prepend) {
-            chatMessages.insertBefore(smsContainer, chatMessages.firstChild);
-            chatMessages.insertBefore(timeDiv, chatMessages.firstChild);
-        } else {
-            chatMessages.appendChild(timeDiv);
-            chatMessages.appendChild(smsContainer);
-        }
+    smsContainer.classList.add("smsContainer")
+    timeDiv.classList.add("smsDate");
+    timeDiv.textContent = date;
+    smsUsername.textContent = sender
 
+    if (currentUser !== destinataire) {
+        smsUsername.classList.add("smsUsername-sms")
+        smsDiv.classList.add("sms");
+    } else {
+        smsUsername.classList.add("smsUsername-sms-received")
+        smsDiv.classList.add("sms-received");
+    }
+
+    smsDiv.textContent = message;
+    smsContainer.appendChild(smsUsername);
+    smsContainer.appendChild(smsDiv);
+
+    if (prepend) {
+        chatMessages.prepend(timeDiv, smsContainer);
+    } else {
+        chatMessages.append(timeDiv, smsContainer);
+        scrollToLastMessage();
     }
 }
 
-let messageChunks = [];
-let currentChunkIndex = 0;
+
 
 function chunks(messages) {
     messageChunks = [];
-    // messageChunks.slice().reverse()
     for (let i = 0; i < messages.length; i += 10) {
         messageChunks.push(messages.slice(i, i + 10));
     }
@@ -238,23 +230,15 @@ function chunks(messages) {
 function loadChunk() {
     if (currentChunkIndex < messageChunks.length) {
         const chunk = messageChunks[currentChunkIndex];
-
-
-
         chunk.forEach(msg => {
             updateNotification(msg.sender, 0);
             displayMessage(msg.message, msg.date, msg.destinataire, msg.sender, true);
         });
-
-
-
         currentChunkIndex++;
     }
 }
 
-let isChunkLoading = false;
 function handleScroll() {
-    // console.log(isChunkLoading);
     const chatMessages = document.getElementById("chat-messages");
     if (chatMessages.scrollTop === 0 && currentChunkIndex < messageChunks.length && !isChunkLoading) {
         isChunkLoading = true;
@@ -321,7 +305,6 @@ function setDivDate(date, sender) {
     });
 }
 
-let firstCall = true;
 
 function loadUsers() {
     fetch('/api/AllUsers')
@@ -381,7 +364,10 @@ function loadUsers() {
         .catch(error => console.error('Error loading users:', error));
 }
 
-
+function scrollToLastMessage() {
+    const chatMessages = document.getElementById("chat-messages");
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
 
 //====================================TYPING-PROGRESS========================================
 
