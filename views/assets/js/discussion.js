@@ -20,92 +20,86 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         closeChat();
     });
-});
 
+    messageInput.addEventListener('keydown', () => {
+        const data3 = {
+            sender: currentUser,
+            destinataire: currentdiscussion,
+            type: "typing"
+        };
+        ws.send(JSON.stringify(data3));
+    });
+});
 
 function openWs() {
     ws = new WebSocket("ws://localhost:8989/messages");
 
-
     ws.onopen = () => {
         console.log("Connected to WebSocket...");
-
-        var discussions = document.querySelectorAll('.discussion');
-
-        var discussionsArray = Array.from(discussions);
-
-        discussionsArray.sort((a, b) => {
-            const dateA = a.getAttribute('date');
-            const dateB = b.getAttribute('date');
-            return compareDiscussionOrder(dateA, dateB);
-        });
-
-        var parentContainer = document.getElementById('most-active-users');
-        parentContainer.innerHTML = '';
-
-        discussionsArray.forEach(function (discussion) {
-            parentContainer.appendChild(discussion);
-        });
+        sortDiscussion();
         AskforNotification()
     };
 
-
-
     ws.onmessage = (e) => {
         const message = JSON.parse(e.data);
-        // console.log("message", message.sender);
-
         if (message.type === 'history') {
-            var temp = message.messages.reverse()
-            loadHistory(temp);
+            loadHistory(message.messages.reverse());
         } else if (message.type == "typing") {
             if (currentdiscussion === message.sender) {
-                document.getElementById('typingIndicator').style.opacity = 1;
-                setTimeout(() => {
-                    document.getElementById('typingIndicator').style.opacity = 0;
-                }, 1000);
+                showTyping();
             }
-
         } else if (message.type == "new_user") {
             handleNewUser(message.sender)
         } else {
-            console.log("NOOOOOOOOOOOOOOON");
-            setDivDate(message.date, message.sender)
-
-            if (currentdiscussion == message.sender) {
-                displayMessage(message.message, message.date, message.destinataire, message.sender, false);
-            }
-
-            var div = document.getElementById(message.sender + "_discussion")
-            var ischatopened = div.getAttribute("ischatopened")
-
-            if (ischatopened === "false" && message.message != "") {
-                updateNotification(message.sender, message.Notif.notification)
-
-                var discussions = document.querySelectorAll('.discussion');
-                var discussionsArray = Array.from(discussions);
-
-                discussionsArray.sort((a, b) => {
-                    const dateA = a.getAttribute('date');
-                    const dateB = b.getAttribute('date');
-                    return compareDiscussionOrder(dateA, dateB);
-                });
-
-                var parentContainer = document.getElementById('most-active-users');
-                parentContainer.innerHTML = '';
-
-                discussionsArray.forEach(function (discussion) {
-                    parentContainer.appendChild(discussion);
-                });
-
-            }
+            handleMessage(message);
         }
-    };
+    }
+}
 
+function handleMessage(message) {
+    console.log("NOOOOOOOOOOOOOOON");
+    setDivDate(message.date, message.sender);
+
+    if (currentdiscussion == message.sender) {
+        displayMessage(message.message, message.date, message.destinataire, message.sender, false);
+    }
+
+    var div = document.getElementById(message.sender + "_discussion");
+    var ischatopened = div.getAttribute("ischatopened");
+
+    if (ischatopened === "false" && message.message != "") {
+        updateNotification(message.sender, message.Notif.notification);
+        sortDiscussion();
+    }
+}
+
+function showTyping() {
+    document.getElementById('typingIndicator').style.opacity = 1;
+    setTimeout(() => {
+        document.getElementById('typingIndicator').style.opacity = 0;
+    }, 1000);
+}
+
+function sortDiscussion() {
+    var discussions = document.querySelectorAll('.discussion');
+
+    var discussionsArray = Array.from(discussions);
+
+    discussionsArray.sort((a, b) => {
+        const dateA = a.getAttribute('date');
+        const dateB = b.getAttribute('date');
+        return compareDiscussionOrder(dateA, dateB);
+    });
+
+    var parentContainer = document.getElementById('most-active-users');
+    parentContainer.innerHTML = '';
+
+    discussionsArray.forEach(function (discussion) {
+        parentContainer.appendChild(discussion);
+    });
 }
 
 function parseDate(dateStr) {
-    // console.log("date", dateStr);
     if (dateStr) {
         const [datePart, timePart] = dateStr.split(' ');
         const [day, month, year] = datePart.split('/').map(Number);
@@ -115,24 +109,13 @@ function parseDate(dateStr) {
 }
 
 function compareDiscussionOrder(dateStr1, dateStr2) {
-    const date1 = parseDate(dateStr1);
-    const date2 = parseDate(dateStr2);
-
-    return date2 - date1;
+    return parseDate(dateStr2) - parseDate(dateStr1)
 }
 
 function updateNotification(sender, count) {
-    if (sender.includes(" ")) {
-        sender = sender.replace(" ", "_")
-    }
-
-    let notificationElement = document.getElementById(sender + "_notif");
+    let notificationElement = document.getElementById(sender.replace(" ", "_") + "_notif");
     if (notificationElement) {
-        if (count !== 0) {
-            notificationElement.textContent = parseInt(count);
-        } else {
-            notificationElement.textContent = "";
-        }
+        notificationElement.textContent = count !== 0 ? parseInt(count) : "";
     }
 }
 
@@ -277,7 +260,6 @@ function loadHistory(messages) {
 
 function closeChat() {
     document.getElementById('chat-container').style.display = 'none';
-    // Ischatopened = false
     document.getElementById("chat-messages").innerHTML = '';
 }
 
@@ -301,7 +283,6 @@ function setDivDate(date, sender) {
         if (user.getAttribute('id').split("_discussion")[0] === sender) {
             user.setAttribute("date", date)
         }
-
     });
 }
 
@@ -319,18 +300,14 @@ function loadUsers() {
                 userDiv.id = `${user.Username}_discussion`;
                 userDiv.setAttribute('ischatopened', 'false');
                 userDiv.setAttribute('date', user.LastMsgDate);
-                // console.log("this is user", user.NbrNotifications, typeof (user.NbrNotifications));
                 const userContainer = document.createElement('div');
                 userContainer.className = 'usercontainer';
 
                 const userStatus = document.createElement(user.Status === 'Online' ? 'strong' : 'em')
 
                 if (!firstCall && index === users.length - 1) {
-                    // console.log('dernier user')
                     userStatus.textContent = `${user.Username} - Online`;
-                    // userStatus.tagName = 'strong';
                 } else {
-                    // console.log('C est pas dernier user')
                     userStatus.textContent = `${user.Username} - ${user.Status !== 'Online' ? 'Offline' : user.Status}`;
                 }
                 const notificationDiv = document.createElement('div');
@@ -341,7 +318,6 @@ function loadUsers() {
                 } else {
                     notificationDiv.textContent = user.NbrNotifications;
                 }
-
                 userContainer.appendChild(userStatus);
                 userContainer.appendChild(notificationDiv);
                 userDiv.appendChild(userContainer);
@@ -369,13 +345,4 @@ function scrollToLastMessage() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-//====================================TYPING-PROGRESS========================================
 
-messageInput.addEventListener('keydown', () => {
-    const data3 = {
-        sender: currentUser,
-        destinataire: currentdiscussion,
-        type: "typing"
-    };
-    ws.send(JSON.stringify(data3));
-});
