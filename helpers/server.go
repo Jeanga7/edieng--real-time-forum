@@ -18,8 +18,9 @@ var Storage = "./views/assets/img/posts"
 
 type User struct {
 	Nickname         string
-	Status           string
+	Status           bool
 	NbrNotifications int
+	LastMsgDate      string
 }
 
 type FinalData struct {
@@ -104,10 +105,10 @@ func RandN(min, max int) int {
 
 func RemoveValueFromList(list []string, valueToRemove string) []string {
 	for i := 0; i < len(list); i++ {
-        if list[i] == valueToRemove {
-            list = append(list[:i], list[i+1:]...)
-        }
-    }
+		if list[i] == valueToRemove {
+			list = append(list[:i], list[i+1:]...)
+		}
+	}
 	return list
 }
 

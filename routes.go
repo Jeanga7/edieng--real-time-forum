@@ -48,7 +48,7 @@ func Routes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/categories-list", api.CategoriesList)
 
 	mux.HandleFunc("/api/session", api.FetchSessions)
-	
+
 	mux.HandleFunc("/api/comments", api.FetchComments)
 
 	mux.HandleFunc("/api/discussions", api.FetchDiscussions)
@@ -56,4 +56,6 @@ func Routes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/likes", api.FetchLike)
 
 	mux.HandleFunc("/api/dislikes", api.FetchDislike)
+
+	mux.HandleFunc("/api/AllUsers", api.GetAllSortedUsers)
 }

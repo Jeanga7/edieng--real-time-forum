@@ -208,3 +208,16 @@ func CheckField(w http.ResponseWriter, fieldVar, fieldName, fieldType string, va
 	}
 	return true
 }
+
+// =======================AJOUT=====================================
+
+func GetAllSortedUsers(w http.ResponseWriter, r *http.Request) {
+	Usernames, Sessions, shouldReturn, _ := controllers.FindUsersOnline(r)
+	if shouldReturn {
+		return
+	}
+	All_users, _ := controllers.GetUsers(strings.Title(Usernames))
+	SortedUsers := controllers.SortUsers(All_users, Sessions, strings.Title(Usernames))
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(SortedUsers)
+}

@@ -95,26 +95,41 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func SortUsers(All_users []helpers.User, Sessions []models.Model, nickname string) []helpers.User {
+func SortUsers(All_users []helpers.User, Sessions []models.Model, username string) []helpers.User {
 	SortedUsers := make([]helpers.User, len(All_users))
 	for i, user := range All_users {
 		SortedUsers[i].Nickname = strings.Title(strings.Join(strings.Split(user.Nickname, " "), "_"))
 		for _, s := range Sessions {
 			var id = GetIdByNickname(user.Nickname)
 			if id == s.Values["idUser"].(string) {
-				SortedUsers[i].Status = "Online"
+				SortedUsers[i].Status = true
+			} else {
+				SortedUsers[i].Status = false
 			}
 		}
 	}
-
 	sort.Slice(SortedUsers, func(i, j int) bool {
 		return SortedUsers[i].Nickname < SortedUsers[j].Nickname
 	})
-
 	filteredUsers := []helpers.User{}
 	for _, user := range SortedUsers {
-		if user.Nickname != strings.Title(strings.Join(strings.Split(nickname, " "), "_")) {
-			notificationId := GetNotificationId(user.Nickname, nickname)
+		if user.Nickname != strings.Title(strings.Join(strings.Split(username, " "), "_")) {
+			DiscussionsId := GetDiscussionId(user.Nickname, username)
+			discussion := models.Discussions.Fetch([]interface{}{"id"}, []interface{}{DiscussionsId})
+			if len(discussion) > 0 {
+				msg := []byte(discussion[0].Values["messages"].(string))
+				var message []Message
+				err := json.Unmarshal(msg, &message)
+				if err != nil {
+					fmt.Println("Error Unmarshaling JSON: ", err)
+					return nil
+				}
+				// fmt.Println("discussion", message[len(message)-1].Date)
+				user.LastMsgDate = message[len(message)-1].Date
+			} else {
+				user.LastMsgDate = "7/6/2000 16:31:54"
+			}
+			notificationId := GetNotificationId(user.Nickname, username)
 			notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
 			if len(notification) > 0 {
 				currentCount, err := strconv.Atoi(notification[0].Values["notifications"].(string))
