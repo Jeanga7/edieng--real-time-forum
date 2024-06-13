@@ -381,13 +381,13 @@ async function ShowUserInfos(userInfos) {
     })
 }
 
-function ShowAllPosts(posts) {
+async function ShowAllPosts(posts) {
     console.log(posts[0]);
 
     let postsZone = document.createElement("div");
     postsZone.id = "posts-zone";
 
-    posts.forEach(postData=>{
+    posts.forEach((postData, i)=>{
         // Post
         let post = document.createElement("div");
         post.className = "post";
@@ -407,10 +407,19 @@ function ShowAllPosts(posts) {
             </div>
         `
         postsZone.appendChild(post);
+        setTimeout(()=>{
+            post.style.opacity = "1";
+            resolve();
+        }, 500+i*500);
     });
 
-
     document.querySelector("#all-posts .terminal-body").appendChild(postsZone);
+    // await new Promise((resolve) => {
+    //     setTimeout(()=>{
+    //         postsZone.style.opacity = "1";
+    //         resolve();
+    //     }, 800);
+    // })
 }
 
 function AddActionsBtn() {
@@ -418,7 +427,7 @@ function AddActionsBtn() {
     actionsZone.id = "actions-zone";
     actionsZone.innerHTML = /*html*/`
         <span id="add-post-btn">Add post</span>
-        <span id="logout-btn">Logout</span>
+        <span id="logout-btn" onclick="window.location.href='/logout'">Logout</span>
     `
     document.querySelector("#actions .terminal-body").appendChild(actionsZone)
 }

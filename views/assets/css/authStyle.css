@@ -526,9 +526,11 @@ input[type=number] {
     padding: 12px;
 }
 .post {
+    opacity: 0;
     display: flex;
     flex-direction: column;
     padding-bottom: 8px;
+    transition: var(--standard-transition);
 }
 .post-title {
     color: var(--fluo);
