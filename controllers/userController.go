@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"forum/global"
@@ -294,28 +293,8 @@ func Auth(r *http.Request, w http.ResponseWriter) (bool, []models.Model) {
 
 func NewLogin(w http.ResponseWriter, r *http.Request) {
 	global.W = w
-
-	Nicknames, Sessions, shouldReturn, _ := FindUsersOnline(r)
-	if shouldReturn {
-		return
-	}
-
-	All_users, Users := GetUsers(strings.Title(Nicknames))
-
-	SortedUsers := SortUsers(All_users, Sessions, strings.Title(Nicknames))
-
-	Posts := models.Post.Fetch()
-	Likes := models.Like.Fetch()
-	Dislikes := models.Dislike.Fetch()
-	Comments := models.Comment.Fetch()
-
-	UserAllData := make(map[string]map[string]interface{})
-
-	stats := GetUsersStats(Posts, Likes, Dislikes, Comments, Users, UserAllData)
-
 	// Récupérer les posts depuis la base de données
 	isLogged, res := Auth(r, w)
-	posts := CheckPostsToShow(r, w)
 
 	var userData []map[string]interface{}
 	for _, u := range res {
@@ -335,21 +314,9 @@ func NewLogin(w http.ResponseWriter, r *http.Request) {
 		data["numComments"] = CountComment
 	}
 
-	categoriesStats := GetCategoriesStats(posts)
-	jsonCategoriesStats, err := json.Marshal(categoriesStats)
-	helpers.ErrorSimple(err)
-
-	usersStats := MostActiveUser(stats, UserAllData)
-
-	data["usersStats"] = usersStats
-	data["categoriesStats"] = string(jsonCategoriesStats)
-
 	allData := helpers.FinalData{
-		Posts:      posts,
 		IsLogged:   isLogged,
 		UserData:   data,
-		AllUser:    SortedUsers,
-		Categories: GetAllCategories(w, r),
 	}
 
 	tmpl, err := template.ParseFiles("./views/realtime.html")

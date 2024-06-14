@@ -134,6 +134,7 @@ body {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    padding: 12px;
 }
 
 .welcome-text {
@@ -172,7 +173,6 @@ body {
 
 .infos-txt:not(.warning) {
     font-size: .75em;
-    padding: 0 12px;
     text-shadow: 0 0 4px white;
 }
 
@@ -447,14 +447,6 @@ input[type=number] {
     gap: var(--gap);
 }
 
-#netcat {
-    border-color: var(--blue);
-    height: 0;
-    width: 0;
-    opacity: 0;
-    display: none;
-}
-
 #netcat .terminal-head{
     background-color: var(--blue);
     color: white;
@@ -498,7 +490,6 @@ input[type=number] {
     justify-content: space-between;
     font-size: .7em;
     width: 100%;
-    padding: 0 12px 12px 12px;
 }
 #user-stats span {
     text-align: center;
@@ -523,7 +514,6 @@ input[type=number] {
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    padding: 12px;
 }
 .post {
     opacity: 0;
@@ -605,7 +595,7 @@ hr.post-separator {
     text-transform: uppercase;
     padding: 4px 16px;
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 700;
 }
 #add-post-btn {
     background-color: var(--blue2);
@@ -618,4 +608,54 @@ hr.post-separator {
 
 #welcome-text .txt {
     font-family: var(--font2);
+}
+
+.user {
+    opacity: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--gap);
+    transition: var(--standard-transition);
+    cursor: pointer;
+}
+
+.user-status {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+.status-online {
+    background-color: var(--fluo);
+    box-shadow: 0 0 5px var(--fluo);
+}
+.status-offline {
+    background-color: red;
+    box-shadow: 0 0 5px red;
+}
+.txt-online {
+    color: var(--fluo);
+    text-shadow: 0 0 4px var(--fluo);
+}
+.txt-offline {
+    color: red;
+    text-shadow: 0 0 4px red;
+}
+
+#netcat {
+    border-color: var(--fluo);
+    height: 0;
+    width: 0;
+    opacity: 0;
+    flex-grow: 0;
+    transition: var(--standard-transition);
+    overflow: hidden;
+    box-shadow: 0 0 4px var(--fluo);
+}
+.active-chat {
+    height: 100%;
+    display: block !important;
+    flex-grow: 2 !important;
+    border-color: var(--blue) !important;
+    box-shadow: 0 0 4px var(--blue) !important;
 }

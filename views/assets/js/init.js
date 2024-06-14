@@ -9,6 +9,9 @@ let authRoute = '/api/auth';
 let userDataRoute = '/api/users';
 let postsRoute = '/api/posts';
 let categoriesListRoute = '/api/categories-list';
+let allUsersRoute = '/api/all-users';
+
+let alphabet = 'abcdefghijklmnopqrstuvwxyz';
 
 let capitalize = (str) => str.charAt(0).toUpperCase() + str.substr(1);
 

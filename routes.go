@@ -57,5 +57,5 @@ func Routes(mux *http.ServeMux) {
 
 	mux.HandleFunc("/api/dislikes", api.FetchDislike)
 
-	mux.HandleFunc("/api/AllUsers", api.GetAllSortedUsers)
+	mux.HandleFunc("/api/all-users", api.GetAllSortedUsers)
 }

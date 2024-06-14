@@ -122,3 +122,40 @@ var feedsView = /*html*/ `
     </div>
 </div>
 `
+
+let actionsButtons = /*html*/`
+<span id="add-post-btn">Add post</span>
+<span id="logout-btn" onclick="window.location.href='/logout'">Logout</span>
+`
+
+let makePost = (postData) => /*html*/`
+<hr class="post-separator">
+<span class="post-title">${postData.title}</span>
+<span class="post-time-author">[${postData.creationDate}] by @${postData.nickname}</span>
+<p class="post-text">${postData.content}</p>
+${postImage}
+<div class="reaction-btns-zone">
+    <span class="like-btn">[ ]Like(2)</span>
+    <span class="dislike-btn">[ ]Dislike(0)</span>
+    <span class="comment-btn">$>Comment(0)</span>
+</div>
+`
+
+let makeUser = (userData) => /*html*/`
+    <span class="user-status ${userData.Online ? 'status-online' : 'status-offline'}"></span>
+    <span class="user-nickname ${userData.Online ? 'txt-online' : 'txt-offline'}">${userData.Nickname}</span>
+    <span class="user-notifications ${userData.Online ? 'txt-online' : 'txt-offline'}">(${userData.NbrNotifications})</span>
+`
+
+let makePostImage = (img) => /*html*/`
+<div class="post-image" style="background-image:url('assets/img/posts/${img}');"></div>
+`
+
+let userStats = () => /*html*/ `
+<span id="stats-posted">0 posted</span>
+<span id="stats-reacted">0 reacted</span>
+<span id="stats-replied">0 replied</span>`
+
+let makeUserName = (userInfos) => /*html*/ `
+<span id="user-fullname">${userInfos.firstname + " " + userInfos.lastname}</span>
+<span id="user-nickname">@${userInfos.nickname}</span>`

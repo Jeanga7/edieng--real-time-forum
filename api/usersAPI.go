@@ -174,8 +174,8 @@ func ValidateFields(w http.ResponseWriter, r *http.Request) {
 		if validUser {
 			newUser := models.User
 			newUser.Values = map[string]interface{}{
-				"firstname": strings.ReplaceAll(strings.Title(userData["firstname"]["value"].(string)), " ", "_"),
-				"lastname":  strings.ReplaceAll(strings.Title(userData["lastname"]["value"].(string)), " ", "_"),
+				"firstname": userData["firstname"]["value"].(string),
+				"lastname":  userData["lastname"]["value"].(string),
 				"nickname":  userData["nickname"]["value"].(string),
 				"email":     userData["email"]["value"].(string),
 				"age":       userData["age"]["value"],
@@ -189,7 +189,7 @@ func ValidateFields(w http.ResponseWriter, r *http.Request) {
 			data, err := json.Marshal(res.Values)
 			helpers.ErrorSimple(err)
 			controllers.CreateSession(w, r, fmt.Sprintf("%s", res.Values["id"]))
-			controllers.BroadcastNewUser(strings.ReplaceAll(strings.Title(userData["firstname"]["value"].(string)), " ", "_"))
+			controllers.BroadcastNewUser(userData["firstname"]["value"].(string))
 			helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted, string(data))
 		} else {
 			helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted)
@@ -216,8 +216,8 @@ func GetAllSortedUsers(w http.ResponseWriter, r *http.Request) {
 	if shouldReturn {
 		return
 	}
-	All_users, _ := controllers.GetUsers(strings.Title(Usernames))
-	SortedUsers := controllers.SortUsers(All_users, Sessions, strings.Title(Usernames))
+	All_users, _ := controllers.GetUsers(Usernames)
+	SortedUsers := controllers.SortUsers(All_users, Sessions, Usernames)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(SortedUsers)
 }

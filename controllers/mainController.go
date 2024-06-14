@@ -32,9 +32,9 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	All_users, Users := GetUsers(strings.Title(Nicknames))
+	All_users, Users := GetUsers(Nicknames)
 
-	SortedUsers := SortUsers(All_users, Sessions, strings.Title(Nicknames))
+	SortedUsers := SortUsers(All_users, Sessions, Nicknames)
 
 	Posts := models.Post.Fetch()
 	Likes := models.Like.Fetch()
@@ -98,14 +98,13 @@ func Index(w http.ResponseWriter, r *http.Request) {
 func SortUsers(All_users []helpers.User, Sessions []models.Model, username string) []helpers.User {
 	SortedUsers := make([]helpers.User, len(All_users))
 	for i, user := range All_users {
-		SortedUsers[i].Nickname = strings.Title(strings.Join(strings.Split(user.Nickname, " "), "_"))
-		for _, s := range Sessions {
-			var id = GetIdByNickname(user.Nickname)
-			if id == s.Values["idUser"].(string) {
-				SortedUsers[i].Status = true
-			} else {
-				SortedUsers[i].Status = false
-			}
+		SortedUsers[i].Nickname = user.Nickname
+		id := GetIdByNickname(user.Nickname)
+		sessionsFound := models.Session.Fetch([]interface{}{"idUser"}, []interface{}{id})
+		if len(sessionsFound) > 0 {
+			SortedUsers[i].Online = true
+		} else {
+			SortedUsers[i].Online = false
 		}
 	}
 	sort.Slice(SortedUsers, func(i, j int) bool {
@@ -113,7 +112,7 @@ func SortUsers(All_users []helpers.User, Sessions []models.Model, username strin
 	})
 	filteredUsers := []helpers.User{}
 	for _, user := range SortedUsers {
-		if user.Nickname != strings.Title(strings.Join(strings.Split(username, " "), "_")) {
+		if user.Nickname != username {
 			DiscussionsId := GetDiscussionId(user.Nickname, username)
 			discussion := models.Discussions.Fetch([]interface{}{"id"}, []interface{}{DiscussionsId})
 			if len(discussion) > 0 {
@@ -167,7 +166,7 @@ func FindUsersOnline(r *http.Request) (string, []models.Model, bool, interface{}
 			var ok bool
 			userID, ok = sessions[0].Values["idUser"]
 			if !ok {
-				log.Println("seesion introuvable")
+				log.Println("SESSION NOT FOUND")
 				return "", nil, true, "noId"
 			}
 			Nicknames = GetNicknameById(userID)

@@ -78,8 +78,14 @@ function typeChar(delay, element, txt, className, i) {
 
 function hidePreloader() {
     return new Promise((resolve) => {
-        setTimeout(() => {
-            document.querySelector("#preloader").style.display = "none";
+        setTimeout(async () => {
+            document.querySelector("#preloader").classList.add("instant-slide-top");
+            await new Promise((resolve) => {
+                setTimeout(()=>{
+                    document.querySelector("#preloader").style.display = "none";
+                    resolve();
+                }, 700);
+            })
             resolve();
         }, 2000);
     });
@@ -138,17 +144,25 @@ function startFeedsTerminals() {
                         })
                 }, 500)
             });
+
             printInTerminal("#categories-text", cats, "cat", 10);
 
             AddActionsBtn();
 
             // Get User Data
             let userInfos = (await fetchUserData(userID))[0];
-            let posts = (await fetchPosts(userID));
+
+            // Get Posts
+            let posts = await fetchPosts(userID);
+
+            // Get All Users
+            let allUsers = await fetchAllUsers();
+            console.log(allUsers);
 
             ShowUserInfos(userInfos);
             ShowAllPosts(posts);
-
+            ListUsers(allUsers);
+            // LettersAnimation("#");
             resolve();
         }, 500);
     });
@@ -344,6 +358,16 @@ async function fetchPosts(userId) {
     });
 }
 
+async function fetchAllUsers() {
+    return new Promise((resolve) => {
+        fetch(allUsersRoute, {method: 'GET'})
+        .then(r=>r.json())
+        .then(d=>{
+            resolve(d);
+        })
+    })
+}
+
 async function ShowUserInfos(userInfos) {
     let infosZone = document.createElement("div");
     infosZone.id = "user-infos-zone"
@@ -357,19 +381,14 @@ async function ShowUserInfos(userInfos) {
     // User Name
     let un = document.createElement("div");
     un.id = "user-name-zone";
-    let userFullName = userInfos.firstname + " " + userInfos.lastname;
-    un.innerHTML = /*html*/ `
-            <span id="user-fullname">${userFullName}</span>
-            <span id="user-nickname">@${userInfos.nickname}</span>`
+    
+    un.innerHTML = makeUserName(userInfos)
     infosZone.appendChild(un);
 
     // Statistics
     let st = document.createElement("div");
     st.id = "user-stats";
-    st.innerHTML = /*html*/ `
-            <span id="stats-posted">0 posted</span>
-            <span id="stats-reacted">0 reacted</span>
-            <span id="stats-replied">0 replied</span>`
+    st.innerHTML = userStats()
     infosZone.appendChild(st);
 
     document.querySelector("#user-infos .terminal-body").appendChild(infosZone);
@@ -391,43 +410,49 @@ async function ShowAllPosts(posts) {
         // Post
         let post = document.createElement("div");
         post.className = "post";
-        postImage = postData.image ? /*html*/`
-            <div class="post-image" style="background-image:url('assets/img/posts/4a41f152-f8ca-42da-8c1c-ffeb21e332d7-thor_chris_hemsworth_hd_thor_the_dark_world-1600x900.jpg');"></div>
-        ` : "";
-        post.innerHTML = /*html*/`
-            <hr class="post-separator">
-            <span class="post-title">${postData.title}</span>
-            <span class="post-time-author">[${postData.creationDate}] by @${postData.nickname}</span>
-            <p class="post-text">${postData.content}</p>
-            ${postImage}
-            <div class="reaction-btns-zone">
-                <span class="like-btn">[ ]Like(2)</span>
-                <span class="dislike-btn">[ ]Dislike(0)</span>
-                <span class="comment-btn">$>Comment(0)</span>
-            </div>
-        `
+        postImage = postData.image ? makePostImage(postData.image) : "";
+        post.innerHTML = makePost(postData)
         postsZone.appendChild(post);
         setTimeout(()=>{
             post.style.opacity = "1";
-            resolve();
         }, 500+i*500);
     });
 
     document.querySelector("#all-posts .terminal-body").appendChild(postsZone);
-    // await new Promise((resolve) => {
-    //     setTimeout(()=>{
-    //         postsZone.style.opacity = "1";
-    //         resolve();
-    //     }, 800);
-    // })
+}
+
+function ListUsers(allUsers) {
+    let usersZone = document.createElement("div");
+    usersZone.id = "users-zone";
+    
+    allUsers.forEach((userData, i) => {
+        let user = document.createElement("div");
+        user.className = "user";
+        user.dataset.nickname = userData.Nickname;
+        user.innerHTML = makeUser(userData);
+        usersZone.appendChild(user);
+        setTimeout(()=>{
+            user.style.opacity = "1";
+        }, 500+i*500);
+    })
+    document.querySelector("#all-users .terminal-body").appendChild(usersZone);
+    document.querySelectorAll(".user").forEach(el=>{
+        el.addEventListener("click", (e)=>{
+            let chatUser = e.target.closest(".user").dataset.nickname;
+            document.querySelector("#netcat").classList.toggle("active-chat");
+        });
+    });
 }
 
 function AddActionsBtn() {
     let actionsZone = document.createElement("div");
     actionsZone.id = "actions-zone";
-    actionsZone.innerHTML = /*html*/`
-        <span id="add-post-btn">Add post</span>
-        <span id="logout-btn" onclick="window.location.href='/logout'">Logout</span>
-    `
+    actionsZone.innerHTML = actionsButtons
     document.querySelector("#actions .terminal-body").appendChild(actionsZone)
+}
+
+function LettersAnimation(selector) {
+    let el = document.querySelector(selector);
+    let val = el.textContent;
+    el.textContent = "";
 }

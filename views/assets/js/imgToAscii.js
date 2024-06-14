@@ -5,7 +5,7 @@ const grayRamp = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/|()1{}[]?-_+~<>i!lI;:
 
 // the grayScale value is an integer ranging from 0 (black) to 255 (white)
 const grayScaleChar = grayScale => grayRamp[Math.ceil(((grayRamp.length - 1) * grayScale) / 255)];
-
+let link = "assets/img/posts/whatsapp-logo.png"
 async function imgToAscii(url) {
     let img = new Image()
     img.src = url
@@ -36,7 +36,7 @@ async function imgToAscii(url) {
 
     let res = art.reduce((prev, next, i) => prev + next + ((i + 1) % w === 0 ? "\n" : ""), "")
 
-    /*
+    
     let pic = document.createElement("pre");
     pic.style.fontSize = "0.12vw";
     pic.style.color = "white";
@@ -44,10 +44,9 @@ async function imgToAscii(url) {
     pic.style.display = "inline-block";
     pic.style.transform = `scaleY(${h/w})`;
 
-    document.querySelector("#all-posts-text").appendChild(pic);
-    */
+    document.querySelector("#all-posts .terminal-body").appendChild(pic);
+    
    return res;
 }
 
-let link = "assets/img/posts/whatsapp-logo.png"
-imgToAscii(link);
+
