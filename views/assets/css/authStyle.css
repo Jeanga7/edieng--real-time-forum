@@ -11,8 +11,7 @@
     --blue2: #0373dd;
     --pink: #E216CE;
     --yellow: #FFB800;
-    --font1: 'IBM Plex Mono';
-    --font2: 'Architekt';
+    --font: 'Architekt';
 }
 
 * {
@@ -25,7 +24,7 @@ body {
     height: 100vh;
     padding: 0;
     margin: 0;
-    font-family: var(--font2);
+    font-family: var(--font);
     letter-spacing: .5px;
     overflow: hidden;
 }
@@ -44,9 +43,16 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    background-color: #1C1C1C;
+    background-color: black;
     z-index: 9999;
     display: flex;
+}
+#preloader h1 {
+    font-size: 4em;
+    font-family: var(--font);
+    color: var(--fluo);
+    margin: auto;
+    text-shadow: 0 0 6px var(--fluo);
 }
 
 #preloader-logo {
@@ -236,7 +242,7 @@ span.auth-btn.active {
     color: white;
     padding-left: 4px;
     caret-color: transparent;
-    font-family: var(--font2);
+    font-family: var(--font);
     font-size: 1em;
     text-shadow: 0 0 4px white;
 }
@@ -278,6 +284,10 @@ span.auth-btn.active {
 
 .slide-right {
     animation: slideRight 800ms 1000ms;
+}
+
+.zoom-in {
+    animation: zoomIn 800ms;
 }
 
 /* Straight Translations */
@@ -325,6 +335,18 @@ span.auth-btn.active {
 
     100% {
         transform: translate(100vw, 0px);
+        opacity: 0;
+    }
+}
+
+@keyframes zoomIn {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(8);
         opacity: 0;
     }
 }
@@ -607,7 +629,7 @@ hr.post-separator {
 }
 
 #welcome-text .txt {
-    font-family: var(--font2);
+    font-family: var(--font);
 }
 
 .user {

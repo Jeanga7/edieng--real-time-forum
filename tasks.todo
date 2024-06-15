@@ -1,2 +1,3 @@
 [ ] Créer un endpoint pour vérifier si l'utilisateur est connecté, si oui le endpoint renvoit l'ID de l'utilisateur en plus du message de succes
 [ ] Remplacer le userID par l'ID de la session pour plus de sécurité
+[ ] Le logout doit permettre de se déconnecter via le terminal en transmettant à la fonction de logout via une requete post, le nickname du user à déconnecter

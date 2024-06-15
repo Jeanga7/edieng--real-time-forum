@@ -24,7 +24,7 @@ let cliRow = (title, txtsList, section) => `
 <!-- ${capitalize(section)} row -->
 <span id="${title}-${section}">
     ${generateSpans(txtsList)}
-</span>`
+</span>`;
 
 let terminalRow = (terminal, title, type) => `
 <!-- ${title} row -->
@@ -55,7 +55,7 @@ let makeTerminal = (name, rows, pClass) => `
     ${rows}
     </p>
 </div>
-</div>`
+</div>`;
 
 let loginRows = cliRow("login", loginTxtsData, "intro") + makeFields("login", loginFields);
 const loginTerminal = makeTerminal("login", loginRows, "infos-txt")

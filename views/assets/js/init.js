@@ -15,6 +15,8 @@ let discussionsRoute = '/api/discussions';
 
 let alphabet = 'abcdefghijklmnopqrstuvwxyz';
 
+let randomLetter = () => alphabet[Math.floor(Math.random() * 26)];
+
 let capitalize = (str) => str.charAt(0).toUpperCase() + str.substr(1);
 
 let loginTxtsData = [{

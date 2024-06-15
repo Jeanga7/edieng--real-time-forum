@@ -7,6 +7,7 @@ let netcatTxt = (user) => [{
 }, ];
 
 window.onload = () => {
+    LettersAnimation("#preloader h1", 0, undefined, false);
     if (!loggedIn) {
         authLayer();
     } else {
@@ -84,12 +85,12 @@ function typeChar(delay, element, txt, className, i) {
 function hidePreloader() {
     return new Promise((resolve) => {
         setTimeout(async () => {
-            document.querySelector("#preloader").classList.add("instant-slide-top");
+            document.querySelector("#preloader").classList.add("zoom-in");
             await new Promise((resolve) => {
                 setTimeout(() => {
                     document.querySelector("#preloader").style.display = "none";
                     resolve();
-                }, 700);
+                }, 500);
             })
             resolve();
         }, 2000);
@@ -166,7 +167,11 @@ function startFeedsTerminals() {
             ShowUserInfos(userInfos);
             ShowAllPosts(posts);
             ListUsers(allUsers);
-            // LettersAnimation("#");
+
+            LettersAnimation("#user-fullname", 4000);
+            LettersAnimation(".post-title", 5000, 50);
+            LettersAnimation(".user-nickname");
+
             resolve();
         }, 500);
     });
@@ -476,7 +481,7 @@ function ListUsers(allUsers) {
 
                 // Show chat
                 let chat = await fetchChat(chatUser);
-                console.log("Chat: ",chat);
+                console.log("Chat: ", chat);
             }
         });
     });
@@ -489,8 +494,30 @@ function AddActionsBtn() {
     document.querySelector("#actions .terminal-body").appendChild(actionsZone)
 }
 
-function LettersAnimation(selector) {
-    let el = document.querySelector(selector);
-    let val = el.textContent;
-    el.textContent = "";
+function LettersAnimation(selector, interval=5000, speed=30, loop=true) {
+    document.querySelectorAll(selector).forEach(el => {
+        el.dataset.name = el.textContent;
+
+        const repeat = setInterval(() => {
+            let iter = 0;
+            const interval = setInterval(() => {
+                el.textContent = el.textContent
+                    .split("")
+                    .map((letter, i) => {
+                        if (i < iter) {
+                            return el.dataset.name[i];
+                        }
+                        return randomLetter();
+                    })
+                    .join("");
+
+                if (iter >= el.dataset.name.length) clearInterval(interval)
+
+                iter += 1 / 3;
+            }, speed);
+
+            if (!loop) clearInterval(repeat);
+        }, interval);
+    });
+
 }
