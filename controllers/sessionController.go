@@ -9,6 +9,7 @@ import (
 
 func CreateSession(w http.ResponseWriter, r *http.Request, idUser string) {
 	global.W = w
+	IdUser = idUser
 	// Define the expiration date of the session (e.g., 1 hour)
 	expiryDate := time.Now().Add(time.Hour)
 
@@ -39,6 +40,7 @@ func CreateSession(w http.ResponseWriter, r *http.Request, idUser string) {
 func DeleteSession(w http.ResponseWriter, r *http.Request, idSession string) {
 	global.W = w
 	models.Session.Delete("id", "=", idSession)
+	IdUser = ""
 
 	sessionCookie := &http.Cookie{
 		Name:     "sessionID",
