@@ -1,3 +1,3 @@
 git add .
-git commit -m "Dernier virage."
+git commit -m "$1"
 git push
