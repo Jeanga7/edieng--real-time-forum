@@ -129,14 +129,14 @@ let actionsButtons = /*html*/`
 
 let makePost = (postData) => /*html*/`
 <hr class="post-separator">
-<span class="post-title">${postData.title}</span>
-<span class="post-time-author">[${postData.creationDate}] by @${postData.nickname}</span>
-<p class="post-text">${postData.content}</p>
+<span class="post-title">${postData.Title}</span>
+<span class="post-time-author">[${postData.CreationDate}] by ${postData.AuthorName}</span>
+<p class="post-text">${postData.Content}</p>
 ${postImage}
-<div class="reaction-btns-zone">
-    <span class="like-btn">[ ]Like(2)</span>
-    <span class="dislike-btn">[ ]Dislike(0)</span>
-    <span class="comment-btn">$>Comment(0)</span>
+<div class="reaction-btns-zone" data-post="${postData.Id}">
+    <span class="reaction like-btn like-dislike ${postData.Liked ? "reaction-active" : ""}">[<span class="reaction-check">${postData.Liked ? "X" : " "}</span>]Like(<span class="reaction-count">${postData.Likes}</span>)</span>
+    <span class="reaction dislike-btn like-dislike ${postData.Disliked ? "reaction-active" : ""}">[<span class="reaction-check">${postData.Disliked ? "X" : " "}</span>]Dislike(<span class="reaction-count">${postData.Dislikes}</span>)</span>
+    <span class="reaction comment-btn">$>Comment(${postData.NumComments})</span>
 </div>
 `
 

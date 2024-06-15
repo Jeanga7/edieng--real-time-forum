@@ -167,6 +167,7 @@ function startFeedsTerminals() {
             ShowUserInfos(userInfos);
             ShowAllPosts(posts);
             ListUsers(allUsers);
+            enableReactions();
 
             LettersAnimation("#user-fullname", 4000);
             LettersAnimation(".post-title", 5000, 50);
@@ -434,7 +435,7 @@ async function ShowAllPosts(posts) {
         // Post
         let post = document.createElement("div");
         post.className = "post";
-        postImage = postData.image ? makePostImage(postData.image) : "";
+        postImage = postData.PostPicture ? makePostImage(postData.image) : "";
         post.innerHTML = makePost(postData)
         postsZone.appendChild(post);
         setTimeout(() => {
