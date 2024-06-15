@@ -1,16 +1,23 @@
 package api
 
 import (
+	"forum/controllers"
+	"forum/global"
+	"forum/helpers"
 	"forum/models"
+	"html"
 	"net/http"
 )
 
 func FetchDiscussions(w http.ResponseWriter, r *http.Request) {
-	var discussions []models.Model
-	params := r.URL.Query()
+	helpers.AllowedMethod(w, "POST", r)
+	global.W = w
 
-	if toShow := params.Get("discussions"); len(toShow) > 0 && toShow == "all" {
-		discussions = models.Discussions.Fetch()
+	chatUser := html.EscapeString(r.FormValue("with"))
+
+	discussions := models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{chatUser, controllers.IdUser})
+	if len(discussions) == 0 {
+		discussions = models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{controllers.IdUser, chatUser})
 	}
 
 	fields := []string{"id", "idSender", "idReceiver", "messages", "picture", "creationDate"}

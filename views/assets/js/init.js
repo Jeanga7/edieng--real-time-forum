@@ -11,6 +11,7 @@ let userDataRoute = '/api/users';
 let postsRoute = '/api/posts';
 let categoriesListRoute = '/api/categories-list';
 let allUsersRoute = '/api/all-users';
+let discussionsRoute = '/api/discussions';
 
 let alphabet = 'abcdefghijklmnopqrstuvwxyz';
 

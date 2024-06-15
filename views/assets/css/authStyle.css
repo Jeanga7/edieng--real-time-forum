@@ -651,10 +651,11 @@ hr.post-separator {
     transition: var(--standard-transition);
     overflow: hidden;
     box-shadow: 0 0 4px var(--fluo);
+    display: none;
 }
 .active-chat {
     height: 100%;
-    display: block !important;
+    /* display: block !important; */
     flex-grow: 2 !important;
     border-color: var(--blue) !important;
     box-shadow: 0 0 4px var(--blue) !important;

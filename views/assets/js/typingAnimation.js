@@ -162,7 +162,6 @@ function startFeedsTerminals() {
 
             // Get All Users
             let allUsers = await fetchAllUsers();
-            console.log(allUsers);
 
             ShowUserInfos(userInfos);
             ShowAllPosts(posts);
@@ -371,8 +370,23 @@ async function fetchAllUsers() {
             .then(r => r.json())
             .then(d => {
                 resolve(d);
+            });
+    });
+}
+
+async function fetchChat(chatUser) {
+    return new Promise((resolve, reject) => {
+        let fd = new FormData();
+        fd.append("with", chatUser);
+        fetch(discussionsRoute, {
+                method: 'POST',
+                body: fd
             })
-    })
+            .then(r => r.json())
+            .then(d => {
+                resolve(d);
+            });
+    });
 }
 
 async function ShowUserInfos(userInfos) {
@@ -459,6 +473,10 @@ function ListUsers(allUsers) {
                         resolve();
                     }, 700)
                 })
+
+                // Show chat
+                let chat = await fetchChat(chatUser);
+                console.log("Chat: ",chat);
             }
         });
     });
