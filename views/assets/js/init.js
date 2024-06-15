@@ -2,6 +2,7 @@
 const speed = 15;
 let fieldLoaded = false;
 var activeForm = "login";
+var chatWith = null;
 
 let printed = {};
 let checked = {};
@@ -127,8 +128,4 @@ let allUsersTxt = [
 let allPostsTxt = [
     {txt: "$> rtf --all-posts", c: "command", eol: true},
     {txt: "", c: null, eol: true},
-];
-
-let netcatTxt = [
-    {txt: `$> nc --connect "Tony Stark"`, c: "command", eol: true},
 ];

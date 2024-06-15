@@ -11,7 +11,6 @@ async function ValidateField(route, selector, varName, data, checked, printed) {
                 })
                 .then(r => r.json())
                 .then(async (d) => {
-                    let logTxt = document.querySelector("#logs-text");
                     let res = `${capitalize(varName)} OK.`;
                     let color = "success";
                     let found = d.value === "SUCCESS";
@@ -25,13 +24,17 @@ async function ValidateField(route, selector, varName, data, checked, printed) {
                         fieldLoaded = true;
                     }
 
-                    logTxt.innerHTML +=
-                        `<span class="txt ${color}"></span><br>`;
-                    let txts = logTxt.querySelectorAll(".txt");
-                    await typing(txts[txts.length - 1], res, "logs");
+                    let data = [{
+                        txt: res,
+                        c: color,
+                        eol: true
+                    }, ];
+
+                    printInTerminal("#logs-text", data, "logs", 10);
+
                     let logsZone = document.querySelector("#logs");
                     logsZone.scrollTop = logsZone.scrollHeight;
-                    if (d.more) {                        
+                    if (d.more) {
                         responseData = JSON.parse(d.more);
                         userID = responseData.id;
                     }

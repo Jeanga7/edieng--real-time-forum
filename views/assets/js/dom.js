@@ -103,8 +103,7 @@ const allUsersTerminal = makeTerminal("all-users", allUsersRows, "infos-txt")
 let allPostsRows = loopSpans(allPostsTxt);
 const allPostsTerminal = makeTerminal("all-posts", allPostsRows, "infos-txt")
 
-let netcatRows = loopSpans(netcatTxt);
-const netcatTerminal = makeTerminal("netcat", netcatRows, "infos-txt")
+const netcatTerminal = makeTerminal("netcat", "", "infos-txt")
 
 var feedsView = /*html*/ `
 <div id="feeds-grid">

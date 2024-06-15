@@ -1,5 +1,10 @@
 var txtDataToLoad = () => activeForm === "login" ? loginTxtsData : registerTxtsData
 var otherBtn = () => activeForm === "login" ? document.querySelector("#register-btn") : document.querySelector("#login-btn")
+let netcatTxt = (user) => [{
+    txt: `$> nc --connect "${user}"`,
+    c: "command",
+    eol: true
+}, ];
 
 window.onload = () => {
     if (!loggedIn) {
@@ -81,7 +86,7 @@ function hidePreloader() {
         setTimeout(async () => {
             document.querySelector("#preloader").classList.add("instant-slide-top");
             await new Promise((resolve) => {
-                setTimeout(()=>{
+                setTimeout(() => {
                     document.querySelector("#preloader").style.display = "none";
                     resolve();
                 }, 700);
@@ -142,7 +147,7 @@ function startFeedsTerminals() {
                             })
                             resolve();
                         })
-                }, 500)
+                }, 600)
             });
 
             printInTerminal("#categories-text", cats, "cat", 10);
@@ -360,11 +365,13 @@ async function fetchPosts(userId) {
 
 async function fetchAllUsers() {
     return new Promise((resolve) => {
-        fetch(allUsersRoute, {method: 'GET'})
-        .then(r=>r.json())
-        .then(d=>{
-            resolve(d);
-        })
+        fetch(allUsersRoute, {
+                method: 'GET'
+            })
+            .then(r => r.json())
+            .then(d => {
+                resolve(d);
+            })
     })
 }
 
@@ -381,7 +388,7 @@ async function ShowUserInfos(userInfos) {
     // User Name
     let un = document.createElement("div");
     un.id = "user-name-zone";
-    
+
     un.innerHTML = makeUserName(userInfos)
     infosZone.appendChild(un);
 
@@ -401,21 +408,19 @@ async function ShowUserInfos(userInfos) {
 }
 
 async function ShowAllPosts(posts) {
-    console.log(posts[0]);
-
     let postsZone = document.createElement("div");
     postsZone.id = "posts-zone";
 
-    posts.forEach((postData, i)=>{
+    posts.forEach((postData, i) => {
         // Post
         let post = document.createElement("div");
         post.className = "post";
         postImage = postData.image ? makePostImage(postData.image) : "";
         post.innerHTML = makePost(postData)
         postsZone.appendChild(post);
-        setTimeout(()=>{
+        setTimeout(() => {
             post.style.opacity = "1";
-        }, 500+i*500);
+        }, 500 + i * 500);
     });
 
     document.querySelector("#all-posts .terminal-body").appendChild(postsZone);
@@ -424,22 +429,37 @@ async function ShowAllPosts(posts) {
 function ListUsers(allUsers) {
     let usersZone = document.createElement("div");
     usersZone.id = "users-zone";
-    
+
     allUsers.forEach((userData, i) => {
         let user = document.createElement("div");
         user.className = "user";
         user.dataset.nickname = userData.Nickname;
         user.innerHTML = makeUser(userData);
         usersZone.appendChild(user);
-        setTimeout(()=>{
+        setTimeout(() => {
             user.style.opacity = "1";
-        }, 500+i*500);
+        }, 500 + i * 500);
     })
     document.querySelector("#all-users .terminal-body").appendChild(usersZone);
-    document.querySelectorAll(".user").forEach(el=>{
-        el.addEventListener("click", (e)=>{
+    document.querySelectorAll(".user").forEach(el => {
+        el.addEventListener("click", async (e) => {
             let chatUser = e.target.closest(".user").dataset.nickname;
-            document.querySelector("#netcat").classList.toggle("active-chat");
+            let nc = document.querySelector("#netcat");
+
+            if (chatWith === chatUser) {
+                if (nc.classList.contains("active-chat")) nc.classList.remove("active-chat");
+                chatWith = null
+            } else {
+                if (!nc.classList.contains("active-chat")) nc.classList.add("active-chat");
+                chatWith = chatUser
+                document.querySelector("#netcat-text").innerHTML = "";
+                await new Promise((resolve) => {
+                    setTimeout(() => {
+                        printInTerminal("#netcat-text", netcatTxt(chatUser), "nc", 10);
+                        resolve();
+                    }, 700)
+                })
+            }
         });
     });
 }
