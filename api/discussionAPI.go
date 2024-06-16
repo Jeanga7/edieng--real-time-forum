@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"forum/controllers"
 	"forum/global"
 	"forum/helpers"
@@ -17,30 +18,45 @@ func FetchDiscussions(w http.ResponseWriter, r *http.Request) {
 	// Get the all the discussion between two users
 	if How == "fetch" {
 
-		chatUser := html.EscapeString(r.FormValue("with"))
+		nickname := html.EscapeString(r.FormValue("with"))
 
-		discussions := models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{chatUser, controllers.IdUser})
-		if len(discussions) == 0 {
-			discussions = models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{controllers.IdUser, chatUser})
+		usersFound := models.User.Fetch([]interface{}{"nickname"}, []interface{}{nickname})
+
+		chatUser := ""
+		if len(usersFound) == 1 {
+			chatUser = (usersFound[0].Values["id"]).(string)
+			discussions := models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{chatUser, controllers.IdUser})
+			if len(discussions) == 0 {
+				discussions = models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{controllers.IdUser, chatUser})
+			}
+
+			fields := []string{"id", "idSender", "idReceiver", "messages", "creationDate"}
+			usersData := TransformModels(discussions, fields)
+			WriteJSONResponse(w, usersData)
 		}
-
-		fields := []string{"id", "idSender", "idReceiver", "messages", "creationDate"}
-		usersData := TransformModels(discussions, fields)
-		WriteJSONResponse(w, usersData)
 		//if we are sending a message to a user
 	} else if How == "send" {
+		nickname := html.EscapeString(r.FormValue("to"))
+		usersFound := models.User.Fetch([]interface{}{"nickname"}, []interface{}{nickname})
+		currentUser := models.User.Fetch([]interface{}{"id"}, []interface{}{controllers.IdUser})[0].Values["nickname"].(string)
 
-		chatReceiver := html.EscapeString(r.FormValue("to"))
+		chatReceiver := ""
+		if len(usersFound) == 1 {
+			chatReceiver = (usersFound[0].Values["id"]).(string)
+			Message := html.EscapeString(r.FormValue("message"))
 
-		Message := html.EscapeString(r.FormValue("message"))
+			discussions := models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{controllers.IdUser, chatReceiver})
+			if len(discussions) == 0 {
+				discussions = models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{chatReceiver, controllers.IdUser})
+			}
 
-		discussions := models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{controllers.IdUser, chatReceiver})
-
-		if len(discussions) == 0 {
-			controllers.SaveDiscussion(Message, controllers.IdUser, chatReceiver, helpers.Now())
-		} else {
-			discussionId := controllers.GetDiscussionId(controllers.IdUser, chatReceiver)
-			controllers.AppendMessageToDiscussion(discussionId, Message, controllers.IdUser, chatReceiver, helpers.Now())
+			if len(discussions) == 0 {
+				controllers.SaveDiscussion(Message, controllers.IdUser, chatReceiver, helpers.Now())
+			} else {
+				discussionId := controllers.GetDiscussionId(controllers.IdUser, chatReceiver)
+				controllers.AppendMessageToDiscussion(discussionId, Message, currentUser, nickname, helpers.Now())
+			}
+			helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted)
 		}
 	}
 }

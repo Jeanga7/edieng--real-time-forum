@@ -1,10 +1,51 @@
+let userNickname = null;
 var txtDataToLoad = () => activeForm === "login" ? loginTxtsData : registerTxtsData
 var otherBtn = () => activeForm === "login" ? document.querySelector("#register-btn") : document.querySelector("#login-btn")
-let netcatTxt = (user) => [{
-    txt: `$> nc --connect "${user}"`,
-    c: "command",
-    eol: true
-}, ];
+let netcatTxt = (user, data) => {
+    let res = [{
+            txt: `$> nc --connect "${user}"`,
+            c: "command",
+            eol: true
+        },
+        {
+            txt: "",
+            c: "command",
+            eol: true
+        },
+    ];
+    if (Object.prototype.toString.call(data) === "[object Array]" && data.length > 0) {
+        data.forEach(d => {
+            let className = userNickname && d.sender === userNickname ? "bold-fluo" : "warning";
+            res.push({
+                txt: d.sender + ":",
+                c: className,
+                eol: false
+            })
+            res.push({
+                txt: d.message,
+                c: null,
+                eol: true
+            })
+        })
+    } else {
+        res.push({
+            txt: "No message.",
+            c: "danger no-message",
+            eol: true
+        })
+    }
+    res.push({
+        txt: userNickname + ":",
+        c: "bold-fluo chat-input-name",
+        eol: false
+    })
+    res.push({
+        txt: " ",
+        c: null,
+        eol: false
+    })
+    return res;
+};
 
 window.onload = () => {
     LettersAnimation("#preloader h1", 0, undefined, false);
@@ -48,7 +89,7 @@ function disableAllInputs() {
 
 function enableAllInputs() {
     return new Promise((resolve) => {
-        document.querySelectorAll(".auth-input").forEach(e => {
+        document.querySelectorAll(".forum-input").forEach(e => {
             e.disabled = false;
         });
         resolve();
@@ -107,6 +148,8 @@ function loadDOM() {
 function startFeedsTerminals() {
     return new Promise((resolve) => {
         setTimeout(async () => {
+            // Clear first Enter event listener
+            document.removeEventListener("keydown", authHandleEnter);
             // Terminal Pop-up
             let w = document.querySelectorAll(".terminal-box").forEach(t => {
                 t.style.opacity = "1";
@@ -157,6 +200,7 @@ function startFeedsTerminals() {
 
             // Get User Data
             let userInfos = (await fetchUserData(userID))[0];
+            userNickname = userInfos.nickname;
 
             // Get Posts
             let posts = await fetchPosts(userID);
@@ -167,6 +211,7 @@ function startFeedsTerminals() {
             ShowUserInfos(userInfos);
             ShowAllPosts(posts);
             ListUsers(allUsers);
+
             enableReactions();
 
             LettersAnimation("#user-fullname", 4000);
@@ -284,7 +329,7 @@ async function typeInTxts(selector, txtsList, className, s = speed) {
 }
 
 function resizeInput() {
-    document.querySelectorAll(".auth-input").forEach(el => {
+    document.querySelectorAll(".forum-input").forEach(el => {
         el.parentNode.addEventListener("click", (e) => {
             el.focus();
         });
@@ -381,9 +426,11 @@ async function fetchAllUsers() {
 }
 
 async function fetchChat(chatUser) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         let fd = new FormData();
+        fd.append("type", "fetch");
         fd.append("with", chatUser);
+        console.log(chatUser);
         fetch(discussionsRoute, {
                 method: 'POST',
                 body: fd
@@ -461,31 +508,9 @@ function ListUsers(allUsers) {
         }, 500 + i * 500);
     })
     document.querySelector("#all-users .terminal-body").appendChild(usersZone);
-    document.querySelectorAll(".user").forEach(el => {
-        el.addEventListener("click", async (e) => {
-            let chatUser = e.target.closest(".user").dataset.nickname;
-            let nc = document.querySelector("#netcat");
 
-            if (chatWith === chatUser) {
-                if (nc.classList.contains("active-chat")) nc.classList.remove("active-chat");
-                chatWith = null
-            } else {
-                if (!nc.classList.contains("active-chat")) nc.classList.add("active-chat");
-                chatWith = chatUser
-                document.querySelector("#netcat-text").innerHTML = "";
-                await new Promise((resolve) => {
-                    setTimeout(() => {
-                        printInTerminal("#netcat-text", netcatTxt(chatUser), "nc", 10);
-                        resolve();
-                    }, 700)
-                })
-
-                // Show chat
-                let chat = await fetchChat(chatUser);
-                console.log("Chat: ", chat);
-            }
-        });
-    });
+    handleOpenChat();
+    handleSendMsg();
 }
 
 function AddActionsBtn() {
@@ -495,7 +520,7 @@ function AddActionsBtn() {
     document.querySelector("#actions .terminal-body").appendChild(actionsZone)
 }
 
-function LettersAnimation(selector, interval=5000, speed=30, loop=true) {
+function LettersAnimation(selector, interval = 5000, speed = 30, loop = true) {
     document.querySelectorAll(selector).forEach(el => {
         el.dataset.name = el.textContent;
 
@@ -521,4 +546,110 @@ function LettersAnimation(selector, interval=5000, speed=30, loop=true) {
         }, interval);
     });
 
+}
+
+function handleOpenChat() {
+    document.querySelectorAll(".user").forEach(el => {
+        el.addEventListener("click", async (e) => {
+            let chatUser = e.target.closest(".user").dataset.nickname;
+            let nc = document.querySelector("#netcat");
+
+            if (chatWith === chatUser) {
+                if (nc.classList.contains("active-chat")) nc.classList.remove("active-chat");
+                chatWith = null
+            } else {
+                if (!nc.classList.contains("active-chat")) nc.classList.add("active-chat");
+                chatWith = chatUser
+
+                // Get chat
+                let chat = await fetchChat(chatUser);
+                let msgs = [];
+                if (chat.length === 1) {
+                    msgs = JSON.parse(chat[0].messages);
+                }
+
+                let netcat = document.querySelector("#netcat-text")
+                netcat.innerHTML = "";
+
+                await new Promise((resolve) => {
+                    setTimeout(async () => {
+                        await printInTerminal("#netcat-text", netcatTxt(chatUser, msgs), "nc", 10);
+                        resolve();
+                    }, 700)
+                });
+
+                await new Promise((resolve) => {
+                    setTimeout(() => {
+                        // Add chat input
+                        let input = /*html*/ `
+                            <input type="text" name="chat-input" id="chat-input" class="forum-input">
+                        `;
+                        let measurer = /*html*/ `
+                            <span class="measurer"></span>
+                        `;
+                        let txts = netcat.querySelectorAll("span.bold-fluo");
+                        txts[txts.length - 1].after(createElementFromHTML(input));
+                        let chatInput = document.querySelector("#chat-input");
+                        chatInput.after(createElementFromHTML(measurer));
+                        chatInput.focus();
+                        resizeInput();
+                        resolve();
+                    }, 1000);
+                });
+
+                await new Promise((resolve) => {
+                    setTimeout(() => {
+                        document.querySelector(".chat-input-name").addEventListener("click", (e) => {
+                            document.querySelector("#chat-input").focus();
+                        });
+                        resolve();
+                    }, 200);
+                });
+            }
+        });
+    });
+}
+
+function handleSendMsg() {
+    document.addEventListener("keydown", async (e) => {
+        let chatInput = document.querySelector("#chat-input");
+        let chatInputName = document.querySelector(".chat-input-name");
+        if (e.code === "Enter" && chatInput.value.length > 0) {
+            e.preventDefault();
+            let msg = chatInput.value;
+            console.log(chatInput.value);
+
+            let fd = new FormData();
+            fd.append("type", "send");
+            fd.append("to", chatWith);
+            fd.append("message", chatInput.value);
+
+            fetch(discussionsRoute, {
+                    method: 'POST',
+                    body: fd
+                })
+                .then(r => r.json())
+                .then(async d => {
+                    if (d.value === "SUCCESS") {
+                        // Clear field
+                        chatInput.value = "";
+                        chatInput.style.width = "0";
+                        chatInput.parentNode.querySelector(".measurer").textContent = "";
+
+                        // Insert new message
+                        chatInputName.before(makeSpan("bold-fluo new-msg-name"));
+
+                        let name = document.querySelectorAll(".new-msg-name");
+                        name[name.length - 1].textContent = userNickname+":"
+                        name[name.length - 1].after(makeSpan("new-msg-txt"))
+
+                        let txt = document.querySelectorAll(".new-msg-txt");
+                        txt[txt.length - 1].textContent = msg;
+
+                        txt[txt.length - 1].after(makeBr())
+                    }
+                });
+
+        }
+    });
 }

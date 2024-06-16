@@ -233,7 +233,7 @@ span.auth-btn.active {
     font-weight: 600;
 }
 
-.auth-input {
+.forum-input {
     background-color: black;
     border: none;
     outline: none;
@@ -247,7 +247,7 @@ span.auth-btn.active {
     text-shadow: 0 0 4px white;
 }
 
-.auth-input:focus {
+.forum-input:focus {
     outline: none;
 }
 
@@ -680,4 +680,7 @@ hr.post-separator {
     flex-grow: 2 !important;
     border-color: var(--blue) !important;
     box-shadow: 0 0 4px var(--blue) !important;
+}
+.chat-input-name {
+    cursor: pointer;
 }

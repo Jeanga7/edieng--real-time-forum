@@ -8,15 +8,31 @@ function loopSpans(txtsList) {
     return res;
 }
 
+function makeSpan(cl) {
+    let span = document.createElement("span");
+    span.className = "txt "+cl;
+    return span;
+}
+
+let makeBr = () => document.createElement("br")
+
 async function printInTerminal(selector, data, typingClass, s=speed) {
     let t = document.querySelector(selector);
     for (let i = 0; i < data.length; i++) {
         const d = data[i];
-        t.innerHTML += `<span class="txt ${d.c}"></span>` + (d.eol ? "<br>" : "");
+        t.innerHTML += `<span class="txt ${d.c ?? ""}"></span>` + (d.eol ? "<br>" : "");
         let txts = t.querySelectorAll(".txt");
         await typing(txts[txts.length - 1], d.txt, typingClass, s);        
     }
 }
+
+function createElementFromHTML(htmlString) {
+    var div = document.createElement('div');
+    div.innerHTML = htmlString.trim();
+  
+    // Change this to div.childNodes to support multiple top-level nodes.
+    return div.firstChild;
+  }
 
 let generateSpans = (t) => loopSpans(t[0].txtsList);
 
@@ -32,7 +48,7 @@ let terminalRow = (terminal, title, type) => `
     <span class="txt"></span>
     <span class="txt bold-fluo"></span>
     <span class="txt"></span>
-    <input type="${type}" name="${terminal}-${title.toLowerCase()}" id="${terminal}-${title.toLowerCase()}" class="auth-input">
+    <input type="${type}" name="${terminal}-${title.toLowerCase()}" id="${terminal}-${title.toLowerCase()}" class="forum-input">
     <span class="txt"></span>
     <span class="measurer"></span>
 </span>

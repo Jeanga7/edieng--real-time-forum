@@ -176,10 +176,20 @@ func SaveDiscussion(content, sender, receiver, date string) error {
 	if content != "" {
 		var messages []Message
 
+		usersFound1 := models.User.Fetch([]interface{}{"id"}, []interface{}{sender})
+		usersFound2 := models.User.Fetch([]interface{}{"id"}, []interface{}{receiver})
+
+		var chatSender, chatReceiver string
+
+		if len(usersFound1) == 1 && len(usersFound2) == 1 {
+			chatSender = (usersFound1[0].Values["nickname"]).(string)
+			chatReceiver = (usersFound2[0].Values["nickname"]).(string)
+		}
+
 		newMessage := Message{
 			MessageContent: content,
-			Sender:         sender,
-			Destinataire:   receiver,
+			Sender:         chatSender,
+			Destinataire:   chatReceiver,
 			Date:           date,
 		}
 		messages = append(messages, newMessage)

@@ -132,3 +132,45 @@ let allPostsTxt = [
     {txt: "$> rtf --all-posts", c: "command", eol: true},
     {txt: "", c: null, eol: true},
 ];
+
+async function authHandleEnter(e) {
+    if (e.code === "Enter") {
+        e.preventDefault();
+
+        // Verify nickname
+        let data = new FormData();
+        data.append("form", activeForm);
+        if (activeForm === "login") {
+            [data, checked, printed] = await ValidateField(authRoute, "#login-nickname", "login", data, checked, printed);
+
+            if (fieldLoaded) {
+                // Verify password
+                [data, checked, printed] = await ValidateNextField(authRoute, "login", "password", "#login-nickname", "#login-password", "#login-password-row", data, checked, printed);
+
+                if (checked["login"] && checked["password"]) {
+                    await switchToFeeds();
+                }
+            }
+        } else if (activeForm === "register") {
+            let prev = ""
+            let fieldset = ["firstname", "lastname", "nickname", "email", "password", "age", "gender"];
+
+            for (let i = 0; i < fieldset.length; i++) {
+                const field = fieldset[i];
+                checked[field] = false;
+                if (i === 0) {
+                    [data, checked, printed] = await ValidateField(authRoute, `#register-${field}`, field, data, checked, printed);
+                } else if (fieldLoaded && document.querySelector(`#register-${prev}`).value.length > 0) {
+                    [data, checked, printed] = await ValidateNextField(authRoute, prev, field, `#register-${prev}`, `#register-${field}`, `#register-${field}-row`, data, checked, printed);
+                }
+                prev = field;
+            }
+
+            let allChecked = fieldset.reduce((res, check) => res && checked[check], true);
+
+            if (allChecked) {
+                await switchToFeeds();
+            }
+        }
+    }
+}
