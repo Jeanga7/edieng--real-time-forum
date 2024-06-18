@@ -427,7 +427,6 @@ async function fetchChat(chatUser) {
         let fd = new FormData();
         fd.append("type", "fetch");
         fd.append("with", chatUser);
-        console.log(chatUser);
         fetch(discussionsRoute, {
                 method: 'POST',
                 body: fd
@@ -496,7 +495,8 @@ async function ListUsers() {
     usersZone.id = "users-zone";
     document.querySelector("#all-users .terminal-body").appendChild(usersZone);
 
-    resetChatList();    
+    await resetChatList();
+    openWs();
 
     handleOpenChat();
     handleSendMsg();
@@ -654,7 +654,6 @@ function handleSendMsg() {
         if (e.code === "Enter" && chatInput.value.length > 0) {
             e.preventDefault();
             let msg = chatInput.value;
-            console.log(chatInput.value);
 
             let fd = new FormData();
             fd.append("type", "send");
@@ -689,4 +688,26 @@ function handleSendMsg() {
 
         }
     });
+}
+
+function openWs() {
+    ws = new WebSocket("ws://localhost:8989/messages");
+    ws.onopen = () => {
+        console.log("Connected to WebSocket...");
+    };
+    ws.onmessage = (e) => {
+        const message = JSON.parse(e);
+        console.log("New message: ", message);
+        // if (message.type === 'history') {
+        //     loadHistory(message.messages.reverse());
+        // } else if (message.type == "typing") {
+        //     if (currentdiscussion === message.sender) {
+        //         showTyping();
+        //     }
+        // } else if (message.type == "new_user") {
+        //     handleNewUser(message.sender)
+        // } else {
+        //     handleMessage(message);
+        // }
+    }
 }

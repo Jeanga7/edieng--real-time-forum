@@ -13,6 +13,7 @@ func FetchLike(w http.ResponseWriter, r *http.Request) {
 		likes = models.Like.Fetch()
 	}
 
-	usersData := TransformModels(likes, models.Like.Columns)
+	fields := []string{"id", "authorId", "likedId", "typeLiked", "creationDate"}
+	usersData := TransformModels(likes, fields)
 	WriteJSONResponse(w, usersData)
 }

@@ -32,7 +32,6 @@ function sendData(el, route) {
     })
     .then(response => response.json())
     .then(data => {
-        console.log(data.value);
         if (data.value == "SUCCESS") {
             countUpdate(el);
         }

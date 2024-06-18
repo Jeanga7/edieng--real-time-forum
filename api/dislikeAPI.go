@@ -13,6 +13,7 @@ func FetchDislike(w http.ResponseWriter, r *http.Request) {
 		dislikes = models.Dislike.Fetch()
 	}
 
-	usersData := TransformModels(dislikes, models.Dislike.Columns)
+	fields := []string{"id", "authorId", "dislikedId", "typeDisliked", "creationDate"}
+	usersData := TransformModels(dislikes, fields)
 	WriteJSONResponse(w, usersData)
 }

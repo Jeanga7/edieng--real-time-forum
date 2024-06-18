@@ -11,7 +11,6 @@ function enableReactions() {
     });
 }
 
-
 function like(el) {
     sendData(el, "/like")
 }
@@ -30,7 +29,6 @@ function sendData(el, route) {
     formData.append("post", data);
     formData.append("action", route);
     formData.append("typeReacted", typeReacted);
-
     fetch(route, {
             method: 'POST',
             body: formData
@@ -47,10 +45,10 @@ function sendData(el, route) {
 
 function countUpdate(el) {
     var parent = el.parentElement;
-    var like = parent.querySelector(".like-btn");
-    var dislike = parent.querySelector(".dislike-btn");
-    var count = el.querySelector(".reaction-count");
-    var intCount = parseInt(count.innerHTML);
+    var like = parent.querySelectorAll(".like-btn")[0];
+    var dislike = parent.querySelectorAll(".dislike-btn")[0];
+    var count = el.querySelectorAll(".reaction-count")[0];
+    var intCount = parseInt(count.textContent);
     var alterEgo = function (element) {
         if (element == like) {
             return dislike
@@ -58,60 +56,45 @@ function countUpdate(el) {
             return like
         }
     };
-
+    var count = el.querySelector(".reaction-count");
+    var intCount = parseInt(count.textContent);
+    const y = alterEgo(el);
+    var yCount = y.querySelector(".reaction-count");
+    var yIntCount = parseInt(yCount.textContent);
     const noReaction = !like.classList.contains("reaction-active") && !dislike.classList.contains("reaction-active");
-    const oneReaction = (like.classList.contains("reaction-active") && !dislike.classList.contains("reaction-active")) || (!like.classList.contains("reaction-active") && dislike.classList.contains("reaction-active"));
+    const oneReaction = (like.classList.contains("reaction-active") && !dislike.classList.contains("reaction-active")) ||
+        (!like.classList.contains("reaction-active") && dislike.classList.contains("reaction-active"));
 
     if (noReaction) {
-        count.innerHTML = String(intCount + 1);
-        el.classList.add("reaction-active");
+        count.textContent = String(intCount + 1);
+        el.classList.toggle("reaction-active");
         el.querySelector(".reaction-check").textContent = "X";
     } else if (oneReaction) {
-        var count = el.querySelector(".reaction-count");
-        var intCount = parseInt(count.innerHTML);
         if (el.classList.contains("reaction-active")) { // Un seul bouton est actif
             // Lorsque c'est le bouton cliqué qui est actif,
             // on le désactive et on diminue son compteur
             if (intCount <= 1) {
-                count.innerHTML = String(0);
+                count.textContent = String(0);
             } else {
-                count.innerHTML = String(intCount - 1);
+                count.textContent = String(intCount - 1);
             }
-            el.classList.remove("reaction-active");
+            el.classList.toggle("reaction-active");
             el.querySelector(".reaction-check").textContent = " ";
         } else {
             // Lorsque c'est le bouton cliqué qui est inactif
             // on désactive son alter ego et on diminue son compteur
-            const y = alterEgo(el);
-            var yCount = y.querySelector(".reaction-count");
-            var yIntCount = parseInt(yCount.innerHTML);
             if (yIntCount <= 1) {
-                yCount.innerHTML = String(0);
+                yCount.textContent = String(0);
             } else {
-                yCount.innerHTML = String(yIntCount - 1);
+                yCount.textContent = String(yIntCount - 1);
             }
-            y.classList.remove("reaction-active");
+            y.classList.toggle("reaction-active");
             y.querySelector(".reaction-check").textContent = " ";
-
             // Puis on active le bouton cliqué et on
             // incrément son compteur
-            count.innerHTML = String(intCount + 1);
-            el.classList.add("reaction-active");
+            count.textContent = String(intCount + 1);
+            el.classList.toggle("reaction-active");
             el.querySelector(".reaction-check").textContent = "X";
         }
-    }
-
-    var count = el.querySelector(".reaction-count");
-    var intCount = parseInt(count.innerHTML);
-    if (el.classList.contains("reaction-active")) {
-        if (intCount <= 1) {
-            count.innerHTML = String(0);
-        } else {
-            count.innerHTML = String(intCount - 1);
-        }
-        el.classList.remove("reaction-active");
-    } else {
-        count.innerHTML = String(intCount + 1);
-        el.classList.add("reaction-active");
     }
 }
