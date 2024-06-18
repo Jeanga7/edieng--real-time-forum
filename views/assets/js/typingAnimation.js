@@ -205,12 +205,9 @@ function startFeedsTerminals() {
             // Get Posts
             let posts = await fetchPosts(userID);
 
-            // Get All Users
-            let allUsers = await fetchAllUsers();
-
             ShowUserInfos(userInfos);
             ShowAllPosts(posts);
-            ListUsers(allUsers);
+            ListUsers();
 
             enableReactions();
 
@@ -493,37 +490,63 @@ async function ShowAllPosts(posts) {
     document.querySelector("#all-posts .terminal-body").appendChild(postsZone);
 }
 
-function ListUsers(allUsers) {
+async function ListUsers() {
+    // Create user zone
     let usersZone = document.createElement("div");
     usersZone.id = "users-zone";
-
-    let known, unknown = [[], []];
-
-    allUsers.forEach(async (userData) => {
-        // Seperate discussions
-        let chat = await fetchChat(userData.Nickname);
-        if (chat.length > 0) {
-            known.push(userData)
-        } else {
-            unknown.push(userData)
-        }
-    })
-
-    allUsers.forEach((userData, i) => {
-        let user = document.createElement("div");
-        user.className = "user";
-        user.dataset.nickname = userData.Nickname;
-        user.innerHTML = makeUser(userData);
-        usersZone.appendChild(user);
-        setTimeout(() => {
-            user.style.opacity = "1";
-        }, 500 + i * 500);
-    })
     document.querySelector("#all-users .terminal-body").appendChild(usersZone);
+
+    resetChatList();    
 
     handleOpenChat();
     handleSendMsg();
 }
+
+async function resetChatList() {
+    // Displaying users
+    let allUsers = await fetchAllUsers();
+    usersZone = document.querySelector("#users-zone");
+    usersZone.innerHTML = "";
+    var known = [];
+    var unknown = [];
+
+    const promises = allUsers.map(async (userData) => {
+        // Seperate discussions
+        let chat = await fetchChat(userData.Nickname);
+        if (chat.length > 0) {
+            known.push({
+                data: userData,
+                date: chat[0].updatedDate
+            });
+        } else {
+            unknown.push({
+                data: userData
+            });
+        }
+    });
+
+    await Promise.all(promises);
+
+    known = known.sort((a, b) => CompareUpdatedDate(b.date, a.date));
+    unknown = unknown.sort((a, b) => CompareNicknames(a.data.Nickname, b.data.Nickname));
+
+    let listChats = (el, i) => {
+        let user = document.createElement("div");
+        user.className = "user";
+        user.dataset.nickname = el.data.Nickname;
+        user.innerHTML = makeUser(el.data);
+        usersZone.appendChild(user);
+        setTimeout(() => {
+            user.style.opacity = "1";
+        }, 500 + i * 500);
+    }
+
+    known.forEach(listChats);
+    unknown.forEach(listChats);
+}
+
+let CompareUpdatedDate = (date1, date2) => (new Date(date1)) - (new Date(date2))
+let CompareNicknames = (nickname1, nickname2) => nickname1.localeCompare(nickname2)
 
 function AddActionsBtn() {
     let actionsZone = document.createElement("div");
@@ -535,7 +558,7 @@ function AddActionsBtn() {
 function LettersAnimation(selector, interval = 5000, speed = 30, loop = true) {
     let alphabet = 'abcdefghijklmnopqrstuvwxyz';
     let randomLetter = () => alphabet[Math.floor(Math.random() * 26)];
-    
+
     document.querySelectorAll(selector).forEach(el => {
         el.dataset.name = el.textContent;
 
@@ -654,7 +677,7 @@ function handleSendMsg() {
                         chatInputName.before(makeSpan("bold-fluo new-msg-name"));
 
                         let name = document.querySelectorAll(".new-msg-name");
-                        name[name.length - 1].textContent = userNickname+":"
+                        name[name.length - 1].textContent = userNickname + ":"
                         name[name.length - 1].after(makeSpan("new-msg-txt"))
 
                         let txt = document.querySelectorAll(".new-msg-txt");
