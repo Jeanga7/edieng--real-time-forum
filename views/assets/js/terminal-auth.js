@@ -30,7 +30,7 @@ async function ValidateField(route, selector, varName, data, checked, printed) {
                         eol: true
                     }, ];
 
-                    printInTerminal("#logs-text", data, "logs", 10);
+                    await printInTerminal("#logs-text", data, "logs", 10);
 
                     let logsZone = document.querySelector("#logs");
                     logsZone.scrollTop = logsZone.scrollHeight;

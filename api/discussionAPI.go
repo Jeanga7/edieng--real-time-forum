@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-func FetchDiscussions(w http.ResponseWriter, r *http.Request) {
+func HandleDiscussions(w http.ResponseWriter, r *http.Request) {
 	helpers.AllowedMethod(w, "POST", r)
 	global.W = w
 

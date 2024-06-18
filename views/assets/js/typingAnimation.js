@@ -691,7 +691,7 @@ function handleSendMsg() {
 }
 
 function openWs() {
-    ws = new WebSocket("ws://localhost:8989/messages");
+    ws = new WebSocket("ws://localhost:8989/api/discussions");
     ws.onopen = () => {
         console.log("Connected to WebSocket...");
     };

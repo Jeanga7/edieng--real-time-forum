@@ -63,47 +63,47 @@ func HandleMessages(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		discussionId := GetDiscussionId(msg.Sender, msg.Destinataire)
+		// discussionId := GetDiscussionId(msg.Sender, msg.Destinataire)
 
-		if discussionId == "" {
-			err = SaveDiscussion(msg.MessageContent, msg.Sender, msg.Destinataire, msg.Date)
-		} else {
-			err = AppendMessageToDiscussion(discussionId, msg.MessageContent, msg.Sender, msg.Destinataire, msg.Date)
-		}
+		// if discussionId == "" {
+		// 	err = SaveDiscussion(msg.MessageContent, msg.Sender, msg.Destinataire, msg.Date)
+		// } else {
+		// 	err = AppendMessageToDiscussion(discussionId, msg.MessageContent, msg.Sender, msg.Destinataire, msg.Date)
+		// }
 
-		notificationId := GetNotificationId(msg.Sender, msg.Destinataire)
-		if notificationId == "" {
-			CreateNotification(msg.Sender, msg.Destinataire)
-		} else if msg.Type == "fetch" {
-			notificationId := GetNotificationId(msg.Destinataire, name)
-			notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
-			SendPreviousMessages(conn, msg.Sender, msg.Destinataire)
-			if len(notification) > 0 {
-				AddNotif(notificationId, msg.Sender, name, 0)
-			}
-		} else {
-			if msg.Type != "typing" {
-				if msg.MessageContent != "" {
+		// notificationId := GetNotificationId(msg.Sender, msg.Destinataire)
+		// if notificationId == "" {
+		// 	CreateNotification(msg.Sender, msg.Destinataire)
+		// } else if msg.Type == "fetch" {
+		// 	notificationId := GetNotificationId(msg.Destinataire, name)
+		// 	notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
+		// 	SendPreviousMessages(conn, msg.Sender, msg.Destinataire)
+		// 	if len(notification) > 0 {
+		// 		AddNotif(notificationId, msg.Sender, name, 0)
+		// 	}
+		// } else {
+		// 	if msg.Type != "typing" {
+		// 		if msg.MessageContent != "" {
 
-					notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
-					if len(notification) > 0 {
-						currentCount, err := strconv.Atoi(notification[0].Values["notifications"].(string))
-						if err != nil {
-							return
-						}
+		// 			notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
+		// 			if len(notification) > 0 {
+		// 				currentCount, err := strconv.Atoi(notification[0].Values["notifications"].(string))
+		// 				if err != nil {
+		// 					return
+		// 				}
 
-						number := currentCount + 1
-						AddNotif(notificationId, msg.Sender, name, number)
-					}
-				}
-			}
-		}
+		// 				number := currentCount + 1
+		// 				AddNotif(notificationId, msg.Sender, name, number)
+		// 			}
+		// 		}
+		// 	}
+		// }
 
-		if err != nil {
-			log.Println("Error saving discussion:", err)
-		}
-		// SendPreviousMessages(conn, msg.Sender, msg.Destinataire)
-		message <- msg
+		// if err != nil {
+		// 	log.Println("Error saving discussion:", err)
+		// }
+		// // SendPreviousMessages(conn, msg.Sender, msg.Destinataire)
+		// message <- msg
 	}
 }
 
