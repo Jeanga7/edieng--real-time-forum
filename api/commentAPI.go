@@ -11,7 +11,6 @@ func FetchComments(w http.ResponseWriter, r *http.Request) {
 	if toShow := params.Get("comments"); len(toShow) > 0 && toShow == "all" {
 		comments = models.Comment.Fetch()
 	}
-	fields := []string{"id", "authorId", "postId", "content", "creationDate"}
-	usersData := TransformModels(comments, fields)
+	usersData := TransformModels(comments, models.Comment.Columns)
 	WriteJSONResponse(w, usersData)
 }

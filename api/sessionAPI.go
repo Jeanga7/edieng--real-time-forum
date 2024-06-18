@@ -13,7 +13,6 @@ func FetchSessions(w http.ResponseWriter, r *http.Request) {
 		sessions = models.Session.Fetch()
 	}
 
-	fields := []string{"id", "idUser", "expiryDate", "creationDate"}
-	usersData := TransformModels(sessions, fields)
+	usersData := TransformModels(sessions, models.Session.Columns)
 	WriteJSONResponse(w, usersData)
 }

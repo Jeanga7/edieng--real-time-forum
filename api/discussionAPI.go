@@ -30,8 +30,7 @@ func FetchDiscussions(w http.ResponseWriter, r *http.Request) {
 				discussions = models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{controllers.IdUser, chatUser})
 			}
 
-			fields := []string{"id", "idSender", "idReceiver", "messages", "creationDate"}
-			usersData := TransformModels(discussions, fields)
+			usersData := TransformModels(discussions, models.Discussions.Columns)
 			WriteJSONResponse(w, usersData)
 		}
 		//if we are sending a message to a user
@@ -59,11 +58,4 @@ func FetchDiscussions(w http.ResponseWriter, r *http.Request) {
 			helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted)
 		}
 	}
-}
-
-// be able to send message with curl
-func SendMessage(w http.ResponseWriter, r *http.Request) {
-	helpers.AllowedMethod(w, "POST", r)
-	global.W = w
-
 }

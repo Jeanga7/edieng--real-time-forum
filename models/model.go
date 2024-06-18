@@ -90,6 +90,7 @@ func (model *Model) FetchLike(attr ...[]interface{}) []Model {
 func (model *Model) Create() Model {
 	model.Values["id"] = helpers.UUID()
 	model.Values["creationDate"] = helpers.Now()
+	model.Values["updatedDate"] = helpers.Now()
 	database.InsertData(model.Table, model.Values)
 	return *model
 }
@@ -98,6 +99,8 @@ func (model *Model) Create() Model {
 func (model *Model) Update(data map[string]interface{}, condAttr string, condVal interface{}) {
 	var cols = make([]string, 0)
 	var values = make([]interface{}, 0)
+	data["updatedDate"] = helpers.Now()
+
 	for col, val := range data {
 		cols = append(cols, col)
 		values = append(values, val)
@@ -129,6 +132,9 @@ func (model *Model) Delete(attr ...string) {
 
 // Réinitialisation de la table
 func (model *Model) Reset() {
+	// Updates
+	model.Columns = append(model.Columns, "updatedDate")
+
 	// Suppression de la table categories
 	database.DropTable(model.Table)
 

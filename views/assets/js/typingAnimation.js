@@ -497,6 +497,18 @@ function ListUsers(allUsers) {
     let usersZone = document.createElement("div");
     usersZone.id = "users-zone";
 
+    let known, unknown = [[], []];
+
+    allUsers.forEach(async (userData) => {
+        // Seperate discussions
+        let chat = await fetchChat(userData.Nickname);
+        if (chat.length > 0) {
+            known.push(userData)
+        } else {
+            unknown.push(userData)
+        }
+    })
+
     allUsers.forEach((userData, i) => {
         let user = document.createElement("div");
         user.className = "user";
@@ -521,6 +533,9 @@ function AddActionsBtn() {
 }
 
 function LettersAnimation(selector, interval = 5000, speed = 30, loop = true) {
+    let alphabet = 'abcdefghijklmnopqrstuvwxyz';
+    let randomLetter = () => alphabet[Math.floor(Math.random() * 26)];
+    
     document.querySelectorAll(selector).forEach(el => {
         el.dataset.name = el.textContent;
 
@@ -545,7 +560,6 @@ function LettersAnimation(selector, interval = 5000, speed = 30, loop = true) {
             if (!loop) clearInterval(repeat);
         }, interval);
     });
-
 }
 
 function handleOpenChat() {
