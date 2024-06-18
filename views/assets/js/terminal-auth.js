@@ -92,6 +92,3 @@ async function switchToFeeds() {
         }, 1800)
     });
 }
-
-
-document.addEventListener("keydown", authHandleEnter);

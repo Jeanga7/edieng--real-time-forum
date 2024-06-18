@@ -70,6 +70,7 @@ async function authLayer() {
     await enableAllInputs();
     firstFieldFocus(`#${activeForm}`);
     formToggle();
+    document.addEventListener("keydown", authHandleEnter);
 }
 
 async function feedsLayer() {
@@ -303,18 +304,26 @@ function startActiveTerminal(terminal, txtData) {
         });
 
         // Typing
-        await new Promise((resolve) => {
-            setTimeout(async () => {
-                for (const d of txtData) {
-                    await typeInTxts(d.zone, d.txtsList, d.className);
-                }
-                resolve();
-            }, 500)
-        });
+        for (const d of txtData) {
+            await typeInTxts(d.zone, d.txtsList, d.className);
+        }
+
         resizeInput();
         firstFieldFocus(`#${terminal}`);
+
+        await resetAuthForm();
+
         resolve();
     });
+}
+
+async function resetAuthForm() {
+    document.removeEventListener("keydown", authHandleEnter);
+    document.addEventListener("keydown", authHandleEnter);
+
+    printed = {};
+    checked = {};
+    fieldLoaded = false;
 }
 
 async function typeInTxts(selector, txtsList, className, s = speed) {
