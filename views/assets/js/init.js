@@ -25,7 +25,8 @@ let loginTxtsData = [{
         txtsList: [
             {txt: "$> help", c: "command", eol: true},
             {txt: "These infos are needed for login :", c: null, eol: true},
-            {txt: " - nickname or email", c: "command", eol: true},
+            {txt: " - nickname or email", c: "command", eol: false},
+            {txt: " (lowercase)", c: "command warning", eol: true},
             {txt: " - password", c: "command", eol: true},
             {txt: "", c: null, eol: true},
             {txt: "User should be registered first before trying to register.", c: "warning", eol: true},
@@ -56,14 +57,14 @@ let registerTxtsData = [{
             {txt: " - firstname", c: "command", eol: true},
             {txt: " - lastname", c: "command", eol: true},
             {txt: " - nickname", c: "command", eol: false},
-            {txt: " (alphanumeric only)", c: "warning", eol: true},
+            {txt: " (alphanumeric only)", c: "command warning", eol: true},
             {txt: " - email", c: "command", eol: true},
             {txt: " - password", c: "command", eol: false},
-            {txt: " (+5 chars)", c: "warning", eol: true},
+            {txt: " (+5 chars)", c: "command warning", eol: true},
             {txt: " - age", c: "command", eol: false},
-            {txt: " (numeric)", c: "warning", eol: true},
+            {txt: " (numeric)", c: "command warning", eol: true},
             {txt: " - gender", c: "command", eol: false},
-            {txt: " (M or F)", c: "warning", eol: true},
+            {txt: " (M or F)", c: "command warning", eol: true},
             {txt: "Check logs to see if inputed values are valid.", c: null, eol: true},
             {txt: "", c: null, eol: true},
             {txt: "", c: null, eol: true},
@@ -172,5 +173,15 @@ async function authHandleEnter(e) {
                 await switchToFeeds();
             }
         }
+    } else if (e.code === "Tab") {
+        e.preventDefault();
     }
 }
+
+// let limitWord = 10;
+// let limitSentence = 50;
+// document.querySelectorAll("input").forEach(el=>{
+//     el.addEventListener("input", (e)=>{
+//         let check = el.value.split(" ").reduce((prev, next)=>prev && length(next) <= limitWord, true)
+//     })
+// })
