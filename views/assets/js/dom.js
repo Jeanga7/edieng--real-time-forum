@@ -48,7 +48,7 @@ let terminalRow = (terminal, title, type) => `
     <span class="txt"></span>
     <span class="txt bold-fluo"></span>
     <span class="txt"></span>
-    <input type="${type}" name="${terminal}-${title.toLowerCase()}" id="${terminal}-${title.toLowerCase()}" class="forum-input">
+    <input type="${type}" name="${terminal}-${title.toLowerCase()}" id="${terminal}-${title.toLowerCase()}" class="forum-input" autocomplete="false">
     <span class="txt"></span>
     <span class="measurer"></span>
 </span>

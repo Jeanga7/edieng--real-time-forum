@@ -37,6 +37,8 @@ async function ValidateField(route, selector, varName, data, checked, printed) {
                     if (d.more) {
                         responseData = JSON.parse(d.more);
                         userID = responseData.id;
+                        sessionID = responseData.idSession;
+                        console.log(responseData);
                     }
                     resolve();
                 });

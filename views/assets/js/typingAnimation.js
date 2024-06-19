@@ -628,7 +628,7 @@ function handleOpenChat() {
                     setTimeout(() => {
                         // Add chat input
                         let input = /*html*/ `
-                            <input type="text" name="chat-input" id="chat-input" class="forum-input">
+                            <input type="text" name="chat-input" id="chat-input" class="forum-input" autocomplete="false">
                         `;
                         let measurer = /*html*/ `
                             <span class="measurer"></span>
@@ -670,11 +670,11 @@ function handleSendMsg() {
             fd.append("message", chatInput.value);
 
             ws.send(JSON.stringify({
-                type: "send",
-                to: chatWith,
-                message: chatInput.value
+                "to": chatWith,
+                "type": "message",
+                "message": chatInput.value,
+                "signature": sessionID
             }))
-            alert("ws")
 
             // fetch(discussionsRoute, {
             //         method: 'POST',
@@ -718,14 +718,19 @@ function handleWebsocket() {
             "signature": sessionID
         }
 
-        setTimeout(()=>{
-            console.log(JSON.stringify(data));
+        setTimeout(() => {
             ws.send(JSON.stringify(data));
-        }, 2000)
+        }, 500)
     };
     ws.onmessage = (e) => {
-        const message = JSON.parse(e);
-        console.log("New message: ", message);
+        let response = JSON.parse(e.data);
+        if (typeof response === "string") {
+            response = JSON.parse(response);
+        }
+
+        if (response.type === "success") {
+            console.log(response.message);
+        }
         // if (message.type === 'history') {
         //     loadHistory(message.messages.reverse());
         // } else if (message.type == "typing") {

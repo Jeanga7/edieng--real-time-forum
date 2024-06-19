@@ -13,7 +13,6 @@ import (
 )
 
 var clients = make(map[*websocket.Conn]string)
-var connected = make(map[*websocket.Conn]bool)
 var connectedNames = make(map[string]*websocket.Conn)
 var message = make(chan Message)
 
@@ -63,31 +62,32 @@ func ReadLoop(r *http.Request, conn *websocket.Conn) {
 		err := conn.ReadJSON(&msg)
 		if err != nil {
 			fmt.Println(err)
-			delete(connected, conn)
+			name, _, _, _ := FindUsersOnline(r)
+			delete(connectedNames, name)
 			break
 		}
-
-		fmt.Println(msg)
 
 		// Find message author
 		resFrom := models.Session.Fetch([]interface{}{"id"}, []interface{}{msg.Signature})
 		resTo := models.User.Fetch([]interface{}{"nickname"}, []interface{}{msg.To})
-		fmt.Println(resFrom)
-		if len(resFrom) > 0 && len(resTo) > 0 {
-			dest := resTo[0]
+
+		fmt.Println("resFrom: ", len(resFrom))
+		fmt.Println("resTo: ", len(resTo))
+		if len(resFrom) > 0 {
 			userFound := models.User.Fetch([]interface{}{"id"}, []interface{}{resFrom[0].Values["idUser"]})[0]
 			senderNickname := userFound.Values["nickname"].(string)
-			destId, destNickname := dest.Values["id"].(string), dest.Values["nickname"].(string)
 
 			// Check if connected user
-			if connected[conn] {
+			if connectedNames[senderNickname] != nil && len(resTo) > 0 {
+				dest := resTo[0]
+				destId, destNickname := dest.Values["id"].(string), dest.Values["nickname"].(string)
+
 				go SaveAndSend(conn, msg.Signature, senderNickname, destId, destNickname, msg)
 
 				// Print message on server side
 				fmt.Printf("Received message from %s: '%s'\n", senderNickname, string(msg.Message))
 			} else if string(msg.To) == "@system" {
 				connectedNames[senderNickname] = conn // Register the senderNickname
-				connected[conn] = true                // Register the connexion
 				fmt.Println(senderNickname + " connected")
 
 				res := ClientMessage{
@@ -122,8 +122,8 @@ func SaveAndSend(conn *websocket.Conn, senderId, senderNickname, destId, destNic
 	}
 
 	// Send
-	if connectedNames[msg.To] != nil {
-		err := connectedNames[msg.To].WriteJSON(msg)
+	if connectedNames[destNickname] != nil {
+		err := connectedNames[destNickname].WriteJSON(msg)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -140,7 +140,7 @@ func StoreMessage(senderId, senderNickname, destId, destNickname, message string
 		return SaveDiscussion(message, IdUser, destId, helpers.Now())
 	} else {
 		discussionId := GetDiscussionId(IdUser, destId)
-		return AppendMessageToDiscussion(discussionId, message, senderId, destNickname, helpers.Now())
+		return AppendMessageToDiscussion(discussionId, message, senderNickname, destNickname, helpers.Now())
 	}
 }
 

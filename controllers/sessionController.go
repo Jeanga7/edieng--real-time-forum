@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func CreateSession(w http.ResponseWriter, r *http.Request, idUser string) {
+func CreateSession(w http.ResponseWriter, r *http.Request, idUser string) models.Model {
 	global.W = w
 	IdUser = idUser
 	// Define the expiration date of the session (e.g., 1 hour)
@@ -36,6 +36,7 @@ func CreateSession(w http.ResponseWriter, r *http.Request, idUser string) {
 		Secure:   true,
 	}
 	http.SetCookie(w, cookie)
+	return newSession
 }
 
 func DeleteSession(w http.ResponseWriter, r *http.Request, idSession string) {

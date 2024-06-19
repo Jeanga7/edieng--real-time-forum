@@ -108,11 +108,12 @@ func ValidateFields(w http.ResponseWriter, r *http.Request) {
 
 				err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 				if err == nil {
+					session := controllers.CreateSession(w, r, fmt.Sprintf("%s", user[0].Values["id"]))
+
 					userInfos := user[0].Values
-					userInfos["idSession"] = controllers.IdSession
+					userInfos["idSession"] = session.Values["id"]
 					data, err := json.Marshal(userInfos)
 					helpers.ErrorSimple(err)
-					controllers.CreateSession(w, r, fmt.Sprintf("%s", user[0].Values["id"]))
 					controllers.BroadcastNewUser(user[0].Values["firstname"].(string) + " " + user[0].Values["lastname"].(string))
 					helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted, string(data))
 					return
@@ -186,13 +187,13 @@ func ValidateFields(w http.ResponseWriter, r *http.Request) {
 			}
 
 			res := newUser.Create()
+			session := controllers.CreateSession(w, r, fmt.Sprintf("%s", res.Values["id"]))
 
 			// Connectez l'utilisateur après l'inscription
 			userInfos := res.Values
-			userInfos["idSession"] = controllers.IdSession
+			userInfos["idSession"] = session.Values["id"]
 			data, err := json.Marshal(userInfos)
 			helpers.ErrorSimple(err)
-			controllers.CreateSession(w, r, fmt.Sprintf("%s", res.Values["id"]))
 			controllers.BroadcastNewUser(userData["firstname"]["value"].(string))
 			helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted, string(data))
 		} else {

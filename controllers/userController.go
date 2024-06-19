@@ -303,6 +303,15 @@ func NewLogin(w http.ResponseWriter, r *http.Request) {
 
 	var data = make(map[string]interface{})
 
+	var sessionID string
+
+	if isLogged {
+		sessions := models.Session.Fetch([]interface{}{"idUser"}, []interface{}{IdUser})
+		if len(sessions) > 0 {
+			sessionID = sessions[0].Values["id"].(string)
+		}
+	}
+
 	if len(userData) > 0 {
 		data = userData[0]
 		if data["picture"] == "" {
@@ -312,7 +321,7 @@ func NewLogin(w http.ResponseWriter, r *http.Request) {
 		data["numLikes"] = len(LikedPost) + NumCommentLike
 		data["numDislikes"] = len(DisLikedPost) + NumCommentDisLike
 		data["numComments"] = CountComment
-		data["idSession"] = IdSession
+		data["idSession"] = sessionID
 	}
 
 	allData := helpers.FinalData{
