@@ -724,11 +724,12 @@ function handleWebsocket() {
     };
     ws.onmessage = (e) => {
         let response = JSON.parse(e.data);
-        if (typeof response === "string") {
+        
+        if (Object.prototype.toString.call(response) === "[object String]") {
             response = JSON.parse(response);
         }
 
-        if (response.type === "success") {
+        if (["success", "message"].includes(response.type)) {
             console.log(response.message);
         }
         // if (message.type === 'history') {

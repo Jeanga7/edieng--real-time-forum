@@ -71,8 +71,6 @@ func ReadLoop(r *http.Request, conn *websocket.Conn) {
 		resFrom := models.Session.Fetch([]interface{}{"id"}, []interface{}{msg.Signature})
 		resTo := models.User.Fetch([]interface{}{"nickname"}, []interface{}{msg.To})
 
-		fmt.Println("resFrom: ", len(resFrom))
-		fmt.Println("resTo: ", len(resTo))
 		if len(resFrom) > 0 {
 			userFound := models.User.Fetch([]interface{}{"id"}, []interface{}{resFrom[0].Values["idUser"]})[0]
 			senderNickname := userFound.Values["nickname"].(string)
@@ -123,7 +121,16 @@ func SaveAndSend(conn *websocket.Conn, senderId, senderNickname, destId, destNic
 
 	// Send
 	if connectedNames[destNickname] != nil {
-		err := connectedNames[destNickname].WriteJSON(msg)
+		res := ClientMessage{
+			To:        senderNickname,
+			Message:   msg.Message,
+			Type:      "message",
+			Signature: msg.Signature,
+		}
+		txt, err := json.Marshal(res)
+		helpers.ErrorSimple(err)
+
+		err = connectedNames[destNickname].WriteJSON(string(txt))
 		if err != nil {
 			fmt.Println(err)
 		}
