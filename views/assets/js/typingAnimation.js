@@ -1,4 +1,5 @@
 let userNickname = null;
+let ws;
 var txtDataToLoad = () => activeForm === "login" ? loginTxtsData : registerTxtsData
 var otherBtn = () => activeForm === "login" ? document.querySelector("#register-btn") : document.querySelector("#login-btn")
 let netcatTxt = (user, data) => {
@@ -77,6 +78,7 @@ async function feedsLayer() {
     await loadDOM();
     await hidePreloader();
     await startFeedsTerminals();
+    ws = new WebSocket("ws://localhost:8989/messages");
 }
 
 function disableAllInputs() {
@@ -505,10 +507,10 @@ async function ListUsers() {
     document.querySelector("#all-users .terminal-body").appendChild(usersZone);
 
     await resetChatList();
-    openWs();
-
+    
     handleOpenChat();
     handleSendMsg();
+    handleWebsocket();
 }
 
 async function resetChatList() {
@@ -659,7 +661,7 @@ function handleOpenChat() {
 function handleSendMsg() {
     document.addEventListener("keydown", async (e) => {
         let chatInput = document.querySelector("#chat-input");
-        let chatInputName = document.querySelector(".chat-input-name");
+        // let chatInputName = document.querySelector(".chat-input-name");
         if (e.code === "Enter" && chatInput.value.length > 0) {
             e.preventDefault();
             let msg = chatInput.value;
@@ -669,38 +671,45 @@ function handleSendMsg() {
             fd.append("to", chatWith);
             fd.append("message", chatInput.value);
 
-            fetch(discussionsRoute, {
-                    method: 'POST',
-                    body: fd
-                })
-                .then(r => r.json())
-                .then(async d => {
-                    if (d.value === "SUCCESS") {
-                        // Clear field
-                        chatInput.value = "";
-                        chatInput.style.width = "0";
-                        chatInput.parentNode.querySelector(".measurer").textContent = "";
+            ws.send(JSON.stringify({
+                type: "send",
+                to: chatWith,
+                message: chatInput.value
+            }))
+            alert("ws")
 
-                        // Insert new message
-                        chatInputName.before(makeSpan("bold-fluo new-msg-name"));
+            // fetch(discussionsRoute, {
+            //         method: 'POST',
+            //         body: fd
+            //     })
+            //     .then(r => r.json())
+            //     .then(async d => {
+            //         if (d.value === "SUCCESS") {
+            //             // Clear field
+            //             chatInput.value = "";
+            //             chatInput.style.width = "0";
+            //             chatInput.parentNode.querySelector(".measurer").textContent = "";
 
-                        let name = document.querySelectorAll(".new-msg-name");
-                        name[name.length - 1].textContent = userNickname + ":"
-                        name[name.length - 1].after(makeSpan("new-msg-txt"))
+            //             // Insert new message
+            //             chatInputName.before(makeSpan("bold-fluo new-msg-name"));
 
-                        let txt = document.querySelectorAll(".new-msg-txt");
-                        txt[txt.length - 1].textContent = msg;
+            //             let name = document.querySelectorAll(".new-msg-name");
+            //             name[name.length - 1].textContent = userNickname + ":"
+            //             name[name.length - 1].after(makeSpan("new-msg-txt"))
 
-                        txt[txt.length - 1].after(makeBr())
-                    }
-                });
+            //             let txt = document.querySelectorAll(".new-msg-txt");
+            //             txt[txt.length - 1].textContent = msg;
+
+            //             txt[txt.length - 1].after(makeBr())
+            //         }
+            //     }
+            // );
 
         }
     });
 }
 
-function openWs() {
-    ws = new WebSocket("ws://localhost:8989/api/discussions");
+function handleWebsocket() {
     ws.onopen = () => {
         console.log("Connected to WebSocket...");
     };

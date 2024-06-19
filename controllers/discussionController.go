@@ -12,6 +12,7 @@ import (
 )
 
 var clients = make(map[*websocket.Conn]string)
+var connected = make(map[*websocket.Conn]bool)
 var message = make(chan Message)
 
 type Message struct {
@@ -38,74 +39,129 @@ var upgrader = websocket.Upgrader{
 func HandleMessages(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println("Error upgrading connection:", err)
+		fmt.Println("Error upgrading connection:", err)
 		return
 	}
 	defer conn.Close()
-	var initialMessage Message
-	err = conn.ReadJSON(&initialMessage)
 
-	name, _, _, _ := FindUsersOnline(r)
+	ReadLoop(r, conn)
+}
 
-	if err != nil {
-		log.Println("Error reading initial message:", err)
-		return
-	}
-
-	clients[conn] = name
+func ReadLoop(r *http.Request, conn *websocket.Conn) {
 	for {
-
-		var msg Message
+		// Read message
+		var msg string
 		err := conn.ReadJSON(&msg)
 		if err != nil {
-			log.Printf("Error: %v", err)
-			delete(clients, conn)
+			fmt.Println(err)
+			delete(connected, conn)
 			break
 		}
 
-		// discussionId := GetDiscussionId(msg.Sender, msg.Destinataire)
+		// Find message author
+		name, _, _, _ := FindUsersOnline(r)
+		if len(name) == 0 {
+			name = "Unknown"
+		}
 
-		// if discussionId == "" {
-		// 	err = SaveDiscussion(msg.MessageContent, msg.Sender, msg.Destinataire, msg.Date)
-		// } else {
-		// 	err = AppendMessageToDiscussion(discussionId, msg.MessageContent, msg.Sender, msg.Destinataire, msg.Date)
-		// }
+		// Check if connected user
+		if connected[conn] {
+			// Broadcast message to connected
+			go BroadcastMsg(conn, name, string(msg))
 
-		// notificationId := GetNotificationId(msg.Sender, msg.Destinataire)
-		// if notificationId == "" {
-		// 	CreateNotification(msg.Sender, msg.Destinataire)
-		// } else if msg.Type == "fetch" {
-		// 	notificationId := GetNotificationId(msg.Destinataire, name)
-		// 	notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
-		// 	SendPreviousMessages(conn, msg.Sender, msg.Destinataire)
-		// 	if len(notification) > 0 {
-		// 		AddNotif(notificationId, msg.Sender, name, 0)
-		// 	}
-		// } else {
-		// 	if msg.Type != "typing" {
-		// 		if msg.MessageContent != "" {
-
-		// 			notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
-		// 			if len(notification) > 0 {
-		// 				currentCount, err := strconv.Atoi(notification[0].Values["notifications"].(string))
-		// 				if err != nil {
-		// 					return
-		// 				}
-
-		// 				number := currentCount + 1
-		// 				AddNotif(notificationId, msg.Sender, name, number)
-		// 			}
-		// 		}
-		// 	}
-		// }
-
-		// if err != nil {
-		// 	log.Println("Error saving discussion:", err)
-		// }
-		// // SendPreviousMessages(conn, msg.Sender, msg.Destinataire)
-		// message <- msg
+			// Print message on server side
+			fmt.Printf("Received message from %s: '%s'", name, string(msg))
+		} else if string(msg) == "azerty" {
+			connected[conn] = true // Register the connexion
+			fmt.Println(name + " connected")
+		}
 	}
 }
+
+func BroadcastMsg(conn *websocket.Conn, name, msg string) {
+	for c := range connected {
+		if c != conn {
+			res := name + " says: " + msg
+			err := c.WriteJSON(res)
+			if err != nil {
+				fmt.Println(err)
+				break
+			}
+		}
+	}
+}
+
+// func HandleMessages(w http.ResponseWriter, r *http.Request) {
+// 	conn, err := upgrader.Upgrade(w, r, nil)
+// 	if err != nil {
+// 		log.Println("Error upgrading connection:", err)
+// 		return
+// 	}
+// 	defer conn.Close()
+// 	var initialMessage Message
+// 	err = conn.ReadJSON(&initialMessage)
+
+// 	name, _, _, _ := FindUsersOnline(r)
+
+// 	if err != nil {
+// 		log.Println("Error reading initial message:", err)
+// 		return
+// 	}
+
+// 	clients[conn] = name
+// 	for {
+
+// 		var msg Message
+// 		err := conn.ReadJSON(&msg)
+// 		if err != nil {
+// 			log.Printf("Error: %v", err)
+// 			delete(clients, conn)
+// 			break
+// 		}
+
+// 		discussionId := GetDiscussionId(msg.Sender, msg.Destinataire)
+
+// 		if discussionId == "" {
+// 			err = SaveDiscussion(msg.MessageContent, msg.Sender, msg.Destinataire, msg.Date)
+// 		} else {
+// 			err = AppendMessageToDiscussion(discussionId, msg.MessageContent, msg.Sender, msg.Destinataire, msg.Date)
+// 		}
+
+// 		notificationId := GetNotificationId(msg.Sender, msg.Destinataire)
+// 		if notificationId == "" {
+// 			CreateNotification(msg.Sender, msg.Destinataire)
+// 		} else if msg.Type == "fetch" {
+// 			notificationId := GetNotificationId(msg.Destinataire, name)
+// 			notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
+// 			SendPreviousMessages(conn, msg.Sender, msg.Destinataire)
+// 			if len(notification) > 0 {
+// 				AddNotif(notificationId, msg.Sender, name, 0)
+// 			}
+// 		} else {
+// 			if msg.Type != "typing" {
+// 				if msg.MessageContent != "" {
+
+// 					notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
+// 					if len(notification) > 0 {
+// 						currentCount, err := strconv.Atoi(notification[0].Values["notifications"].(string))
+// 						if err != nil {
+// 							return
+// 						}
+
+// 						number := currentCount + 1
+// 						AddNotif(notificationId, msg.Sender, name, number)
+// 					}
+// 				}
+// 			}
+// 		}
+
+// 		if err != nil {
+// 			log.Println("Error saving discussion:", err)
+// 		}
+// 		// SendPreviousMessages(conn, msg.Sender, msg.Destinataire)
+// 		message <- msg
+// 	}
+// }
 
 func HandleTheMessages() {
 	for {
