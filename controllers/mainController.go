@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	IdUser string
+	IdUser, IdSession string
 )
 
 type ActiveUsersData struct {
@@ -65,6 +65,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		data["numLikes"] = len(LikedPost) + NumCommentLike
 		data["numDislikes"] = len(DisLikedPost) + NumCommentDisLike
 		data["numComments"] = CountComment
+		data["idSession"] = IdSession
 	}
 
 	categoriesStats := GetCategoriesStats(posts)

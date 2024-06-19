@@ -10,9 +10,11 @@
         const loggedIn = {{ .IsLogged }};
         var responseData = null;
         var userID = null;
+        var sessionID = null;
         
         {{ if .IsLogged }}
         userID = "{{ .UserData.id }}";
+        sessionID = "{{ .UserData.idSession }}";
         {{ end }}
     </script>
     <script src="assets/js/init.js"></script>

@@ -14,6 +14,11 @@ func HandleDiscussions(w http.ResponseWriter, r *http.Request) {
 	helpers.AllowedMethod(w, "POST", r)
 	global.W = w
 
+	if controllers.IdUser == "" {
+		helpers.JSONResponse(w, errors.New("SESSION NOT FOUND"), http.StatusNotFound)
+		return
+	}
+
 	How := html.EscapeString(r.FormValue("type"))
 	// Get the all the discussion between two users
 	if How == "fetch" {
@@ -42,7 +47,7 @@ func HandleDiscussions(w http.ResponseWriter, r *http.Request) {
 		chatReceiver := ""
 		if len(usersFound) == 1 {
 			chatReceiver = (usersFound[0].Values["id"]).(string)
-			Message := html.EscapeString(r.FormValue("message"))
+			message := html.EscapeString(r.FormValue("message"))
 
 			discussions := models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{controllers.IdUser, chatReceiver})
 			if len(discussions) == 0 {
@@ -50,10 +55,16 @@ func HandleDiscussions(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if len(discussions) == 0 {
-				controllers.SaveDiscussion(Message, controllers.IdUser, chatReceiver, helpers.Now())
+				controllers.SaveDiscussion(message, controllers.IdUser, chatReceiver, helpers.Now())
 			} else {
 				discussionId := controllers.GetDiscussionId(controllers.IdUser, chatReceiver)
-				controllers.AppendMessageToDiscussion(discussionId, Message, currentUser, nickname, helpers.Now())
+				controllers.AppendMessageToDiscussion(discussionId, message, currentUser, nickname, helpers.Now())
+			}
+
+			err := controllers.StoreMessage(controllers.IdUser, currentUser, chatReceiver, nickname, message)
+
+			if err != nil {
+				helpers.JSONResponse(w, err, http.StatusInternalServerError)
 			}
 			helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted)
 		}

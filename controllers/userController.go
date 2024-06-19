@@ -312,11 +312,12 @@ func NewLogin(w http.ResponseWriter, r *http.Request) {
 		data["numLikes"] = len(LikedPost) + NumCommentLike
 		data["numDislikes"] = len(DisLikedPost) + NumCommentDisLike
 		data["numComments"] = CountComment
+		data["idSession"] = IdSession
 	}
 
 	allData := helpers.FinalData{
-		IsLogged:   isLogged,
-		UserData:   data,
+		IsLogged: isLogged,
+		UserData: data,
 	}
 
 	tmpl, err := template.ParseFiles("./views/realtime.html")

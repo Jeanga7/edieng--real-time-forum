@@ -1,5 +1,4 @@
 let userNickname = null;
-let ws;
 var txtDataToLoad = () => activeForm === "login" ? loginTxtsData : registerTxtsData
 var otherBtn = () => activeForm === "login" ? document.querySelector("#register-btn") : document.querySelector("#login-btn")
 let netcatTxt = (user, data) => {
@@ -78,7 +77,6 @@ async function feedsLayer() {
     await loadDOM();
     await hidePreloader();
     await startFeedsTerminals();
-    ws = new WebSocket("ws://localhost:8989/messages");
 }
 
 function disableAllInputs() {
@@ -507,10 +505,10 @@ async function ListUsers() {
     document.querySelector("#all-users .terminal-body").appendChild(usersZone);
 
     await resetChatList();
-    
+
+    handleWebsocket();
     handleOpenChat();
     handleSendMsg();
-    handleWebsocket();
 }
 
 async function resetChatList() {
@@ -710,8 +708,20 @@ function handleSendMsg() {
 }
 
 function handleWebsocket() {
+    let ws = new WebSocket("ws://localhost:9090/messages");
     ws.onopen = () => {
         console.log("Connected to WebSocket...");
+        let data = {
+            "to": "@system",
+            "type": "join",
+            "message": "",
+            "signature": sessionID
+        }
+
+        setTimeout(()=>{
+            console.log(JSON.stringify(data));
+            ws.send(JSON.stringify(data));
+        }, 2000)
     };
     ws.onmessage = (e) => {
         const message = JSON.parse(e);

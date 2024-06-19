@@ -25,10 +25,11 @@ func CreateSession(w http.ResponseWriter, r *http.Request, idUser string) {
 		"expiryDate": expiryDate,
 	}
 	newSession := session.Create()
+	IdSession = newSession.Values["id"].(string)
 
 	cookie := &http.Cookie{
 		Name:     "sessionID",
-		Value:    newSession.Values["id"].(string),
+		Value:    IdSession,
 		Path:     "/",
 		Expires:  expiryDate,
 		HttpOnly: true,

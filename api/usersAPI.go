@@ -108,7 +108,9 @@ func ValidateFields(w http.ResponseWriter, r *http.Request) {
 
 				err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 				if err == nil {
-					data, err := json.Marshal(user[0].Values)
+					userInfos := user[0].Values
+					userInfos["idSession"] = controllers.IdSession
+					data, err := json.Marshal(userInfos)
 					helpers.ErrorSimple(err)
 					controllers.CreateSession(w, r, fmt.Sprintf("%s", user[0].Values["id"]))
 					controllers.BroadcastNewUser(user[0].Values["firstname"].(string) + " " + user[0].Values["lastname"].(string))
@@ -186,7 +188,9 @@ func ValidateFields(w http.ResponseWriter, r *http.Request) {
 			res := newUser.Create()
 
 			// Connectez l'utilisateur après l'inscription
-			data, err := json.Marshal(res.Values)
+			userInfos := res.Values
+			userInfos["idSession"] = controllers.IdSession
+			data, err := json.Marshal(userInfos)
 			helpers.ErrorSimple(err)
 			controllers.CreateSession(w, r, fmt.Sprintf("%s", res.Values["id"]))
 			controllers.BroadcastNewUser(userData["firstname"]["value"].(string))

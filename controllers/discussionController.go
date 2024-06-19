@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"forum/helpers"
 	"forum/models"
 	"log"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 
 var clients = make(map[*websocket.Conn]string)
 var connected = make(map[*websocket.Conn]bool)
+var connectedNames = make(map[string]*websocket.Conn)
 var message = make(chan Message)
 
 type Message struct {
@@ -22,6 +24,13 @@ type Message struct {
 	Date           string `json:"date"`
 	Notif          Notification
 	Type           string `json:"type"`
+}
+
+type ClientMessage struct {
+	To        string `json:"to"`
+	Message   string `json:"message"`
+	Type      string `json:"type"`
+	Signature string `json:"signature"`
 }
 
 type Notification struct {
@@ -50,7 +59,7 @@ func HandleMessages(w http.ResponseWriter, r *http.Request) {
 func ReadLoop(r *http.Request, conn *websocket.Conn) {
 	for {
 		// Read message
-		var msg string
+		var msg ClientMessage
 		err := conn.ReadJSON(&msg)
 		if err != nil {
 			fmt.Println(err)
@@ -58,36 +67,80 @@ func ReadLoop(r *http.Request, conn *websocket.Conn) {
 			break
 		}
 
+		fmt.Println(msg)
+
 		// Find message author
-		name, _, _, _ := FindUsersOnline(r)
-		if len(name) == 0 {
-			name = "Unknown"
-		}
+		resFrom := models.Session.Fetch([]interface{}{"id"}, []interface{}{msg.Signature})
+		resTo := models.User.Fetch([]interface{}{"nickname"}, []interface{}{msg.To})
+		fmt.Println(resFrom)
+		if len(resFrom) > 0 && len(resTo) > 0 {
+			dest := resTo[0]
+			userFound := models.User.Fetch([]interface{}{"id"}, []interface{}{resFrom[0].Values["idUser"]})[0]
+			senderNickname := userFound.Values["nickname"].(string)
+			destId, destNickname := dest.Values["id"].(string), dest.Values["nickname"].(string)
 
-		// Check if connected user
-		if connected[conn] {
-			// Broadcast message to connected
-			go BroadcastMsg(conn, name, string(msg))
+			// Check if connected user
+			if connected[conn] {
+				go SaveAndSend(conn, msg.Signature, senderNickname, destId, destNickname, msg)
 
-			// Print message on server side
-			fmt.Printf("Received message from %s: '%s'", name, string(msg))
-		} else if string(msg) == "azerty" {
-			connected[conn] = true // Register the connexion
-			fmt.Println(name + " connected")
+				// Print message on server side
+				fmt.Printf("Received message from %s: '%s'\n", senderNickname, string(msg.Message))
+			} else if string(msg.To) == "@system" {
+				connectedNames[senderNickname] = conn // Register the senderNickname
+				connected[conn] = true                // Register the connexion
+				fmt.Println(senderNickname + " connected")
+
+				res := ClientMessage{
+					To:        senderNickname,
+					Message:   "Connected successfully",
+					Type:      "success",
+					Signature: "@server",
+				}
+				txt, err := json.Marshal(res)
+				helpers.ErrorSimple(err)
+				conn.WriteJSON(string(txt))
+			}
+			// {"to":"@system","type":"join","message":"","signature":"035fe39c-b3db-4e01-8062-2a4af9a1f66f"}
 		}
 	}
 }
 
-func BroadcastMsg(conn *websocket.Conn, name, msg string) {
-	for c := range connected {
-		if c != conn {
-			res := name + " says: " + msg
-			err := c.WriteJSON(res)
-			if err != nil {
-				fmt.Println(err)
-				break
-			}
+func SaveAndSend(conn *websocket.Conn, senderId, senderNickname, destId, destNickname string, msg ClientMessage) {
+	// Save
+	err := StoreMessage(senderId, senderNickname, destId, destNickname, msg.Message)
+	if err != nil {
+		res := ClientMessage{
+			To:        senderNickname,
+			Message:   err.Error(),
+			Type:      "error",
+			Signature: "@server",
 		}
+		txt, err := json.Marshal(res)
+		helpers.ErrorSimple(err)
+		conn.WriteJSON(string(txt))
+		return
+	}
+
+	// Send
+	if connectedNames[msg.To] != nil {
+		err := connectedNames[msg.To].WriteJSON(msg)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+}
+
+func StoreMessage(senderId, senderNickname, destId, destNickname, message string) error {
+	discussions := models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{IdUser, destId})
+	if len(discussions) == 0 {
+		discussions = models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{destId, IdUser})
+	}
+
+	if len(discussions) == 0 {
+		return SaveDiscussion(message, IdUser, destId, helpers.Now())
+	} else {
+		discussionId := GetDiscussionId(IdUser, destId)
+		return AppendMessageToDiscussion(discussionId, message, senderId, destNickname, helpers.Now())
 	}
 }
 
