@@ -435,6 +435,7 @@ async function fetchChat(chatUser) {
     return new Promise((resolve) => {
         let fd = new FormData();
         fd.append("type", "fetch");
+        fd.append("user", userNickname);
         fd.append("with", chatUser);
         fetch(discussionsRoute, {
                 method: 'POST',
@@ -646,6 +647,7 @@ function handleOpenChat() {
                         document.querySelector(".chat-input-name").addEventListener("click", (e) => {
                             document.querySelector("#chat-input").focus();
                         });
+                        chatScrollBottom();
                         resolve();
                     }, 200);
                 });
@@ -686,6 +688,7 @@ function handleSendMsg() {
             txt[txt.length - 1].textContent = msg;
 
             txt[txt.length - 1].after(makeBr());
+            chatScrollBottom();
         }
     });
 }
@@ -732,7 +735,8 @@ function handleWebsocket() {
                     let txt = document.querySelectorAll(".new-msg-txt");
                     txt[txt.length - 1].textContent = response.message;
 
-                    txt[txt.length - 1].after(makeBr())
+                    txt[txt.length - 1].after(makeBr());
+                    chatScrollBottom();
                 }
                 break;
 
@@ -755,4 +759,9 @@ function handleWebsocket() {
                 break;
         }
     }
+}
+
+function chatScrollBottom() {
+    let nc = document.querySelector("#netcat");
+    nc.scrollTop = nc.scrollHeight
 }
