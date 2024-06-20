@@ -12,7 +12,7 @@ func main() {
 	mux := http.NewServeMux()
 	Routes(mux)
 
-	port := ":9090"
+	port := ":8989"
 	// Ouvrir la base de données
 	database.OpenDB()
 	if args := os.Args; len(args) > 1 && args[1] == "--reset" {

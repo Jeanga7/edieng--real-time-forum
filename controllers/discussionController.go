@@ -26,6 +26,7 @@ type Message struct {
 }
 
 type ClientMessage struct {
+	From      string `json:"from"`
 	To        string `json:"to"`
 	Message   string `json:"message"`
 	Type      string `json:"type"`
@@ -89,6 +90,7 @@ func ReadLoop(r *http.Request, conn *websocket.Conn) {
 				fmt.Println(senderNickname + " connected")
 
 				res := ClientMessage{
+					From:      "@server",
 					To:        senderNickname,
 					Message:   "Connected successfully",
 					Type:      "success",
@@ -108,6 +110,7 @@ func SaveAndSend(conn *websocket.Conn, senderId, senderNickname, destId, destNic
 	err := StoreMessage(senderId, senderNickname, destId, destNickname, msg.Message)
 	if err != nil {
 		res := ClientMessage{
+			From:      "@server",
 			To:        senderNickname,
 			Message:   err.Error(),
 			Type:      "error",
@@ -122,7 +125,8 @@ func SaveAndSend(conn *websocket.Conn, senderId, senderNickname, destId, destNic
 	// Send
 	if connectedNames[destNickname] != nil {
 		res := ClientMessage{
-			To:        senderNickname,
+			From:      senderNickname,
+			To:        destNickname,
 			Message:   msg.Message,
 			Type:      "message",
 			Signature: msg.Signature,

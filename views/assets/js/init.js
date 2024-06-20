@@ -12,9 +12,9 @@ let postsRoute = '/api/posts';
 let categoriesListRoute = '/api/categories-list';
 let allUsersRoute = '/api/all-users';
 let discussionsRoute = '/api/discussions';
+let port = ":8989"
 
-let ws = new WebSocket("ws://localhost:9090/messages");
-
+let ws = new WebSocket(`ws://localhost${port}/messages`);
 // let alphabet = 'abcdefghijklmnopqrstuvwxyz';
 
 // let randomLetter = () => alphabet[Math.floor(Math.random() * 26)];

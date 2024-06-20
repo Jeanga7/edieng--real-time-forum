@@ -625,22 +625,20 @@ function handleOpenChat() {
                 });
 
                 await new Promise((resolve) => {
-                    setTimeout(() => {
-                        // Add chat input
-                        let input = /*html*/ `
-                            <input type="text" name="chat-input" id="chat-input" class="forum-input" autocomplete="false">
-                        `;
-                        let measurer = /*html*/ `
-                            <span class="measurer"></span>
-                        `;
-                        let txts = netcat.querySelectorAll("span.bold-fluo");
-                        txts[txts.length - 1].after(createElementFromHTML(input));
-                        let chatInput = document.querySelector("#chat-input");
-                        chatInput.after(createElementFromHTML(measurer));
-                        chatInput.focus();
-                        resizeInput();
-                        resolve();
-                    }, 1000);
+                    // Add chat input
+                    let input = /*html*/ `
+                        <input type="text" name="chat-input" id="chat-input" class="forum-input" autocomplete="false">
+                    `;
+                    let measurer = /*html*/ `
+                        <span class="measurer"></span>
+                    `;
+                    let txts = netcat.querySelectorAll("span.bold-fluo");
+                    txts[txts.length - 1].after(createElementFromHTML(input));
+                    let chatInput = document.querySelector("#chat-input");
+                    chatInput.after(createElementFromHTML(measurer));
+                    chatInput.focus();
+                    resizeInput();
+                    resolve();
                 });
 
                 await new Promise((resolve) => {
@@ -659,59 +657,45 @@ function handleOpenChat() {
 function handleSendMsg() {
     document.addEventListener("keydown", async (e) => {
         let chatInput = document.querySelector("#chat-input");
-        // let chatInputName = document.querySelector(".chat-input-name");
         if (e.code === "Enter" && chatInput.value.length > 0) {
             e.preventDefault();
-            let msg = chatInput.value;
-
-            let fd = new FormData();
-            fd.append("type", "send");
-            fd.append("to", chatWith);
-            fd.append("message", chatInput.value);
 
             ws.send(JSON.stringify({
+                "from": userNickname,
                 "to": chatWith,
                 "type": "message",
                 "message": chatInput.value,
                 "signature": sessionID
             }))
 
-            // fetch(discussionsRoute, {
-            //         method: 'POST',
-            //         body: fd
-            //     })
-            //     .then(r => r.json())
-            //     .then(async d => {
-            //         if (d.value === "SUCCESS") {
-            //             // Clear field
-            //             chatInput.value = "";
-            //             chatInput.style.width = "0";
-            //             chatInput.parentNode.querySelector(".measurer").textContent = "";
+            // Reset input
+            let msg = chatInput.value;
+            chatInput.value = "";
+            chatInput.style.width = "0";
+            chatInput.parentNode.querySelector(".measurer").textContent = "";
 
-            //             // Insert new message
-            //             chatInputName.before(makeSpan("bold-fluo new-msg-name"));
+            // Insert new message
+            let chatInputName = document.querySelector(".chat-input-name");
+            chatInputName.before(makeSpan("bold-fluo new-msg-name"));
 
-            //             let name = document.querySelectorAll(".new-msg-name");
-            //             name[name.length - 1].textContent = userNickname + ":"
-            //             name[name.length - 1].after(makeSpan("new-msg-txt"))
+            let name = document.querySelectorAll(".new-msg-name");
+            name[name.length - 1].textContent = userNickname + ":"
+            name[name.length - 1].after(makeSpan("new-msg-txt"))
 
-            //             let txt = document.querySelectorAll(".new-msg-txt");
-            //             txt[txt.length - 1].textContent = msg;
+            let txt = document.querySelectorAll(".new-msg-txt");
+            txt[txt.length - 1].textContent = msg;
 
-            //             txt[txt.length - 1].after(makeBr())
-            //         }
-            //     }
-            // );
-
+            txt[txt.length - 1].after(makeBr());
         }
     });
 }
 
 function handleWebsocket() {
-    let ws = new WebSocket("ws://localhost:9090/messages");
+    let ws = new WebSocket(`ws://localhost${port}/messages`);
     ws.onopen = () => {
         console.log("Connected to WebSocket...");
-        let data = {
+        let registerMsg = {
+            "from": userNickname,
             "to": "@system",
             "type": "join",
             "message": "",
@@ -719,29 +703,38 @@ function handleWebsocket() {
         }
 
         setTimeout(() => {
-            ws.send(JSON.stringify(data));
+            ws.send(JSON.stringify(registerMsg));
         }, 500)
     };
     ws.onmessage = (e) => {
         let response = JSON.parse(e.data);
-        
+
         if (Object.prototype.toString.call(response) === "[object String]") {
             response = JSON.parse(response);
         }
 
-        if (["success", "message"].includes(response.type)) {
-            console.log(response.message);
+        switch (response.type) {
+            case "success":
+                console.log(response.message);
+                break;
+
+            case "message":
+                if (chatWith !== null) {
+
+                    // Insert new message
+                    let chatInputName = document.querySelector(".chat-input-name");
+                    chatInputName.before(makeSpan("warning new-msg-name"));
+
+                    let name = document.querySelectorAll(".new-msg-name");
+                    name[name.length - 1].textContent = response.from + ":"
+                    name[name.length - 1].after(makeSpan("new-msg-txt"))
+
+                    let txt = document.querySelectorAll(".new-msg-txt");
+                    txt[txt.length - 1].textContent = response.message;
+
+                    txt[txt.length - 1].after(makeBr())
+                }
+                break;
         }
-        // if (message.type === 'history') {
-        //     loadHistory(message.messages.reverse());
-        // } else if (message.type == "typing") {
-        //     if (currentdiscussion === message.sender) {
-        //         showTyping();
-        //     }
-        // } else if (message.type == "new_user") {
-        //     handleNewUser(message.sender)
-        // } else {
-        //     handleMessage(message);
-        // }
     }
 }
