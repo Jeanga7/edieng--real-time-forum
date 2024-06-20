@@ -1,18 +1,19 @@
 // Initialization
 const speed = 15;
-let fieldLoaded = false;
+var fieldLoaded = false;
 var activeForm = "login";
 var chatWith = null;
+var chatChunks = [];
 
-let printed = {};
-let checked = {};
-let authRoute = '/api/auth';
-let userDataRoute = '/api/users';
-let postsRoute = '/api/posts';
-let categoriesListRoute = '/api/categories-list';
-let allUsersRoute = '/api/all-users';
-let discussionsRoute = '/api/discussions';
-let port = ":8989"
+var printed = {};
+var checked = {};
+const authRoute = '/api/auth';
+const userDataRoute = '/api/users';
+const postsRoute = '/api/posts';
+const categoriesListRoute = '/api/categories-list';
+const allUsersRoute = '/api/all-users';
+const discussionsRoute = '/api/discussions';
+const port = ":8989"
 
 let ws = new WebSocket(`ws://localhost${port}/messages`);
 // let alphabet = 'abcdefghijklmnopqrstuvwxyz';
@@ -20,6 +21,27 @@ let ws = new WebSocket(`ws://localhost${port}/messages`);
 // let randomLetter = () => alphabet[Math.floor(Math.random() * 26)];
 
 let capitalize = (str) => str.charAt(0).toUpperCase() + str.substr(1);
+
+let formatDate = (d=undefined) => (d ? new Date(d) : new Date()).toLocaleString('fr-FR', {
+    // year: '2-digit',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false // Use 24-hour time format
+});
+
+// let reverseArray = (arr) => arr.length > 1
+//                             ? [arr[]]
+
+// function chunkList(arr, len) {
+//     let newArr = [];
+//     for (arr.length > len) {
+//         newArr.push(arr.slice(len - arr.length))
+//     }
+// }
+
+// let chunk = (arr, len) => [arr.length>=len ? ]
 
 let loginTxtsData = [{
         zone: "#login-intro",

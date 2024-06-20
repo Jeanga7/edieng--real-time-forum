@@ -12,6 +12,7 @@
     --pink: #E216CE;
     --yellow: #FFB800;
     --font: 'Architekt';
+    --fontAlt: 'IBM Plex Mono';
 }
 
 * {
@@ -670,8 +671,12 @@ hr.post-separator {
     opacity: 0;
     flex-grow: 0;
     transition: var(--standard-transition);
-    overflow: hidden;
+    /* overflow: hidden; */
     box-shadow: 0 0 4px var(--fluo);
+}
+#netcat-text {
+    font-size: .6em;
+    /* font-family: var(--fontAlt); */
 }
 .active-chat {
     height: 100%;

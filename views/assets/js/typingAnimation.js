@@ -17,7 +17,7 @@ let netcatTxt = (user, data) => {
         data.forEach(d => {
             let className = userNickname && d.sender === userNickname ? "bold-fluo" : "warning";
             res.push({
-                txt: d.sender + ":",
+                txt: `[${formatDate(d.date)}][${d.sender}]:`,
                 c: className,
                 eol: false
             })
@@ -35,7 +35,7 @@ let netcatTxt = (user, data) => {
         })
     }
     res.push({
-        txt: userNickname + ":",
+        txt: "> ",
         c: "bold-fluo chat-input-name",
         eol: false
     })
@@ -608,6 +608,9 @@ function handleOpenChat() {
                 if (!nc.classList.contains("active-chat")) nc.classList.add("active-chat");
                 chatWith = chatUser
 
+                // Reset notifications
+                ResetNotifsNumber();
+
                 // Get chat
                 let chat = await fetchChat(chatUser);
                 let msgs = [];
@@ -620,7 +623,7 @@ function handleOpenChat() {
 
                 await new Promise((resolve) => {
                     setTimeout(async () => {
-                        await printInTerminal("#netcat-text", netcatTxt(chatUser, msgs), "nc", 10);
+                        await printInTerminal("#netcat-text", netcatTxt(chatUser, msgs), "nc", 5);
                         resolve();
                     }, 700)
                 });
@@ -647,7 +650,7 @@ function handleOpenChat() {
                         document.querySelector(".chat-input-name").addEventListener("click", (e) => {
                             document.querySelector("#chat-input").focus();
                         });
-                        chatScrollBottom();
+                        terminalScrollBottom("#chat-input");
                         resolve();
                     }, 200);
                 });
@@ -681,14 +684,14 @@ function handleSendMsg() {
             chatInputName.before(makeSpan("bold-fluo new-msg-name"));
 
             let name = document.querySelectorAll(".new-msg-name");
-            name[name.length - 1].textContent = userNickname + ":"
+            name[name.length - 1].textContent = `[${formatDate()}][${userNickname}]:`
             name[name.length - 1].after(makeSpan("new-msg-txt"))
 
             let txt = document.querySelectorAll(".new-msg-txt");
             txt[txt.length - 1].textContent = msg;
 
             txt[txt.length - 1].after(makeBr());
-            chatScrollBottom();
+            terminalScrollBottom("#chat-input");
         }
     });
 }
@@ -723,20 +726,24 @@ function handleWebsocket() {
 
             case "message":
                 if (chatWith !== null) {
-
                     // Insert new message
                     let chatInputName = document.querySelector(".chat-input-name");
                     chatInputName.before(makeSpan("warning new-msg-name"));
 
                     let name = document.querySelectorAll(".new-msg-name");
-                    name[name.length - 1].textContent = response.from + ":"
+                    name[name.length - 1].textContent = `[${formatDate(response.time)}][${response.from}]:`
                     name[name.length - 1].after(makeSpan("new-msg-txt"))
 
                     let txt = document.querySelectorAll(".new-msg-txt");
                     txt[txt.length - 1].textContent = response.message;
 
                     txt[txt.length - 1].after(makeBr());
-                    chatScrollBottom();
+                    terminalScrollBottom("#chat-input");
+                } else {
+                    let user = document.querySelector(`[data-nickname="${response.from}"]`);
+                    let notifsContent = user.querySelector(".user-notifications").textContent;
+                    let notifs = parseInt(notifsContent.replace("(", "").replace(")", ""));
+                    user.querySelector(".user-notifications").textContent = `(${notifs+1})`;
                 }
                 break;
 
@@ -761,7 +768,12 @@ function handleWebsocket() {
     }
 }
 
-function chatScrollBottom() {
-    let nc = document.querySelector("#netcat");
-    nc.scrollTop = nc.scrollHeight
+function terminalScrollBottom(selector) {
+    let tl = document.querySelector(selector).closest(".terminal-box");
+    tl.scrollTop = tl.scrollHeight;
+}
+
+function ResetNotifsNumber() {
+    let user = document.querySelector(`[data-nickname="${chatWith}"]`);
+    user.querySelector(".user-notifications").textContent = `(0)`;
 }

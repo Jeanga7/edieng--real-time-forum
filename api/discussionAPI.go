@@ -1,8 +1,6 @@
 package api
 
 import (
-	"errors"
-	"forum/controllers"
 	"forum/global"
 	"forum/helpers"
 	"forum/models"
@@ -13,11 +11,6 @@ import (
 func HandleDiscussions(w http.ResponseWriter, r *http.Request) {
 	helpers.AllowedMethod(w, "POST", r)
 	global.W = w
-
-	if controllers.IdUser == "" {
-		helpers.JSONResponse(w, errors.New("SESSION NOT FOUND"), http.StatusNotFound)
-		return
-	}
 
 	How := html.EscapeString(r.FormValue("type"))
 	// Get the all the discussion between two users

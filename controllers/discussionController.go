@@ -76,14 +76,14 @@ func ReadLoop(r *http.Request, conn *websocket.Conn) {
 
 		if len(resFrom) > 0 {
 			userFound := models.User.Fetch([]interface{}{"id"}, []interface{}{resFrom[0].Values["idUser"]})[0]
-			senderNickname := userFound.Values["nickname"].(string)
+			senderId, senderNickname := userFound.Values["id"].(string), userFound.Values["nickname"].(string)
 
 			// Check if connected user
 			if connectedNames[senderNickname] != nil && len(resTo) > 0 {
 				dest := resTo[0]
 				destId, destNickname := dest.Values["id"].(string), dest.Values["nickname"].(string)
 
-				go SaveAndSend(conn, msg.Signature, senderNickname, destId, destNickname, msg)
+				go SaveAndSend(conn, senderId, senderNickname, destId, destNickname, msg)
 
 				// Print message on server side
 				fmt.Printf("Received message from %s: '%s'\n", senderNickname, string(msg.Message))
@@ -157,15 +157,15 @@ func Broadcasting(user, typeMsg string) {
 }
 
 func StoreMessage(senderId, senderNickname, destId, destNickname, message string) error {
-	discussions := models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{IdUser, destId})
+	discussions := models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{senderId, destId})
 	if len(discussions) == 0 {
-		discussions = models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{destId, IdUser})
+		discussions = models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{destId, senderId})
 	}
 
 	if len(discussions) == 0 {
-		return SaveDiscussion(message, IdUser, destId, helpers.Now())
+		return SaveDiscussion(message, senderId, destId, helpers.Now())
 	} else {
-		discussionId := GetDiscussionId(IdUser, destId)
+		discussionId := GetDiscussionId(senderId, destId)
 		return AppendMessageToDiscussion(discussionId, message, senderNickname, destNickname, helpers.Now())
 	}
 }

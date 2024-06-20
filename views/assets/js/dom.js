@@ -22,7 +22,8 @@ async function printInTerminal(selector, data, typingClass, s=speed) {
         const d = data[i];
         t.innerHTML += `<span class="txt ${d.c ?? ""}"></span>` + (d.eol ? "<br>" : "");
         let txts = t.querySelectorAll(".txt");
-        await typing(txts[txts.length - 1], d.txt, typingClass, s);        
+        await typing(txts[txts.length - 1], d.txt, typingClass, s);
+        terminalScrollBottom(selector);       
     }
 }
 

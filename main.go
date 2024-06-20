@@ -16,12 +16,15 @@ func main() {
 	port := ":8989"
 	// Ouvrir la base de données
 	database.OpenDB()
-	if args := os.Args; len(args) > 1 && args[1] == "--reset" {
+
+	args := os.Args
+	if len(args) > 1 && args[1] == "--reset" {
 		resetApp()
 		// fmt.Println(database.FetchDataJoin([]string{"posts", "users"}, []string{"*"}, "posts.authorId=users.id")[0])
+	} else if len(args) == 1 {
+		// Réinitialisation des sessions
+		migrations.MigrateSession()
 	}
-	// Réinitialisation des sessions
-	migrations.MigrateSession()
 
 	// fmt.Println("Hello world !")
 	defer database.DB.Close()
