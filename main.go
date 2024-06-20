@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"forum/database"
 	"forum/helpers"
+	"forum/migrations"
 	"net/http"
 	"os"
 )
@@ -19,6 +20,9 @@ func main() {
 		resetApp()
 		// fmt.Println(database.FetchDataJoin([]string{"posts", "users"}, []string{"*"}, "posts.authorId=users.id")[0])
 	}
+	// Réinitialisation des sessions
+	migrations.MigrateSession()
+
 	// fmt.Println("Hello world !")
 	defer database.DB.Close()
 

@@ -31,6 +31,7 @@ type ClientMessage struct {
 	Message   string `json:"message"`
 	Type      string `json:"type"`
 	Signature string `json:"signature"`
+	Time      string `json:"time"`
 }
 
 type Notification struct {
@@ -65,6 +66,7 @@ func ReadLoop(r *http.Request, conn *websocket.Conn) {
 			fmt.Println(err)
 			name, _, _, _ := FindUsersOnline(r)
 			delete(connectedNames, name)
+			go Broadcasting(name, "offline")
 			break
 		}
 
@@ -89,16 +91,7 @@ func ReadLoop(r *http.Request, conn *websocket.Conn) {
 				connectedNames[senderNickname] = conn // Register the senderNickname
 				fmt.Println(senderNickname + " connected")
 
-				res := ClientMessage{
-					From:      "@server",
-					To:        senderNickname,
-					Message:   "Connected successfully",
-					Type:      "success",
-					Signature: "@server",
-				}
-				txt, err := json.Marshal(res)
-				helpers.ErrorSimple(err)
-				conn.WriteJSON(string(txt))
+				go Broadcasting(senderNickname, "online")
 			}
 			// {"to":"@system","type":"join","message":"","signature":"035fe39c-b3db-4e01-8062-2a4af9a1f66f"}
 		}
@@ -130,13 +123,35 @@ func SaveAndSend(conn *websocket.Conn, senderId, senderNickname, destId, destNic
 			Message:   msg.Message,
 			Type:      "message",
 			Signature: msg.Signature,
+			Time:      helpers.Now(),
 		}
 		txt, err := json.Marshal(res)
 		helpers.ErrorSimple(err)
 
 		err = connectedNames[destNickname].WriteJSON(string(txt))
-		if err != nil {
-			fmt.Println(err)
+		helpers.ErrorSimple(err)
+	}
+}
+
+func Broadcasting(user, typeMsg string) {
+	// Create message
+	res := ClientMessage{
+		From:      "@server",
+		To:        "",
+		Message:   user,
+		Type:      typeMsg,
+		Signature: "@server",
+		Time:      helpers.Now(),
+	}
+
+	// Broadcast
+	for n := range connectedNames {
+		if n != user {
+			res.To = n
+			txt, err := json.Marshal(res)
+			helpers.ErrorSimple(err)
+			err = connectedNames[n].WriteJSON(string(txt))
+			helpers.ErrorSimple(err)
 		}
 	}
 }

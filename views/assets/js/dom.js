@@ -157,9 +157,9 @@ ${postImage}
 `
 
 let makeUser = (userData) => /*html*/`
-    <span class="user-status ${userData.Online ? 'status-online' : 'status-offline'}"></span>
-    <span class="user-nickname ${userData.Online ? 'txt-online' : 'txt-offline'}">${userData.Nickname}</span>
-    <span class="user-notifications ${userData.Online ? 'txt-online' : 'txt-offline'}">(${userData.NbrNotifications})</span>
+    <span class="user-status ${userData.Online ? 'status-online' : ''}"></span>
+    <span class="user-nickname ${userData.Online ? 'txt-online' : ''}">${userData.Nickname}</span>
+    <span class="user-notifications ${userData.Online ? 'txt-online' : ''}">(${userData.NbrNotifications})</span>
 `
 
 let makePostImage = (img) => /*html*/`

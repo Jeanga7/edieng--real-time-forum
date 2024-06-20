@@ -735,6 +735,24 @@ function handleWebsocket() {
                     txt[txt.length - 1].after(makeBr())
                 }
                 break;
+
+            case "online":
+                let userToOnline = document.querySelector(`[data-nickname="${response.message}"]`);
+                if (userToOnline) {
+                    userToOnline.querySelector(".user-status").classList.add("status-online");
+                    userToOnline.querySelector(".user-nickname").classList.add("txt-online");
+                    userToOnline.querySelector(".user-notifications").classList.add("txt-online");
+                }
+                break;
+
+            case "offline":
+                let userToOffline = document.querySelector(`[data-nickname="${response.message}"]`);
+                if (userToOffline) {
+                    userToOffline.querySelector(".user-status").classList.remove("status-online");
+                    userToOffline.querySelector(".user-nickname").classList.remove("txt-online");
+                    userToOffline.querySelector(".user-notifications").classList.remove("txt-online");
+                }
+                break;
         }
     }
 }

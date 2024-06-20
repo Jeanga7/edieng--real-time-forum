@@ -646,22 +646,21 @@ hr.post-separator {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-}
-.status-online {
-    background-color: var(--fluo);
-    box-shadow: 0 0 5px var(--fluo);
-}
-.status-offline {
     background-color: red;
     box-shadow: 0 0 5px red;
 }
-.txt-online {
-    color: var(--fluo);
-    text-shadow: 0 0 4px var(--fluo);
+.status-online {
+    background-color: var(--fluo) !important;
+    box-shadow: 0 0 5px var(--fluo) !important;
 }
-.txt-offline {
+
+.user-nickname, .user-notifications {
     color: red;
     text-shadow: 0 0 4px red;
+}
+.txt-online {
+    color: var(--fluo) !important;
+    text-shadow: 0 0 4px var(--fluo) !important;
 }
 
 #netcat {
