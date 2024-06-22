@@ -2,34 +2,25 @@ function enableReactions() {
     document.querySelectorAll(".like-dislike").forEach(el => {
         el.addEventListener("click", function (e) {
             let target = e.target.closest(".reaction");
-            if (target.classList.contains("like-btn")) {
-                like(target);
-            } else if (target.classList.contains("dislike-btn")) {
-                dislike(target);
+            if (target.classList.contains("like-btn") || target.classList.contains("dislike-btn")) {
+                sendData(target);
             }
         });
     });
 }
 
-function like(el) {
-    sendData(el, "/like")
-}
-
-function dislike(el) {
-    sendData(el, "/dislike")
-}
-
-function sendData(el, route) {
+function sendData(el) {
     var data = el.parentElement.getAttribute("data-post");
-    var typeReacted = "post";
-    if (el.parentElement.classList.contains("comments-reactions")) {
-        typeReacted = "comment";
-    }
+    var typeReacted = el.parentElement.classList.contains("comments-reactions") ? "comment" : "post";
+    var reaction = el.classList.contains("like-btn") ? "like" : "dislike";
+
     var formData = new FormData();
     formData.append("post", data);
-    formData.append("action", route);
+    formData.append("action", reactionRoute);
+    formData.append("reaction", reaction);
     formData.append("typeReacted", typeReacted);
-    fetch(route, {
+    formData.append("author", userNickname);
+    fetch(reactionRoute, {
             method: 'POST',
             body: formData
         })

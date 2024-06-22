@@ -13,6 +13,7 @@ const postsRoute = '/api/posts';
 const categoriesListRoute = '/api/categories-list';
 const allUsersRoute = '/api/all-users';
 const discussionsRoute = '/api/discussions';
+const reactionRoute = '/reaction';
 const port = ":8989"
 
 let ws = new WebSocket(`ws://localhost${port}/messages`);

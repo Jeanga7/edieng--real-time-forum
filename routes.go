@@ -31,10 +31,7 @@ func Routes(mux *http.ServeMux) {
 	// mux.HandleFunc("/add-category", controllers.AddCategory)
 
 	// Like routes
-	mux.HandleFunc("/like", controllers.Like)
-
-	// Dislike routes
-	mux.HandleFunc("/dislike", controllers.Dislike)
+	mux.HandleFunc("/reaction", controllers.React)
 
 	// API Routes
 	mux.HandleFunc("/api/users", api.FetchUsers)
