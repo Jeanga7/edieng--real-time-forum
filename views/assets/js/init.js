@@ -15,7 +15,7 @@ const allUsersRoute = '/api/all-users';
 const discussionsRoute = '/api/discussions';
 const resetNotifsRoute = '/api/reset-notifications'
 const reactionRoute = '/reaction';
-const port = ":9090"
+const port = ":8989"
 
 let ws = new WebSocket(`ws://localhost${port}/messages`);
 // let alphabet = 'abcdefghijklmnopqrstuvwxyz';

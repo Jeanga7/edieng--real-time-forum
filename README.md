@@ -18,7 +18,7 @@ To get started with the project, follow these steps:
 1. **Clone the Repository**: Clone the repository using `git clone https://learn.zone01dakar.sn/git/lodiouf/forum.git`.
 2. **Set Up the Database**: The application uses SQLite as its database. Ensure that SQLite is installed on your machine.
 3. **Run the Application**: Start the application by running `go run .` in the project directory.
-4. **Access the Application**: Open a web browser and navigate to `http://localhost:9090` to access the forum.
+4. **Access the Application**: Open a web browser and navigate to `http://localhost:8989` to access the forum.
 
 ## 🧩 MVC Architecture 🧩
 
