@@ -70,6 +70,7 @@ async function authLayer() {
     await enableAllInputs();
     firstFieldFocus(`#${activeForm}`);
     formToggle();
+    focusInput();
     document.addEventListener("keydown", authHandleEnter);
 }
 
@@ -216,6 +217,16 @@ function startFeedsTerminals() {
             LettersAnimation(".post-title", 5000, 50);
             LettersAnimation(".user-nickname");
 
+            document.querySelector("#logout-btn").addEventListener("click", async (e) => {
+                await new Promise((resolve) => {
+                    setTimeout(()=>{
+                        ws.close(); 
+                        resolve();                       
+                    }, 50)
+                })
+                window.location.href='/logout';
+            });
+
             resolve();
         }, 500);
     });
@@ -350,7 +361,10 @@ function resizeInput() {
 }
 
 function firstFieldFocus(selector) {
-    document.querySelectorAll(`${selector} input`)[0].focus();
+    removeAllFocusedClass();
+    let firstField = document.querySelectorAll(`${selector} input`)[0];
+    firstField.focus();
+    firstField.classList.add("focused");
 }
 
 function formToggle() {
@@ -527,6 +541,7 @@ async function resetChatList() {
         // Seperate discussions
         let chat = await fetchChat(userData.Nickname);
         if (chat.length > 0) {
+            console.log(chat);
             known.push({
                 data: userData,
                 date: chat[0].updatedDate
@@ -553,6 +568,7 @@ async function resetChatList() {
             user.style.opacity = "1";
         }, 500 + i * 500);
     }
+    console.log(known);
 
     known.forEach(listChats);
     unknown.forEach(listChats);
@@ -644,15 +660,14 @@ function handleOpenChat() {
                     let chatInput = document.querySelector("#chat-input");
                     chatInput.after(createElementFromHTML(measurer));
                     chatInput.focus();
+                    chatInput.classList.add("focused");
                     resizeInput();
                     resolve();
                 });
 
                 await new Promise((resolve) => {
                     setTimeout(() => {
-                        document.querySelector(".chat-input-name").addEventListener("click", (e) => {
-                            document.querySelector("#chat-input").focus();
-                        });
+                        focusInput();
                         terminalScrollBottom("#chat-input");
                         resolve();
                     }, 200);
@@ -664,13 +679,13 @@ function handleOpenChat() {
                     data.append("dest", userNickname);
 
                     fetch(resetNotifsRoute, {
-                        method: 'POST',
-                        body: data
-                    })
-                    .then(r=>r.json())
-                    .then(d=>{
-                        resolve();
-                    })
+                            method: 'POST',
+                            body: data
+                        })
+                        .then(r => r.json())
+                        .then(d => {
+                            resolve();
+                        })
                 })
             }
         });
@@ -799,4 +814,15 @@ function terminalScrollBottom(selector) {
 function ResetNotifsNumber() {
     let user = document.querySelector(`[data-nickname="${chatWith}"]`);
     user.querySelector(".user-notifications").textContent = `(0)`;
+}
+
+function focusInput() {
+    document.querySelectorAll(".terminal-box").forEach(el => {
+        el.addEventListener("click", (e) => {
+            let focused = el.querySelectorAll(".focused");
+            if (focused.length > 0) {
+                focused[0].focus();
+            }
+        });
+    });
 }

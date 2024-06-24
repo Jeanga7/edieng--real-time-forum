@@ -1,6 +1,8 @@
 async function ValidateField(route, selector, varName, data, checked, printed) {
+    removeAllFocusedClass();
     let field = document.querySelector(selector);
     field.focus();
+    field.classList.add("focused");
     let val = field.value;
     data.append(varName, val)
     if (val.length > 0 && !checked[varName]) {

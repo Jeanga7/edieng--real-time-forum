@@ -213,6 +213,12 @@ function moveElementToParentStart(el) {
     }
 }
 
+function removeAllFocusedClass() {
+    document.querySelectorAll("input").forEach(el=>{
+        el.classList.remove("focused");
+    });
+}
+
 // let limitWord = 10;
 // let limitSentence = 50;
 // document.querySelectorAll("input").forEach(el=>{

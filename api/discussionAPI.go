@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"forum/global"
 	"forum/helpers"
 	"forum/models"
@@ -28,39 +29,9 @@ func HandleDiscussions(w http.ResponseWriter, r *http.Request) {
 				discussions = models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{chatUser, chatWith})
 			}
 
-			usersData := TransformModels(discussions, models.Discussions.Columns)
+			fields := append(models.Discussions.Columns, "updatedDate")
+			usersData := TransformModels(discussions, fields)
 			WriteJSONResponse(w, usersData)
 		}
-		//if we are sending a message to a user
 	}
-	// else if How == "send" {
-	// 	nickname := html.EscapeString(r.FormValue("to"))
-	// 	usersFound := models.User.Fetch([]interface{}{"nickname"}, []interface{}{nickname})
-	// 	currentUser := models.User.Fetch([]interface{}{"id"}, []interface{}{controllers.IdUser})[0].Values["nickname"].(string)
-
-	// 	chatReceiver := ""
-	// 	if len(usersFound) == 1 {
-	// 		chatReceiver = (usersFound[0].Values["id"]).(string)
-	// 		message := html.EscapeString(r.FormValue("message"))
-
-	// 		discussions := models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{controllers.IdUser, chatReceiver})
-	// 		if len(discussions) == 0 {
-	// 			discussions = models.Discussions.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{chatReceiver, controllers.IdUser})
-	// 		}
-
-	// 		if len(discussions) == 0 {
-	// 			controllers.SaveDiscussion(message, controllers.IdUser, chatReceiver, helpers.Now())
-	// 		} else {
-	// 			discussionId := controllers.GetDiscussionId(controllers.IdUser, chatReceiver)
-	// 			controllers.AppendMessageToDiscussion(discussionId, message, currentUser, nickname, helpers.Now())
-	// 		}
-
-	// 		err := controllers.StoreMessage(controllers.IdUser, currentUser, chatReceiver, nickname, message)
-
-	// 		if err != nil {
-	// 			helpers.JSONResponse(w, err, http.StatusInternalServerError)
-	// 		}
-	// 		helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted)
-	// 	}
-	// }
 }
