@@ -421,8 +421,11 @@ async function fetchPosts(userId) {
 
 async function fetchAllUsers() {
     return new Promise((resolve) => {
+        let data = new FormData();
+        data.append("sessionID", sessionID);
         fetch(allUsersRoute, {
-                method: 'GET'
+                method: 'POST',
+                body: data
             })
             .then(r => r.json())
             .then(d => {
@@ -654,6 +657,21 @@ function handleOpenChat() {
                         resolve();
                     }, 200);
                 });
+
+                await new Promise((resolve) => {
+                    let data = new FormData();
+                    data.append("sender", chatWith);
+                    data.append("dest", userNickname);
+
+                    fetch(resetNotifsRoute, {
+                        method: 'POST',
+                        body: data
+                    })
+                    .then(r=>r.json())
+                    .then(d=>{
+                        resolve();
+                    })
+                })
             }
         });
     });
@@ -692,6 +710,9 @@ function handleSendMsg() {
 
             txt[txt.length - 1].after(makeBr());
             terminalScrollBottom("#chat-input");
+
+            let user = document.querySelector(`.user[data-nickname="${chatWith}"]`);
+            moveElementToParentStart(user);
         }
     });
 }
@@ -725,7 +746,7 @@ function handleWebsocket() {
                 break;
 
             case "message":
-                if (chatWith !== null) {
+                if (chatWith === response.from) {
                     // Insert new message
                     let chatInputName = document.querySelector(".chat-input-name");
                     chatInputName.before(makeSpan("warning new-msg-name"));
@@ -740,7 +761,9 @@ function handleWebsocket() {
                     txt[txt.length - 1].after(makeBr());
                     terminalScrollBottom("#chat-input");
                 } else {
-                    let user = document.querySelector(`[data-nickname="${response.from}"]`);
+                    // Notify
+                    let user = document.querySelector(`.user[data-nickname="${response.from}"]`);
+                    moveElementToParentStart(user);
                     let notifsContent = user.querySelector(".user-notifications").textContent;
                     let notifs = parseInt(notifsContent.replace("(", "").replace(")", ""));
                     user.querySelector(".user-notifications").textContent = `(${notifs+1})`;

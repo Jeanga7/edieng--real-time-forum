@@ -14,7 +14,7 @@ RUN go build -o forum .
 
 # RUN apk update && apk add --no-cache bash 
 
-EXPOSE 8989
+EXPOSE 9090
 
  CMD [ "./forum" ]
 
@@ -22,4 +22,4 @@ EXPOSE 8989
 
 #1st STEP 
 #make your image  [ docker build -t <image> . ]
-#execut a container from your image [ docker run -d -p 8080:8989 <image> ]
+#execut a container from your image [ docker run -d -p 8080:9090 <image> ]

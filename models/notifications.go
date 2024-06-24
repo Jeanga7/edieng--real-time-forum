@@ -14,7 +14,7 @@ var Notification = Model{
 		"id",
 		"idSender TEXT",
 		"idReceiver TEXT",
-		"notifications TEXT",
+		"notifications INTEGER",
 		"creationDate",
 	},
 }

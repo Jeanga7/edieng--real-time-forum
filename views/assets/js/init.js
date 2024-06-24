@@ -13,8 +13,9 @@ const postsRoute = '/api/posts';
 const categoriesListRoute = '/api/categories-list';
 const allUsersRoute = '/api/all-users';
 const discussionsRoute = '/api/discussions';
+const resetNotifsRoute = '/api/reset-notifications'
 const reactionRoute = '/reaction';
-const port = ":8989"
+const port = ":9090"
 
 let ws = new WebSocket(`ws://localhost${port}/messages`);
 // let alphabet = 'abcdefghijklmnopqrstuvwxyz';
@@ -200,6 +201,15 @@ async function authHandleEnter(e) {
         }
     } else if (e.code === "Tab") {
         e.preventDefault();
+    }
+}
+
+function moveElementToParentStart(el) {
+    if (el) {
+        let parent = el.parentElement;
+        if (parent) {
+            parent.prepend(el);
+        }
     }
 }
 

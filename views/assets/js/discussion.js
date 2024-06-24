@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 function openWs() {
-    ws = new WebSocket("ws://localhost:8989/messages");
+    ws = new WebSocket("ws://localhost:9090/messages");
     ws.onopen = () => {
         console.log("Connected to WebSocket...");
         sortDiscussion();

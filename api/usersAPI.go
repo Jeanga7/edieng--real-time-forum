@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"forum/controllers"
+	"forum/database"
 	"forum/global"
 	"forum/helpers"
 	"forum/models"
@@ -223,6 +224,33 @@ func GetAllSortedUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	All_users, _ := controllers.GetUsers(Usernames)
 	SortedUsers := controllers.SortUsers(All_users, Sessions, Usernames)
+
+	sessionID := r.FormValue("sessionID")
+	if len(sessionID) > 0 {
+		res := database.FetchDataJoin(
+			[]string{"sessions", "users"},
+			[]string{"*"},
+			"sessions.idUser=users.id AND sessions.id = ?",
+			sessionID,
+		)
+		if len(res) > 0 {
+			idReceiver := res[0]["idUser"].(string)
+			for i := range SortedUsers {
+				users := models.User.Fetch([]interface{}{"nickname"}, []interface{}{SortedUsers[i].Nickname})
+				if len(users) > 0 {
+					idSender := users[0].Values["id"].(string)
+					notifs := models.Notification.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{idSender, idReceiver})
+
+					if len(notifs) == 0 {
+						SortedUsers[i].NbrNotifications = 0
+					} else {
+						SortedUsers[i].NbrNotifications = notifs[0].Values["notifications"].(int64)
+					}
+				}
+			}
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(SortedUsers)
 }

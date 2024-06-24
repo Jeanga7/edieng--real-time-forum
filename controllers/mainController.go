@@ -136,7 +136,7 @@ func SortUsers(All_users []helpers.User, Sessions []models.Model, username strin
 				if err != nil {
 					fmt.Println(err)
 				}
-				user.NbrNotifications = currentCount
+				user.NbrNotifications = int64(currentCount)
 			} else {
 				user.NbrNotifications = 0
 			}

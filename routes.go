@@ -55,4 +55,6 @@ func Routes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/dislikes", api.FetchDislike)
 
 	mux.HandleFunc("/api/all-users", api.GetAllSortedUsers)
+
+	mux.HandleFunc("/api/reset-notifications", api.ResetNotifications)
 }

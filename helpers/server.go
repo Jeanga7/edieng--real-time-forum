@@ -19,7 +19,7 @@ var Storage = "./views/assets/img/posts"
 type User struct {
 	Nickname         string
 	Online           bool
-	NbrNotifications int
+	NbrNotifications int64
 	LastMsgDate      string
 }
 

@@ -115,6 +115,18 @@ func SaveAndSend(conn *websocket.Conn, senderId, senderNickname, destId, destNic
 		return
 	}
 
+	// Save notification
+	notifs := models.Notification.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{senderId, destId})
+	if len(notifs) == 0 {
+		// Create notification
+		CreateNotification(senderId, destId)
+	} else {
+		// Update notification
+		notifId := notifs[0].Values["id"].(string)
+		notifNb := notifs[0].Values["notifications"].(int64)
+		UpdateNotif(notifId, senderId, destId, notifNb+1)
+	}
+
 	// Send
 	if connectedNames[destNickname] != nil {
 		res := ClientMessage{
@@ -214,7 +226,7 @@ func StoreMessage(senderId, senderNickname, destId, destNickname, message string
 // 			notification := models.Notification.Fetch([]interface{}{"id"}, []interface{}{notificationId})
 // 			SendPreviousMessages(conn, msg.Sender, msg.Destinataire)
 // 			if len(notification) > 0 {
-// 				AddNotif(notificationId, msg.Sender, name, 0)
+// 				UpdateNotif(notificationId, msg.Sender, name, 0)
 // 			}
 // 		} else {
 // 			if msg.Type != "typing" {
@@ -228,7 +240,7 @@ func StoreMessage(senderId, senderNickname, destId, destNickname, message string
 // 						}
 
 // 						number := currentCount + 1
-// 						AddNotif(notificationId, msg.Sender, name, number)
+// 						UpdateNotif(notificationId, msg.Sender, name, number)
 // 					}
 // 				}
 // 			}
@@ -350,16 +362,14 @@ func CreateNotification(sender string, receiver string) {
 	notif.Values = map[string]interface{}{
 		"idSender":      sender,
 		"idReceiver":    receiver,
-		"notifications": "1",
+		"notifications": 1,
 	}
 	notif.Create()
 }
 
-func AddNotif(notifId interface{}, sender, receiver string, number int) error {
-
-	data := map[string]interface{}{"notifications": strconv.Itoa(number)}
+func UpdateNotif(notifId interface{}, sender, receiver string, number int64) error {
+	data := map[string]interface{}{"notifications": number}
 	models.Notification.Update(data, "id", notifId)
-
 	return nil
 }
 

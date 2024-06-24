@@ -664,6 +664,9 @@ hr.post-separator {
     text-shadow: 0 0 4px var(--fluo) !important;
 }
 
+#all-users {
+    flex-grow: 3;
+}
 #netcat {
     border-color: var(--fluo);
     height: 0;
@@ -681,7 +684,7 @@ hr.post-separator {
 .active-chat {
     height: 100%;
     display: block !important;
-    flex-grow: 2 !important;
+    flex-grow: 1 !important;
     border-color: var(--blue) !important;
     box-shadow: 0 0 4px var(--blue) !important;
 }
