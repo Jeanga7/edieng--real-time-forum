@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"forum/global"
 	"forum/helpers"
 	"forum/models"
