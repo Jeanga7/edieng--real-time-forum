@@ -692,3 +692,34 @@ hr.post-separator {
 .chat-input-name {
     cursor: pointer;
 }
+
+#all-posts {
+    flex-grow: 10 !important;
+}
+
+
+#new-post{
+    height: 0;
+    width: 0;
+    opacity: 0;
+    flex-grow: 0;
+    transition: var(--standard-transition);
+}
+.active-new-post {
+    height: 100%;
+    display: block !important;
+    flex-grow: 4 !important;
+}
+
+#all-comments{
+    height: 0;
+    width: 0;
+    opacity: 0;
+    flex-grow: 0;
+    transition: var(--standard-transition);
+}
+.active-all-comments {
+    height: 100%;
+    display: block !important;
+    flex-grow: 4 !important;
+}

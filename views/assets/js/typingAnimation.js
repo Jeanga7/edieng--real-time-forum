@@ -209,6 +209,9 @@ function startFeedsTerminals() {
 
             ShowUserInfos(userInfos);
             ShowAllPosts(posts);
+            handleOpenNewPost();
+            handleOpenComments();
+            
             ListUsers();
 
             enableReactions();
@@ -850,4 +853,42 @@ function handleLoadMoreMsg() {
             e.target.scrollTop += 25
         }
     }, 200));
+}
+
+function handleOpenNewPost() {
+    document.querySelector("#add-post-btn").addEventListener("click", async (e) => {
+        let np = document.querySelector("#new-post");
+        if (np.classList.contains("active-new-post")) {
+            document.querySelector("#new-post-text").textContent = "";
+            np.classList.remove("active-new-post");
+        } else {
+            np.classList.add("active-new-post");
+            await new Promise((resolve) => {
+                setTimeout(() => {
+                    printInTerminal("#new-post-text", newPostTxt, "np", 10);
+                    resolve();
+                }, 500);
+            })
+        }
+    });
+}
+
+function handleOpenComments() {
+    document.querySelectorAll(".comment-btn").forEach(el => {
+        el.addEventListener("click", async (e) => {
+            let ac = document.querySelector("#all-comments");
+            if (ac.classList.contains("active-all-comments")) {
+                document.querySelector("#all-comments-text").textContent = "";
+                ac.classList.remove("active-all-comments");
+            } else {
+                ac.classList.add("active-all-comments");
+                await new Promise((resolve) => {
+                    setTimeout(() => {
+                        printInTerminal("#all-comments-text", allCommentsTxt, "cmt", 10);
+                        resolve();
+                    }, 500);
+                })
+            }
+        });
+    })
 }

@@ -120,6 +120,10 @@ const allUsersTerminal = makeTerminal("all-users", allUsersRows, "infos-txt")
 let allPostsRows = loopSpans(allPostsTxt);
 const allPostsTerminal = makeTerminal("all-posts", allPostsRows, "infos-txt")
 
+const newPostTerminal = makeTerminal("new-post", "", "infos-txt")
+
+const allCommentsTerminal = makeTerminal("all-comments", "", "infos-txt")
+
 const netcatTerminal = makeTerminal("netcat", "", "infos-txt")
 
 var feedsView = /*html*/ `
@@ -130,7 +134,9 @@ var feedsView = /*html*/ `
         ${actionsTerminal}
     </div>
     <div id="feeds-middle" class="feeds-col">
+        ${newPostTerminal}
         ${allPostsTerminal}
+        ${allCommentsTerminal}
     </div>
     <div id="feeds-right" class="feeds-col">
         ${allUsersTerminal}
@@ -147,7 +153,7 @@ let actionsButtons = /*html*/`
 let makePost = (postData) => /*html*/`
 <hr class="post-separator">
 <span class="post-title">${postData.Title}</span>
-<span class="post-time-author">[${postData.CreationDate}] by ${postData.AuthorName}</span>
+<span class="post-time-author">[${formatDate(postData.CreationDate)}] by ${postData.AuthorName}</span>
 <p class="post-text">${postData.Content}</p>
 ${postImage}
 <div class="reaction-btns-zone" data-post="${postData.Id}">

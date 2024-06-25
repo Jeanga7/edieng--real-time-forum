@@ -54,6 +54,15 @@ function debounce(func, wait) {
     };
 }
 
+function autoMsg(txt, msgDelay) {
+    let field = document.querySelector("#chat-input");
+    setTimeout(()=>{
+        for (let i = 0; i < txt.length; i++) {
+            
+        }
+    }, msgDelay)
+}
+
 let loginTxtsData = [{
         zone: "#login-intro",
         className: "lgn",
@@ -166,6 +175,16 @@ let allUsersTxt = [
 
 let allPostsTxt = [
     {txt: "$> rtf --all-posts", c: "command", eol: true},
+    {txt: "", c: null, eol: true},
+];
+
+let newPostTxt = [
+    {txt: "$> rtf --new-post", c: "command", eol: true},
+    {txt: "", c: null, eol: true},
+];
+
+let allCommentsTxt = [
+    {txt: "$> rtf --all-comments", c: "command", eol: true},
     {txt: "", c: null, eol: true},
 ];
 
