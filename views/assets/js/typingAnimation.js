@@ -830,8 +830,8 @@ function insertMsg(refElement, isOld, className, date, author, msg) {
 }
 
 function handleLoadMoreMsg() {
-    document.querySelector("#netcat").addEventListener("scroll", async (e) => {
-        if (e.target.scrollTop === 0 && chatChunks.length > 0) {
+    document.querySelector("#netcat").addEventListener("scroll", debounce(async (e) => {
+        if (e.target.scrollTop < 20 && chatChunks.length > 0) {
             let msgs = reverseArray(chatChunks.shift());
 
             let oldMsgs = () => document.querySelectorAll(".old-msg-name");
@@ -847,6 +847,7 @@ function handleLoadMoreMsg() {
                     })
                 }
             }
+            e.target.scrollTop += 25
         }
-    });
+    }, 200));
 }

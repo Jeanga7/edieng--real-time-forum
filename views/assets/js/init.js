@@ -46,6 +46,14 @@ let chunkList = (arr, len) => arr.length > len
                             : [arr];
 
 
+function debounce(func, wait) {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => func(...args), wait);
+    };
+}
+
 let loginTxtsData = [{
         zone: "#login-intro",
         className: "lgn",

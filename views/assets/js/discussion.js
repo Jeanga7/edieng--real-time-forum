@@ -200,13 +200,7 @@ function handleScroll() {
         }, 500);
     }
 }
-function debounce(func, wait) {
-    let timer;
-    return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => func(...args), wait);
-    };
-}
+
 function loadHistory(messages) {
     const chatMessages = document.getElementById("chat-messages");
     chatMessages.innerHTML = '';
