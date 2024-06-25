@@ -18,7 +18,7 @@ let netcatTxt = (user, data) => {
             let className = userNickname && d.sender === userNickname ? "bold-fluo" : "warning";
             res.push({
                 txt: `[${formatDate(d.date)}][${d.sender}]:`,
-                c: className,
+                c: className + " old-msg-name",
                 eol: false
             })
             res.push({
@@ -219,12 +219,12 @@ function startFeedsTerminals() {
 
             document.querySelector("#logout-btn").addEventListener("click", async (e) => {
                 await new Promise((resolve) => {
-                    setTimeout(()=>{
-                        ws.close(); 
-                        resolve();                       
+                    setTimeout(() => {
+                        ws.close();
+                        resolve();
                     }, 50)
                 })
-                window.location.href='/logout';
+                window.location.href = '/logout';
             });
 
             resolve();
@@ -541,7 +541,6 @@ async function resetChatList() {
         // Seperate discussions
         let chat = await fetchChat(userData.Nickname);
         if (chat.length > 0) {
-            console.log(chat);
             known.push({
                 data: userData,
                 date: chat[0].updatedDate
@@ -568,7 +567,6 @@ async function resetChatList() {
             user.style.opacity = "1";
         }, 500 + i * 500);
     }
-    console.log(known);
 
     known.forEach(listChats);
     unknown.forEach(listChats);
@@ -622,7 +620,8 @@ function handleOpenChat() {
 
             if (chatWith === chatUser) {
                 if (nc.classList.contains("active-chat")) nc.classList.remove("active-chat");
-                chatWith = null
+                chatWith = null;
+                chatChunks = [];
             } else {
                 if (!nc.classList.contains("active-chat")) nc.classList.add("active-chat");
                 chatWith = chatUser
@@ -636,6 +635,8 @@ function handleOpenChat() {
                 if (chat.length === 1) {
                     msgs = JSON.parse(chat[0].messages);
                 }
+                chatChunks = chunkList(msgs, 10);
+                msgs = chatChunks.shift();
 
                 let netcat = document.querySelector("#netcat-text")
                 netcat.innerHTML = "";
@@ -687,6 +688,8 @@ function handleOpenChat() {
                             resolve();
                         })
                 })
+
+                handleLoadMoreMsg();
             }
         });
     });
@@ -714,16 +717,7 @@ function handleSendMsg() {
 
             // Insert new message
             let chatInputName = document.querySelector(".chat-input-name");
-            chatInputName.before(makeSpan("bold-fluo new-msg-name"));
-
-            let name = document.querySelectorAll(".new-msg-name");
-            name[name.length - 1].textContent = `[${formatDate()}][${userNickname}]:`
-            name[name.length - 1].after(makeSpan("new-msg-txt"))
-
-            let txt = document.querySelectorAll(".new-msg-txt");
-            txt[txt.length - 1].textContent = msg;
-
-            txt[txt.length - 1].after(makeBr());
+            insertMsg(chatInputName, false, "bold-fluo", undefined, userNickname, msg)
             terminalScrollBottom("#chat-input");
 
             let user = document.querySelector(`.user[data-nickname="${chatWith}"]`);
@@ -764,16 +758,7 @@ function handleWebsocket() {
                 if (chatWith === response.from) {
                     // Insert new message
                     let chatInputName = document.querySelector(".chat-input-name");
-                    chatInputName.before(makeSpan("warning new-msg-name"));
-
-                    let name = document.querySelectorAll(".new-msg-name");
-                    name[name.length - 1].textContent = `[${formatDate(response.time)}][${response.from}]:`
-                    name[name.length - 1].after(makeSpan("new-msg-txt"))
-
-                    let txt = document.querySelectorAll(".new-msg-txt");
-                    txt[txt.length - 1].textContent = response.message;
-
-                    txt[txt.length - 1].after(makeBr());
+                    insertMsg(chatInputName, false, "warning", response.time, response.from, response.message)
                     terminalScrollBottom("#chat-input");
                 } else {
                     // Notify
@@ -824,5 +809,44 @@ function focusInput() {
                 focused[0].focus();
             }
         });
+    });
+}
+
+function insertMsg(refElement, isOld, className, date, author, msg) {
+    // Insert message
+    let index = (arr) => isOld ? 0 : arr.length - 1;
+    let status = isOld ? "old" : "new";
+
+    refElement.before(makeSpan(`${className} ${status}-msg-name`));
+    let name = document.querySelectorAll(`.${status}-msg-name`);
+
+    name[index(name)].textContent = `[${formatDate(date)}][${author}]:`;
+    name[index(name)].after(makeSpan(`${status}-msg-txt`));
+
+    let txt = document.querySelectorAll(`.${status}-msg-txt`);
+    txt[index(txt)].textContent = msg;
+
+    txt[index(txt)].after(makeBr());
+}
+
+function handleLoadMoreMsg() {
+    document.querySelector("#netcat").addEventListener("scroll", async (e) => {
+        if (e.target.scrollTop === 0 && chatChunks.length > 0) {
+            let msgs = reverseArray(chatChunks.shift());
+
+            let oldMsgs = () => document.querySelectorAll(".old-msg-name");
+            if (oldMsgs().length > 0) {
+                console.log(msgs);
+                for (const msg of msgs) {
+                    await new Promise((resolve) => {
+                        setTimeout(() => {
+                            let className = msg.sender !== userNickname ? "warning" : "bold-fluo"
+                            insertMsg(oldMsgs()[0], true, className, msg.date, msg.sender, msg.message);
+                            resolve();
+                        }, 100);
+                    })
+                }
+            }
+        }
     });
 }

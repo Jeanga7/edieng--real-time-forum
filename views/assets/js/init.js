@@ -33,17 +33,18 @@ let formatDate = (d=undefined) => (d ? new Date(d) : new Date()).toLocaleString(
     hour12: false // Use 24-hour time format
 });
 
-// let reverseArray = (arr) => arr.length > 1
-//                             ? [arr[]]
+let reverseArray = (arr) => arr.length > 1
+                            ? [...arr.slice(-1), ...reverseArray(arr.slice(0, -1))]
+                            : arr;
 
-// function chunkList(arr, len) {
-//     let newArr = [];
-//     for (arr.length > len) {
-//         newArr.push(arr.slice(len - arr.length))
-//     }
-// }
+// let genList = (start, end) => start < end
+//                                 ? [start, ...genList(start+1, end)]
+//                                 : [end];
 
-// let chunk = (arr, len) => [arr.length>=len ? ]
+let chunkList = (arr, len) => arr.length > len
+                            ? [arr.slice(-len), ...chunkList(arr.slice(0, -len), len)]
+                            : [arr];
+
 
 let loginTxtsData = [{
         zone: "#login-intro",
