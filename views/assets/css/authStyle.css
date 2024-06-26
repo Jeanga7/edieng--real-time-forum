@@ -503,7 +503,7 @@ input[type=number] {
     font-weight: 500;
 }
 #user-nickname {
-    font-size: .8em;
+    font-size: .7em;
     font-weight: 300;
 }
 
@@ -639,7 +639,7 @@ hr.post-separator {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: var(--gap);
+    gap: 6px;
     transition: var(--standard-transition);
     cursor: pointer;
 }
@@ -656,7 +656,7 @@ hr.post-separator {
     box-shadow: 0 0 5px var(--fluo) !important;
 }
 
-.user-nickname, .user-notifications {
+.user-nickname, .user-notifications, .user-typing {
     color: red;
     text-shadow: 0 0 4px red;
 }
@@ -722,4 +722,8 @@ hr.post-separator {
     height: 100%;
     display: block !important;
     flex-grow: 4 !important;
+}
+.user-typing {
+    font-size: .4em;
+    padding-top: 6px;
 }

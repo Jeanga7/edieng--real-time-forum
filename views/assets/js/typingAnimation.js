@@ -211,7 +211,7 @@ function startFeedsTerminals() {
             ShowAllPosts(posts);
             handleOpenNewPost();
             handleOpenComments();
-            
+
             ListUsers();
 
             enableReactions();
@@ -701,30 +701,36 @@ function handleOpenChat() {
 function handleSendMsg() {
     document.addEventListener("keydown", async (e) => {
         let chatInput = document.querySelector("#chat-input");
-        if (e.code === "Enter" && chatInput.value.length > 0) {
-            e.preventDefault();
+        if (chatInput && chatWith !== null) {
+            throttle(sendTypingNotif, "sendTyping", 1200)();
 
-            ws.send(JSON.stringify({
-                "from": userNickname,
-                "to": chatWith,
-                "type": "message",
-                "message": chatInput.value,
-                "signature": sessionID
-            }))
+            if (chatInput.value.length > 0) {
+                if (e.code === "Enter") {
+                    e.preventDefault();
 
-            // Reset input
-            let msg = chatInput.value;
-            chatInput.value = "";
-            chatInput.style.width = "0";
-            chatInput.parentNode.querySelector(".measurer").textContent = "";
+                    ws.send(JSON.stringify({
+                        "from": userNickname,
+                        "to": chatWith,
+                        "type": "message",
+                        "message": chatInput.value,
+                        "signature": sessionID
+                    }))
 
-            // Insert new message
-            let chatInputName = document.querySelector(".chat-input-name");
-            insertMsg(chatInputName, false, "bold-fluo", undefined, userNickname, msg)
-            terminalScrollBottom("#chat-input");
+                    // Reset input
+                    let msg = chatInput.value;
+                    chatInput.value = "";
+                    chatInput.style.width = "0";
+                    chatInput.parentNode.querySelector(".measurer").textContent = "";
 
-            let user = document.querySelector(`.user[data-nickname="${chatWith}"]`);
-            moveElementToParentStart(user);
+                    // Insert new message
+                    let chatInputName = document.querySelector(".chat-input-name");
+                    insertMsg(chatInputName, false, "bold-fluo", undefined, userNickname, msg)
+                    terminalScrollBottom("#chat-input");
+
+                    let user = document.querySelector(`.user[data-nickname="${chatWith}"]`);
+                    moveElementToParentStart(user);
+                }
+            }
         }
     });
 }
@@ -774,7 +780,7 @@ function handleWebsocket() {
                 break;
 
             case "online":
-                let userToOnline = document.querySelector(`[data-nickname="${response.message}"]`);
+                let userToOnline = document.querySelector(`[data-nickname="${response.from}"]`);
                 if (userToOnline) {
                     userToOnline.querySelector(".user-status").classList.add("status-online");
                     userToOnline.querySelector(".user-nickname").classList.add("txt-online");
@@ -783,14 +789,38 @@ function handleWebsocket() {
                 break;
 
             case "offline":
-                let userToOffline = document.querySelector(`[data-nickname="${response.message}"]`);
+                let userToOffline = document.querySelector(`[data-nickname="${response.from}"]`);
                 if (userToOffline) {
                     userToOffline.querySelector(".user-status").classList.remove("status-online");
                     userToOffline.querySelector(".user-nickname").classList.remove("txt-online");
                     userToOffline.querySelector(".user-notifications").classList.remove("txt-online");
                 }
                 break;
+
+            case "typing":
+                displayTyping(response);
         }
+    }
+}
+
+function sendTypingNotif() {
+    ws.send(JSON.stringify({
+        "from": userNickname,
+        "to": chatWith,
+        "type": "typing",
+        "message": "",
+        "signature": sessionID
+    }))
+}
+
+function displayTyping(response) {
+    let userBlock = document.querySelector(`[data-nickname="${response.from}"]`);
+    if (userBlock) {
+        userBlock.querySelector(".user-typing").classList.remove("not-displayed");
+        clearTimeout(timers["typing"]);
+        timers["typing"] = setTimeout(() => {
+            userBlock.querySelector(".user-typing").classList.add("not-displayed");
+        }, 2500);
     }
 }
 
@@ -852,7 +882,7 @@ function handleLoadMoreMsg() {
             }
             e.target.scrollTop += 25
         }
-    }, 200));
+    }, "scroll", 500));
 }
 
 function handleOpenNewPost() {

@@ -45,12 +45,23 @@ let chunkList = (arr, len) => arr.length > len
                             ? [arr.slice(-len), ...chunkList(arr.slice(0, -len), len)]
                             : [arr];
 
-
-function debounce(func, wait) {
-    let timer;
+var timers = {}
+function debounce(func, timer, wait) {
     return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => func(...args), wait);
+        clearTimeout(timers[timer]);
+        timers[timer] = setTimeout(() => func(...args), wait);
+    };
+}
+
+function throttle(func, timer, wait) {
+    return (...args) => {
+        if (!timers[timer]) {
+            func(...args);
+            timers[timer] = true;
+            setTimeout(()=>{
+                timers[timer] = false;
+            }, wait);
+        }
     };
 }
 

@@ -86,7 +86,7 @@ func ReadLoop(r *http.Request, conn *websocket.Conn) {
 				go SaveAndSend(conn, senderId, senderNickname, destId, destNickname, msg)
 
 				// Print message on server side
-				fmt.Printf("Received message from %s: '%s'\n", senderNickname, string(msg.Message))
+				// fmt.Printf("Received message from %s: '%s'\n", senderNickname, string(msg.Message))
 			} else if string(msg.To) == "@system" {
 				connectedNames[senderNickname] = conn // Register the senderNickname
 				fmt.Println(senderNickname + " connected")
@@ -99,32 +99,34 @@ func ReadLoop(r *http.Request, conn *websocket.Conn) {
 }
 
 func SaveAndSend(conn *websocket.Conn, senderId, senderNickname, destId, destNickname string, msg ClientMessage) {
-	// Save
-	err := StoreMessage(senderId, senderNickname, destId, destNickname, msg.Message)
-	if err != nil {
-		res := ClientMessage{
-			From:      "@server",
-			To:        senderNickname,
-			Message:   err.Error(),
-			Type:      "error",
-			Signature: "@server",
+	if msg.Type == "message" {
+		// Save
+		err := StoreMessage(senderId, senderNickname, destId, destNickname, msg.Message)
+		if err != nil {
+			res := ClientMessage{
+				From:      "@server",
+				To:        senderNickname,
+				Message:   err.Error(),
+				Type:      "error",
+				Signature: "@server",
+			}
+			txt, err := json.Marshal(res)
+			helpers.ErrorSimple(err)
+			conn.WriteJSON(string(txt))
+			return
 		}
-		txt, err := json.Marshal(res)
-		helpers.ErrorSimple(err)
-		conn.WriteJSON(string(txt))
-		return
-	}
 
-	// Save notification
-	notifs := models.Notification.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{senderId, destId})
-	if len(notifs) == 0 {
-		// Create notification
-		CreateNotification(senderId, destId)
-	} else {
-		// Update notification
-		notifId := notifs[0].Values["id"].(string)
-		notifNb := notifs[0].Values["notifications"].(int64)
-		UpdateNotif(notifId, senderId, destId, notifNb+1)
+		// Save notification
+		notifs := models.Notification.Fetch([]interface{}{"idSender", "idReceiver"}, []interface{}{senderId, destId})
+		if len(notifs) == 0 {
+			// Create notification
+			CreateNotification(senderId, destId)
+		} else {
+			// Update notification
+			notifId := notifs[0].Values["id"].(string)
+			notifNb := notifs[0].Values["notifications"].(int64)
+			UpdateNotif(notifId, senderId, destId, notifNb+1)
+		}
 	}
 
 	// Send
@@ -133,7 +135,7 @@ func SaveAndSend(conn *websocket.Conn, senderId, senderNickname, destId, destNic
 			From:      senderNickname,
 			To:        destNickname,
 			Message:   msg.Message,
-			Type:      "message",
+			Type:      msg.Type,
 			Signature: msg.Signature,
 			Time:      helpers.Now(),
 		}
