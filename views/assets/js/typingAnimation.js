@@ -12,6 +12,12 @@ let netcatTxt = (user, data) => {
             c: "command",
             eol: true
         },
+        ...netcatLogo(),
+        {
+            txt: "",
+            c: "command",
+            eol: true
+        },
     ];
     if (Object.prototype.toString.call(data) === "[object Array]" && data.length > 0) {
         data.forEach(d => {
@@ -211,7 +217,7 @@ function startFeedsTerminals() {
             ShowAllPosts(posts);
             handleOpenNewPost();
             handleOpenComments();
-
+            
             ListUsers();
 
             enableReactions();
@@ -701,36 +707,30 @@ function handleOpenChat() {
 function handleSendMsg() {
     document.addEventListener("keydown", async (e) => {
         let chatInput = document.querySelector("#chat-input");
-        if (chatInput && chatWith !== null) {
-            throttle(sendTypingNotif, "sendTyping", 1200)();
+        if (e.code === "Enter" && chatInput.value.length > 0) {
+            e.preventDefault();
 
-            if (chatInput.value.length > 0) {
-                if (e.code === "Enter") {
-                    e.preventDefault();
+            ws.send(JSON.stringify({
+                "from": userNickname,
+                "to": chatWith,
+                "type": "message",
+                "message": chatInput.value,
+                "signature": sessionID
+            }))
 
-                    ws.send(JSON.stringify({
-                        "from": userNickname,
-                        "to": chatWith,
-                        "type": "message",
-                        "message": chatInput.value,
-                        "signature": sessionID
-                    }))
+            // Reset input
+            let msg = chatInput.value;
+            chatInput.value = "";
+            chatInput.style.width = "0";
+            chatInput.parentNode.querySelector(".measurer").textContent = "";
 
-                    // Reset input
-                    let msg = chatInput.value;
-                    chatInput.value = "";
-                    chatInput.style.width = "0";
-                    chatInput.parentNode.querySelector(".measurer").textContent = "";
+            // Insert new message
+            let chatInputName = document.querySelector(".chat-input-name");
+            insertMsg(chatInputName, false, "bold-fluo", undefined, userNickname, msg)
+            terminalScrollBottom("#chat-input");
 
-                    // Insert new message
-                    let chatInputName = document.querySelector(".chat-input-name");
-                    insertMsg(chatInputName, false, "bold-fluo", undefined, userNickname, msg)
-                    terminalScrollBottom("#chat-input");
-
-                    let user = document.querySelector(`.user[data-nickname="${chatWith}"]`);
-                    moveElementToParentStart(user);
-                }
-            }
+            let user = document.querySelector(`.user[data-nickname="${chatWith}"]`);
+            moveElementToParentStart(user);
         }
     });
 }
@@ -780,7 +780,7 @@ function handleWebsocket() {
                 break;
 
             case "online":
-                let userToOnline = document.querySelector(`[data-nickname="${response.from}"]`);
+                let userToOnline = document.querySelector(`[data-nickname="${response.message}"]`);
                 if (userToOnline) {
                     userToOnline.querySelector(".user-status").classList.add("status-online");
                     userToOnline.querySelector(".user-nickname").classList.add("txt-online");
@@ -789,38 +789,14 @@ function handleWebsocket() {
                 break;
 
             case "offline":
-                let userToOffline = document.querySelector(`[data-nickname="${response.from}"]`);
+                let userToOffline = document.querySelector(`[data-nickname="${response.message}"]`);
                 if (userToOffline) {
                     userToOffline.querySelector(".user-status").classList.remove("status-online");
                     userToOffline.querySelector(".user-nickname").classList.remove("txt-online");
                     userToOffline.querySelector(".user-notifications").classList.remove("txt-online");
                 }
                 break;
-
-            case "typing":
-                displayTyping(response);
         }
-    }
-}
-
-function sendTypingNotif() {
-    ws.send(JSON.stringify({
-        "from": userNickname,
-        "to": chatWith,
-        "type": "typing",
-        "message": "",
-        "signature": sessionID
-    }))
-}
-
-function displayTyping(response) {
-    let userBlock = document.querySelector(`[data-nickname="${response.from}"]`);
-    if (userBlock) {
-        userBlock.querySelector(".user-typing").classList.remove("not-displayed");
-        clearTimeout(timers["typing"]);
-        timers["typing"] = setTimeout(() => {
-            userBlock.querySelector(".user-typing").classList.add("not-displayed");
-        }, 2500);
     }
 }
 
@@ -863,26 +839,7 @@ function insertMsg(refElement, isOld, className, date, author, msg) {
 }
 
 function handleLoadMoreMsg() {
-    document.querySelector("#netcat").addEventListener("scroll", debounce(async (e) => {
-        if (e.target.scrollTop < 20 && chatChunks.length > 0) {
-            let msgs = reverseArray(chatChunks.shift());
-
-            let oldMsgs = () => document.querySelectorAll(".old-msg-name");
-            if (oldMsgs().length > 0) {
-                console.log(msgs);
-                for (const msg of msgs) {
-                    await new Promise((resolve) => {
-                        setTimeout(() => {
-                            let className = msg.sender !== userNickname ? "warning" : "bold-fluo"
-                            insertMsg(oldMsgs()[0], true, className, msg.date, msg.sender, msg.message);
-                            resolve();
-                        }, 100);
-                    })
-                }
-            }
-            e.target.scrollTop += 25
-        }
-    }, "scroll", 500));
+    document.querySelector("#netcat").addEventListener("scroll", debounceScroll);
 }
 
 function handleOpenNewPost() {
@@ -901,6 +858,29 @@ function handleOpenNewPost() {
             })
         }
     });
+}
+
+let debounceScroll = (e) => debounce(loadOldMsg, "chat", 800)(e);
+
+async function loadOldMsg(e) {
+    if (e.target.scrollTop < 240 && chatChunks.length > 0) {
+        let msgs = reverseArray(chatChunks.shift());
+
+        let oldMsgs = () => document.querySelectorAll(".old-msg-name");
+        if (oldMsgs().length > 0) {
+            console.log(msgs);
+            for (const msg of msgs) {
+                await new Promise((resolve) => {
+                    setTimeout(() => {
+                        let className = msg.sender !== userNickname ? "warning" : "bold-fluo"
+                        insertMsg(oldMsgs()[0], true, className, msg.date, msg.sender, msg.message);
+                        resolve();
+                    }, 100);
+                })
+            }
+        }
+        e.target.scrollTop += 255
+    }
 }
 
 function handleOpenComments() {

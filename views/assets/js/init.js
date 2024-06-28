@@ -199,6 +199,37 @@ let allCommentsTxt = [
     {txt: "", c: null, eol: true},
 ];
 
+let netcatLinux = [
+    "........._nnnn_",
+    "........dGGGGMMb",
+    ".......@p~qp~~qMb",
+    ".......M|@||@).M|",
+    ".......@,----.JM|",
+    "......JS^\\__/..qKL",
+    ".....dZP........qKRb",
+    "....dZP..........qKKb",
+    "...fZP............SMMb",
+    "...HZM............MMMM",
+    "...FqM............MMMM",
+    ".__|.\".........|\\dS\"qML",
+    ".|....`........|.`'.\\Zq",
+    "_)......\\.___.,|......'",
+    "\\____...)MMMMMP|....'",
+    ".....`-'.......`--'",
+];
+
+function netcatLogo() {
+    let res = [];
+    netcatLinux.forEach(l=>{
+        res.push({
+            txt: l,
+            c: "command",
+            eol: true
+        });
+    });
+    return res;
+}
+
 async function authHandleEnter(e) {
     if (e.code === "Enter") {
         e.preventDefault();
