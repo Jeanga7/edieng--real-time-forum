@@ -1,10 +1,12 @@
-# 🌐 Forum Project (image-upload) 🌐
+# 🌐 Real Time Forum 🌐
 
-Welcome to the **Forum Project**! 🚀 This repository contains the source code for a dynamic forum application built with Go, following the Model-View-Controller (MVC) architectural pattern. 🛠️
+Welcome to the **Real Time Forum**! 🚀 This repository contains the source code for a dynamic forum application built with Go and JS, following the Model-View-Controller (MVC) architectural pattern. 🛠️
 
 ## 🎯 Features 🎯
 
 - **User Authentication**: 🔐 Users can register, log in, and log out.
+- **Private Messages**: 🗨️ Users can send privates messages each other.
+- **Real Time Actions**: 🔐 This forum is built as a Single Page Application, so all actions are carried out in real time.
 - **Post Management**: 📝 Users can create, read, edit, and delete posts.
 - **Comment Management**: 🗨️ Users can comment on posts and manage their comments.
 - **Like/Dislike System**: 👍 Users can like or dislike posts and comments.
@@ -15,7 +17,7 @@ Welcome to the **Forum Project**! 🚀 This repository contains the source code 
 
 To get started with the project, follow these steps:
 
-1. **Clone the Repository**: Clone the repository using `git clone https://learn.zone01dakar.sn/git/lodiouf/forum.git`.
+1. **Clone the Repository**: Clone the repository using `git clone https://learn.zone01dakar.sn/git/edieng/real-time-forum.git`.
 2. **Set Up the Database**: The application uses SQLite as its database. Ensure that SQLite is installed on your machine.
 3. **Run the Application**: Start the application by running `go run .` in the project directory.
 4. **Access the Application**: Open a web browser and navigate to `http://localhost:8989` to access the forum.
@@ -78,5 +80,5 @@ Contributions are welcome! Please feel free to open issues for any bugs or featu
 
 - **@lodiouf**
 - **@jgoudiab** 
-- **@mouhamadououdiouf**
-- **@mabdelwe**
+- **@edieng**
+- **@aliouniang**
