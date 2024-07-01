@@ -7,3 +7,7 @@
 [ ] Le logout doit permettre de se déconnecter via le terminal en transmettant à la fonction de logout via une requete post, le nickname du user à déconnecter
 [ ] Mettre le nombre de réactions, posts et commentaires
 [ ] Rediriger toutes les routes vers la page d'accueil
+[ ] Ajouter un throttle pour le bouton "Add post"
+[ ] Ajouter un throttle pour l'ouverture d'un chat
+[ ] Résoudre le problème de typing
+[ ] Vérifier et résoudre les causes de crash Go Routine
