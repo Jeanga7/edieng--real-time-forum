@@ -48,6 +48,8 @@ func Routes(mux *http.ServeMux) {
 
 	mux.HandleFunc("/api/comments", api.FetchComments)
 
+	mux.HandleFunc("/api/create-comment", api.CreateComment)
+
 	mux.HandleFunc("/api/discussions", api.HandleDiscussions)
 
 	mux.HandleFunc("/api/likes", api.FetchLike)

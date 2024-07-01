@@ -593,7 +593,7 @@ hr.post-separator {
     color: red;
     text-shadow: 0 0 4px red;
 }
-.comment-btn {
+.comment-btn, .comment-infos {
     color: var(--blue2);
     text-shadow: 0 0 4px var(--blue2);
 }
@@ -726,4 +726,9 @@ hr.post-separator {
 .user-typing {
     font-size: .4em;
     padding-top: 6px;
+}
+
+#comments-zone {
+    display: flex;
+    flex-direction: column;
 }

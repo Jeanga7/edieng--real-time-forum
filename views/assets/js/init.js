@@ -13,7 +13,9 @@ const postsRoute = '/api/posts';
 const categoriesListRoute = '/api/categories-list';
 const allUsersRoute = '/api/all-users';
 const discussionsRoute = '/api/discussions';
+const commentsRoute = '/api/comments';
 const resetNotifsRoute = '/api/reset-notifications'
+const createCommentRoute = '/api/create-comment';
 const reactionRoute = '/reaction';
 const port = ":8989"
 
@@ -197,6 +199,8 @@ let newPostTxt = [
 let allCommentsTxt = [
     {txt: "$> rtf --all-comments", c: "command", eol: true},
     {txt: "", c: null, eol: true},
+    {txt: "> ", c: "bold-fluo comment-input-name", eol: false},
+    {txt: " ", c: null, eol: false}
 ];
 
 let netcatLinux = [

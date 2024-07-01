@@ -217,7 +217,7 @@ function startFeedsTerminals() {
             ShowAllPosts(posts);
             handleOpenNewPost();
             handleOpenComments();
-            
+
             ListUsers();
 
             enableReactions();
@@ -705,7 +705,7 @@ function handleOpenChat() {
 }
 
 function handleSendMsg() {
-    document.addEventListener("keydown", async (e) => {
+    document.querySelector("#netcat").addEventListener("keydown", async (e) => {
         let chatInput = document.querySelector("#chat-input");
         if (e.code === "Enter" && chatInput.value.length > 0) {
             e.preventDefault();
@@ -868,7 +868,6 @@ async function loadOldMsg(e) {
 
         let oldMsgs = () => document.querySelectorAll(".old-msg-name");
         if (oldMsgs().length > 0) {
-            console.log(msgs);
             for (const msg of msgs) {
                 await new Promise((resolve) => {
                     setTimeout(() => {
@@ -891,14 +890,111 @@ function handleOpenComments() {
                 document.querySelector("#all-comments-text").textContent = "";
                 ac.classList.remove("active-all-comments");
             } else {
+                // Fetch comments
+                let postId = el.parentElement.dataset.post;
+                let data = new FormData();
+                data.append("postId", postId);
+
+                let comments = await new Promise((resolve) => {
+                    fetch(commentsRoute, {
+                            method: 'POST',
+                            body: data
+                        })
+                        .then(r => r.json())
+                        .then(d => {
+                            resolve(d);
+                        });
+                });
+
+                // Open comments terminal
                 ac.classList.add("active-all-comments");
                 await new Promise((resolve) => {
-                    setTimeout(() => {
-                        printInTerminal("#all-comments-text", allCommentsTxt, "cmt", 10);
+                    setTimeout(async () => {
+                        await printInTerminal("#all-comments-text", allCommentsTxt, "cmt", 10);
                         resolve();
                     }, 500);
                 })
+
+                // Add comment input
+                await new Promise((resolve) => {
+                    // Add comment input
+                    let input = /*html*/ `
+                        <input type="text" name="comment-input" id="comment-input" class="forum-input" autocomplete="false">
+                    `;
+                    let measurer = /*html*/ `
+                        <span class="measurer"></span>
+                    `;
+                    let txts = document.querySelectorAll("span.comment-input-name");
+                    txts[txts.length - 1].after(createElementFromHTML(input));
+                    let commentInput = document.querySelector("#comment-input");
+                    commentInput.after(createElementFromHTML(measurer));
+                    commentInput.focus();
+                    commentInput.classList.add("focused");
+                    resizeInput();
+                    resolve();
+                });
+
+                // Display comments
+                let commentsZone = document.createElement("div");
+                commentsZone.id = "comments-zone";
+                document.querySelector(".comment-input-name").before(commentsZone);
+                document.querySelector(".comment-input-name").before(document.createElement("br"));
+
+                comments.forEach(c=>{
+                    commentsZone.appendChild(comment(c.creationDate, c.nickname, c.content))
+                });
+
+                handleSendComment(postId, el);
+                terminalScrollBottom("#comment-input");
             }
         });
     })
+}
+
+function handleSendComment(postId, el) {
+    document.querySelector("#all-comments").addEventListener("keydown", async (e) => {
+        let commentInput = document.querySelector("#comment-input");
+        let cmtTxt = commentInput.value;
+        if (e.code === "Enter" && cmtTxt.length > 0) {
+            e.preventDefault();
+
+            // Send comment text
+            let data = new FormData();
+            data.append("postId", postId);
+            data.append("sessionId", sessionID);
+            data.append("commentTxt", cmtTxt);
+
+            fetch(createCommentRoute, {
+                method: 'POST',
+                body: data
+            })
+            .then(r=>r.json())
+            .then(d=>{
+                if (d.value === "SUCCESS") {
+                    // Insert new comment
+                    let commentsZone = document.querySelector("#comments-zone");
+                    commentsZone.appendChild(comment(undefined, userNickname, cmtTxt))
+                }
+            });
+
+            // Reset input
+            commentInput.value = "";
+            commentInput.style.width = "0";
+            commentInput.parentNode.querySelector(".measurer").textContent = "";
+
+            // Update comments count number
+            let numComments = el.querySelector(".num-comments");
+            numComments.textContent = String(parseInt(numComments.textContent)+1);
+            terminalScrollBottom("#comment-input");
+        }
+    });
+}
+
+function comment(date, author, txt) {
+    let commentLine = document.createElement("span");
+    commentLine.className = "comment";
+    commentLine.innerHTML = /*html*/`
+        <span class="comment-infos">[${formatDate(date)}][${author}]:</span>${txt}
+    `
+    return commentLine;
 }

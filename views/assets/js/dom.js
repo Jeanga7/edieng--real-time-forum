@@ -159,7 +159,7 @@ ${postImage}
 <div class="reaction-btns-zone" data-post="${postData.Id}">
     <span class="reaction like-btn like-dislike ${postData.Liked ? "reaction-active" : ""}">[<span class="reaction-check">${postData.Liked ? "X" : " "}</span>]Like(<span class="reaction-count">${postData.Likes}</span>)</span>
     <span class="reaction dislike-btn like-dislike ${postData.Disliked ? "reaction-active" : ""}">[<span class="reaction-check">${postData.Disliked ? "X" : " "}</span>]Dislike(<span class="reaction-count">${postData.Dislikes}</span>)</span>
-    <span class="reaction comment-btn">$>Comment(${postData.NumComments})</span>
+    <span class="reaction comment-btn">$>Comment(<span class="num-comments">${postData.NumComments}</span>)</span>
 </div>
 `
 
