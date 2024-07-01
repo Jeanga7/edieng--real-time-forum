@@ -3,6 +3,7 @@ const speed = 15;
 var fieldLoaded = false;
 var activeForm = "login";
 var chatWith = null;
+var activePost = null;
 var chatChunks = [];
 
 var printed = {};

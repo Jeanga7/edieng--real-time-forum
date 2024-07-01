@@ -885,13 +885,16 @@ async function loadOldMsg(e) {
 function handleOpenComments() {
     document.querySelectorAll(".comment-btn").forEach(el => {
         el.addEventListener("click", async (e) => {
+            let postId = el.parentElement.dataset.post;
             let ac = document.querySelector("#all-comments");
-            if (ac.classList.contains("active-all-comments")) {
-                document.querySelector("#all-comments-text").textContent = "";
+            document.querySelector("#all-comments-text").textContent = "";
+            if (ac.classList.contains("active-all-comments") && postId === activePost) {
                 ac.classList.remove("active-all-comments");
+                activePost = null;
             } else {
+                activePost = postId;
+
                 // Fetch comments
-                let postId = el.parentElement.dataset.post;
                 let data = new FormData();
                 data.append("postId", postId);
 
@@ -905,6 +908,8 @@ function handleOpenComments() {
                             resolve(d);
                         });
                 });
+
+                comments = comments.sort((a, b) => CompareUpdatedDate(a.creationDate, b.creationDate));
 
                 // Open comments terminal
                 ac.classList.add("active-all-comments");
@@ -940,18 +945,23 @@ function handleOpenComments() {
                 document.querySelector(".comment-input-name").before(commentsZone);
                 document.querySelector(".comment-input-name").before(document.createElement("br"));
 
-                comments.forEach(c=>{
-                    commentsZone.appendChild(comment(c.creationDate, c.nickname, c.content))
-                });
+                for (const c of comments) {
+                    await new Promise((resolve) => {
+                        setTimeout(() => {
+                            commentsZone.appendChild(comment(c.creationDate, c.nickname, c.content))
+                            resolve();
+                        }, 100);
+                    })
+                }
 
-                handleSendComment(postId, el);
+                handleSendComment();
                 terminalScrollBottom("#comment-input");
             }
         });
     })
 }
 
-function handleSendComment(postId, el) {
+function handleSendComment() {
     document.querySelector("#all-comments").addEventListener("keydown", async (e) => {
         let commentInput = document.querySelector("#comment-input");
         let cmtTxt = commentInput.value;
@@ -960,22 +970,22 @@ function handleSendComment(postId, el) {
 
             // Send comment text
             let data = new FormData();
-            data.append("postId", postId);
+            data.append("postId", activePost);
             data.append("sessionId", sessionID);
             data.append("commentTxt", cmtTxt);
 
             fetch(createCommentRoute, {
-                method: 'POST',
-                body: data
-            })
-            .then(r=>r.json())
-            .then(d=>{
-                if (d.value === "SUCCESS") {
-                    // Insert new comment
-                    let commentsZone = document.querySelector("#comments-zone");
-                    commentsZone.appendChild(comment(undefined, userNickname, cmtTxt))
-                }
-            });
+                    method: 'POST',
+                    body: data
+                })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.value === "SUCCESS") {
+                        // Insert new comment
+                        let commentsZone = document.querySelector("#comments-zone");
+                        commentsZone.appendChild(comment(undefined, userNickname, cmtTxt))
+                    }
+                });
 
             // Reset input
             commentInput.value = "";
@@ -983,8 +993,9 @@ function handleSendComment(postId, el) {
             commentInput.parentNode.querySelector(".measurer").textContent = "";
 
             // Update comments count number
+            let el = document.querySelector(`.reaction-btns-zone[data-post="${activePost}"]`);
             let numComments = el.querySelector(".num-comments");
-            numComments.textContent = String(parseInt(numComments.textContent)+1);
+            numComments.textContent = String(parseInt(numComments.textContent) + 1);
             terminalScrollBottom("#comment-input");
         }
     });
@@ -993,7 +1004,7 @@ function handleSendComment(postId, el) {
 function comment(date, author, txt) {
     let commentLine = document.createElement("span");
     commentLine.className = "comment";
-    commentLine.innerHTML = /*html*/`
+    commentLine.innerHTML = /*html*/ `
         <span class="comment-infos">[${formatDate(date)}][${author}]:</span>${txt}
     `
     return commentLine;
