@@ -195,6 +195,14 @@ let allPostsTxt = [
 let newPostTxt = [
     {txt: "$> rtf --new-post", c: "command", eol: true},
     {txt: "", c: null, eol: true},
+    {txt: "Enter the ", c: null, eol: false},
+    {txt: "post title", c: "bold-fluo", eol: false},
+    {txt: ": ", c: null, eol: false},
+    {txt: " ", c: null, eol: false},
+];
+
+let newPostLogsTxt = [
+    {txt: "$> Fill all fields", c: "command warning", eol: true},
 ];
 
 let allCommentsTxt = [
@@ -293,6 +301,9 @@ function removeAllFocusedClass() {
         el.classList.remove("focused");
     });
 }
+
+let CompareUpdatedDate = (date1, date2) => (new Date(date1)) - (new Date(date2))
+let CompareNicknames = (nickname1, nickname2) => nickname1.localeCompare(nickname2)
 
 // let limitWord = 10;
 // let limitSentence = 50;

@@ -1,7 +1,9 @@
-[ ] Créer un endpoint pour vérifier si l'utilisateur est connecté, si oui le endpoint renvoit l'ID de l'utilisateur en plus du message de succes
-[ ] Remplacer le userID par l'ID de la session pour plus de sécurité (dans le script et dans le websocket)
-[ ] Le logout doit permettre de se déconnecter via le terminal en transmettant à la fonction de logout via une requete post, le nickname du user à déconnecter
-[ ] Limiter la longueur des mots et le nombre de caractère du chat
-[ ] Reset chat list lorsque je reçois un message d'un utilisateur
+[x] Créer un endpoint pour vérifier si l'utilisateur est connecté, si oui le endpoint renvoit l'ID de l'utilisateur en plus du message de succes
+[x] Remplacer le userID par l'ID de la session pour plus de sécurité (dans le script et dans le websocket)
+[x] Limiter la longueur des mots et le nombre de caractère du chat
+[x] Reset chat list lorsque je reçois un message d'un utilisateur
+[x] Mettre l'id de session dans le formData du like et dislike pour éviter que ce soit mis au nom de la session en cours
 [ ] Sécurisation des entêtes pour l'API et la page
-[ ] Mettre l'id de session dans le formData du like et dislike pour éviter que ce soit mis au nom de la session en cours
+[ ] Le logout doit permettre de se déconnecter via le terminal en transmettant à la fonction de logout via une requete post, le nickname du user à déconnecter
+[ ] Mettre le nombre de réactions, posts et commentaires
+[ ] Rediriger toutes les routes vers la page d'accueil

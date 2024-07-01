@@ -121,6 +121,7 @@ let allPostsRows = loopSpans(allPostsTxt);
 const allPostsTerminal = makeTerminal("all-posts", allPostsRows, "infos-txt")
 
 const newPostTerminal = makeTerminal("new-post", "", "infos-txt")
+const newPostLogsTerminal = makeTerminal("new-post-logs", "", "infos-txt")
 
 const allCommentsTerminal = makeTerminal("all-comments", "", "infos-txt")
 
@@ -134,7 +135,10 @@ var feedsView = /*html*/ `
         ${actionsTerminal}
     </div>
     <div id="feeds-middle" class="feeds-col">
-        ${newPostTerminal}
+        <div id="new-post-zone">
+            ${newPostTerminal}
+            ${newPostLogsTerminal}
+        </div>
         ${allPostsTerminal}
         ${allCommentsTerminal}
     </div>
@@ -182,3 +186,64 @@ let userStats = () => /*html*/ `
 let makeUserName = (userInfos) => /*html*/ `
 <span id="user-fullname">${userInfos.firstname + " " + userInfos.lastname}</span>
 <span id="user-nickname">@${userInfos.nickname}</span>`
+
+function comment(date, author, txt) {
+    let commentLine = document.createElement("span");
+    commentLine.className = "comment";
+    commentLine.innerHTML = /*html*/ `
+        <span class="comment-infos">[${formatDate(date)}][${author}]:</span>${txt}
+    `
+    return commentLine;
+}
+
+let netcatTxt = (user, data) => {
+    let res = [{
+            txt: `$> nc --connect "${user}"`,
+            c: "command",
+            eol: true
+        },
+        {
+            txt: "",
+            c: "command",
+            eol: true
+        },
+        ...netcatLogo(),
+        {
+            txt: "",
+            c: "command",
+            eol: true
+        },
+    ];
+    if (Object.prototype.toString.call(data) === "[object Array]" && data.length > 0) {
+        data.forEach(d => {
+            let className = userNickname && d.sender === userNickname ? "bold-fluo" : "warning";
+            res.push({
+                txt: `[${formatDate(d.date)}][${d.sender}]:`,
+                c: className + " old-msg-name",
+                eol: false
+            })
+            res.push({
+                txt: d.message,
+                c: null,
+                eol: true
+            })
+        })
+    } else {
+        res.push({
+            txt: "No message.",
+            c: "danger no-message",
+            eol: true
+        })
+    }
+    res.push({
+        txt: "> ",
+        c: "bold-fluo netcat-input-name",
+        eol: false
+    })
+    res.push({
+        txt: " ",
+        c: null,
+        eol: false
+    })
+    return res;
+};

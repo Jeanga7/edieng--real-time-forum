@@ -1,4 +1,4 @@
-async function ValidateField(route, selector, varName, data, checked, printed) {
+async function ValidateField(route, selector, varName, data, checked, printed, logsText = "#logs-text", terminalName = "logs") {
     removeAllFocusedClass();
     let field = document.querySelector(selector);
     field.focus();
@@ -32,14 +32,14 @@ async function ValidateField(route, selector, varName, data, checked, printed) {
                         eol: true
                     }, ];
 
-                    await printInTerminal("#logs-text", data, "logs", 10);
+                    await printInTerminal(logsText, data, terminalName, 10);
 
-                    let logsZone = document.querySelector("#logs");
+                    let logsZone = document.querySelector("#" + terminalName);
                     logsZone.scrollTop = logsZone.scrollHeight;
                     if (d.more) {
                         responseData = JSON.parse(d.more);
-                        userID = responseData.id;
-                        sessionID = responseData.idSession;
+                        if (responseData.id) {userID = responseData.id;}
+                        if (responseData.idSession) {sessionID = responseData.idSession;}
                     }
                     resolve();
                 });
