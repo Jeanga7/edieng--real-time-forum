@@ -11,12 +11,12 @@ func Routes(mux *http.ServeMux) {
 	mux.Handle("/assets/", http.StripPrefix("/assets", fileServer))
 	mux.HandleFunc("/messages", controllers.HandleMessages)
 	go controllers.HandleTheMessages()
-	mux.HandleFunc("/", controllers.Index)
+	mux.HandleFunc("/", controllers.NewLogin)
 
 	// User routes
 	mux.HandleFunc("/register", controllers.RegisterHandler)
 	mux.HandleFunc("/login", controllers.LoginHandler)
-	mux.HandleFunc("/start", controllers.NewLogin)
+	// mux.HandleFunc("/start", controllers.NewLogin)
 	mux.HandleFunc("/logout", controllers.LogoutHandler)
 
 	// Posts routes

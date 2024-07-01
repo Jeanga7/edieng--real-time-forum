@@ -117,7 +117,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	global.W = w
 	cookie, err := r.Cookie("sessionID")
 	if err != nil {
-		http.Redirect(w, r, "/start", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 
@@ -128,7 +128,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		BroadcastNewUser(GetNicknameById(idUser[0].Values["idUser"]))
 	}
 	DeleteSession(w, r, sessionID)
-	http.Redirect(w, r, "/start", http.StatusFound)
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
