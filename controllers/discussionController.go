@@ -83,7 +83,7 @@ func ReadLoop(r *http.Request, conn *websocket.Conn) {
 				dest := resTo[0]
 				destId, destNickname := dest.Values["id"].(string), dest.Values["nickname"].(string)
 
-				go SaveAndSend(conn, senderId, senderNickname, destId, destNickname, msg)
+				SaveAndSend(conn, senderId, senderNickname, destId, destNickname, msg)
 
 				// Print message on server side
 				// fmt.Printf("Received message from %s: '%s'\n", senderNickname, string(msg.Message))
@@ -91,7 +91,7 @@ func ReadLoop(r *http.Request, conn *websocket.Conn) {
 				connectedNames[senderNickname] = conn // Register the senderNickname
 				fmt.Println(senderNickname + " connected")
 
-				go Broadcasting(senderNickname, "online")
+				Broadcasting(senderNickname, "online")
 			}
 			// {"to":"@system","type":"join","message":"","signature":"035fe39c-b3db-4e01-8062-2a4af9a1f66f"}
 		}

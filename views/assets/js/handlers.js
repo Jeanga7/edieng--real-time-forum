@@ -59,6 +59,78 @@ function handleWebsocket() {
     }
 }
 
+function handleOpenChat() {
+    document.querySelectorAll(".user").forEach(el => {
+        el.addEventListener("click", async (e) => {
+            let chatUser = e.target.closest(".user").dataset.nickname;
+            let nc = document.querySelector("#netcat");
+
+            if (chatWith === chatUser) {
+                if (nc.classList.contains("active-chat")) nc.classList.remove("active-chat");
+                chatWith = null;
+                chatChunks = [];
+            } else {
+                if (!nc.classList.contains("active-chat")) nc.classList.add("active-chat");
+                chatWith = chatUser;
+
+                // Get chat
+                let chat = await fetchChat(chatUser);
+                let msgs = [];
+                if (chat.length === 1) {
+                    msgs = JSON.parse(chat[0].messages);
+                }
+                chatChunks = chunkList(msgs, 10);
+                msgs = chatChunks.shift();
+
+                let netcat = document.querySelector("#netcat-text")
+                netcat.innerHTML = "";
+
+                await new Promise((resolve) => {
+                    setTimeout(async () => {
+                        await printInTerminal("#netcat-text", netcatTxt(chatUser, msgs), "nc", 5);
+                        resolve();
+                    }, 700)
+                });
+                
+                await addInputBeforeCursor("netcat")
+
+                await new Promise((resolve) => {
+                    setTimeout(() => {
+                        focusInput();
+                        terminalScrollBottom("#netcat-input");
+                        resolve();
+                    }, 200);
+                });
+
+                await handleResetNotifications();
+
+                handleLoadMoreMsg();
+            }
+        });
+    });
+}
+
+function handleResetNotifications() {
+    return new Promise((resolve) => {
+        // Reset notifications DOM
+        ResetNotifsNumber();
+
+        // Reset notifications request
+        let data = new FormData();
+        data.append("sender", chatWith);
+        data.append("dest", userNickname);
+
+        fetch(resetNotifsRoute, {
+                method: 'POST',
+                body: data
+            })
+            .then(r => r.json())
+            .then(d => {
+                resolve();
+            })
+    })
+}
+
 function handleSendMsg() {
     document.querySelector("#netcat").addEventListener("keydown", async (e) => {
         let chatInput = document.querySelector("#netcat-input");
@@ -84,6 +156,7 @@ function handleSendMsg() {
                     terminalScrollBottom("#netcat-input");
                     let user = document.querySelector(`.user[data-nickname="${chatWith}"]`);
                     moveElementToParentStart(user);
+                    await handleResetNotifications();
                 } else {
                     throttle(sendTypingNotif, "sendTyping", 1200)();
                 }
