@@ -15,7 +15,7 @@ import (
 var clients = make(map[*websocket.Conn]string)
 var connectedNames = make(map[string]*websocket.Conn)
 var message = make(chan Message)
-var clientMsg = make(chan ClientMessage)
+var ClientMsg = make(chan ClientMessage)
 
 type Message struct {
 	MessageContent string `json:"message"`
@@ -159,12 +159,12 @@ func Broadcasting(user, typeMsg string) {
 		Time:      helpers.Now(),
 	}
 
-	clientMsg <- res
+	ClientMsg <- res
 }
 
 func HandleSendQueue() {
 	for {
-		for msg := range clientMsg {
+		for msg := range ClientMsg {
 			// Broadcast
 			for n := range connectedNames {
 				if n != msg.Message {
