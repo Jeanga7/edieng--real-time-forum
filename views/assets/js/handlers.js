@@ -9,23 +9,19 @@ function handleWebsocket() {
             "message": "",
             "signature": sessionID
         }
-
         setTimeout(() => {
             ws.send(JSON.stringify(registerMsg));
         }, 500)
     };
     ws.onmessage = (e) => {
         let response = JSON.parse(e.data);
-
         if (Object.prototype.toString.call(response) === "[object String]") {
             response = JSON.parse(response);
         }
-
         switch (response.type) {
             case "success":
                 console.log(response.message);
                 break;
-
             case "message":
                 if (chatWith === response.from) {
                     // Insert new message
@@ -41,7 +37,6 @@ function handleWebsocket() {
                     user.querySelector(".user-notifications").textContent = `(${notifs+1})`;
                 }
                 break;
-
             case "online":
                 let userToOnline = document.querySelector(`[data-nickname="${response.message}"]`);
                 if (userToOnline) {
@@ -50,7 +45,6 @@ function handleWebsocket() {
                     userToOnline.querySelector(".user-notifications").classList.add("txt-online");
                 }
                 break;
-
             case "offline":
                 let userToOffline = document.querySelector(`[data-nickname="${response.message}"]`);
                 if (userToOffline) {
@@ -59,7 +53,63 @@ function handleWebsocket() {
                     userToOffline.querySelector(".user-notifications").classList.remove("txt-online");
                 }
                 break;
+            case "typing":
+                displayTyping(response);
         }
+    }
+}
+
+function handleSendMsg() {
+    document.querySelector("#netcat").addEventListener("keydown", async (e) => {
+        let chatInput = document.querySelector("#netcat-input");
+        if (chatInput && chatWith !== null) {
+            if (chatInput.value.length > 0) {
+                if (e.code === "Enter") {
+                    e.preventDefault();
+                    ws.send(JSON.stringify({
+                        "from": userNickname,
+                        "to": chatWith,
+                        "type": "message",
+                        "message": chatInput.value,
+                        "signature": sessionID
+                    }))
+                    // Reset input
+                    let msg = chatInput.value;
+                    chatInput.value = "";
+                    chatInput.style.width = "0";
+                    chatInput.parentNode.querySelector(".measurer").textContent = "";
+                    // Insert new message
+                    let chatInputName = document.querySelector(".netcat-input-name");
+                    insertMsg(chatInputName, false, "bold-fluo", undefined, userNickname, msg)
+                    terminalScrollBottom("#netcat-input");
+                    let user = document.querySelector(`.user[data-nickname="${chatWith}"]`);
+                    moveElementToParentStart(user);
+                } else {
+                    throttle(sendTypingNotif, "sendTyping", 1200)();
+                }
+            }
+        }
+    });
+}
+
+function sendTypingNotif() {
+    ws.send(JSON.stringify({
+        "from": userNickname,
+        "to": chatWith,
+        "type": "typing",
+        "message": "",
+        "signature": sessionID
+    }))
+}
+
+function displayTyping(response) {
+    let userBlock = document.querySelector(`[data-nickname="${response.from}"]`);
+    if (userBlock) {
+        userBlock.querySelector(".user-typing").classList.remove("not-displayed");
+        clearTimeout(timers["typing"]);
+        timers["typing"] = setTimeout(() => {
+            userBlock.querySelector(".user-typing").classList.add("not-displayed");
+        }, 2500);
     }
 }
 
@@ -208,5 +258,17 @@ function handleSendComment() {
             numComments.textContent = String(parseInt(numComments.textContent) + 1);
             terminalScrollBottom("#comment-input");
         }
+    });
+}
+
+function handleLogout() {
+    document.querySelector("#logout-btn").addEventListener("click", async (e) => {
+        ws.close();
+        await new Promise((resolve) => {
+            setTimeout(() => {
+                window.location.href = '/logout';
+                resolve();
+            }, 100);
+        })
     });
 }

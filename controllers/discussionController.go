@@ -63,10 +63,10 @@ func ReadLoop(r *http.Request, conn *websocket.Conn) {
 		var msg ClientMessage
 		err := conn.ReadJSON(&msg)
 		if err != nil {
-			fmt.Println(err)
 			name, _, _, _ := FindUsersOnline(r)
+			fmt.Println(name + " disconnected")
 			delete(connectedNames, name)
-			go Broadcasting(name, "offline")
+			Broadcasting(name, "offline")
 			break
 		}
 

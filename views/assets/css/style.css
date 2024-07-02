@@ -182,7 +182,7 @@ body {
     border-top: 5px solid #ccc;
 }
 
-#chat-input {
+#netcat-input {
     width: 80%;
     padding: 5px;
     margin-right: 5px;
@@ -190,7 +190,7 @@ body {
     border-radius: 10px;
 }
 
-#chat-input:focus {
+#netcat-input:focus {
     outline: none;
     border-color: #4e4e4e;
 }

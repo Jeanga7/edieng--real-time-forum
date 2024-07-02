@@ -69,7 +69,7 @@ function throttle(func, timer, wait) {
 }
 
 function autoMsg(txt, msgDelay) {
-    let field = document.querySelector("#chat-input");
+    let field = document.querySelector("#netcat-input");
     setTimeout(()=>{
         for (let i = 0; i < txt.length; i++) {
             

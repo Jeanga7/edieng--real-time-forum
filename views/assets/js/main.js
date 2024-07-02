@@ -155,15 +155,7 @@ function startFeedsTerminals() {
             LettersAnimation(".post-title", 5000, 50);
             LettersAnimation(".user-nickname");
 
-            document.querySelector("#logout-btn").addEventListener("click", async (e) => {
-                await new Promise((resolve) => {
-                    setTimeout(() => {
-                        ws.close();
-                        resolve();
-                    }, 50)
-                })
-                window.location.href = '/logout';
-            });
+            handleLogout();
 
             resolve();
         }, 500);
@@ -410,37 +402,6 @@ function addInputBeforeCursor(terminal, type="input") {
             resizeInput();
         }
         resolve();
-    });
-}
-
-function handleSendMsg() {
-    document.querySelector("#netcat").addEventListener("keydown", async (e) => {
-        let chatInput = document.querySelector("#netcat-input");
-        if (e.code === "Enter" && chatInput.value.length > 0) {
-            e.preventDefault();
-
-            ws.send(JSON.stringify({
-                "from": userNickname,
-                "to": chatWith,
-                "type": "message",
-                "message": chatInput.value,
-                "signature": sessionID
-            }))
-
-            // Reset input
-            let msg = chatInput.value;
-            chatInput.value = "";
-            chatInput.style.width = "0";
-            chatInput.parentNode.querySelector(".measurer").textContent = "";
-
-            // Insert new message
-            let chatInputName = document.querySelector(".netcat-input-name");
-            insertMsg(chatInputName, false, "bold-fluo", undefined, userNickname, msg)
-            terminalScrollBottom("#netcat-input");
-
-            let user = document.querySelector(`.user[data-nickname="${chatWith}"]`);
-            moveElementToParentStart(user);
-        }
     });
 }
 

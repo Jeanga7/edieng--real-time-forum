@@ -689,7 +689,7 @@ hr.post-separator {
     border-color: var(--blue) !important;
     box-shadow: 0 0 4px var(--blue) !important;
 }
-.chat-input-name {
+.netcat-input-name {
     cursor: pointer;
 }
 

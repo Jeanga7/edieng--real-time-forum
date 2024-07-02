@@ -12,7 +12,6 @@ async function fetchUserData(userId) {
             })
     });
 }
-
 async function fetchPosts(userId) {
     return new Promise((resolve) => {
         let fd = new FormData();
@@ -26,7 +25,6 @@ async function fetchPosts(userId) {
             })
     });
 }
-
 async function fetchAllUsers() {
     return new Promise((resolve) => {
         let data = new FormData();
@@ -41,7 +39,6 @@ async function fetchAllUsers() {
             });
     });
 }
-
 async function fetchChat(chatUser) {
     return new Promise((resolve) => {
         let fd = new FormData();
