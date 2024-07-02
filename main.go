@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"forum/controllers"
 	"forum/database"
 	"forum/helpers"
 	"net/http"
@@ -24,6 +25,8 @@ func main() {
 		// Réinitialisation des sessions
 		// migrations.MigrateSession()
 	}
+
+	go controllers.HandleSendQueue()
 
 	// fmt.Println("Hello world !")
 	defer database.DB.Close()

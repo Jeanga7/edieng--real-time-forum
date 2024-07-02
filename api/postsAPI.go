@@ -1,10 +1,13 @@
 package api
 
 import (
+	"errors"
+	"fmt"
 	"forum/controllers"
 	"forum/global"
 	"forum/helpers"
 	"forum/models"
+	"html"
 	"net/http"
 )
 
@@ -100,4 +103,81 @@ func ReadPost(w http.ResponseWriter, r *http.Request) []helpers.ForumPost {
 		}
 	}
 	return res
+}
+
+func CreatePost(w http.ResponseWriter, r *http.Request) {
+	global.W = w
+	helpers.AllowedMethod(w, "POST", r)
+
+	author := html.EscapeString(r.FormValue("author"))
+	if len(author) == 0 {
+		helpers.JSONResponse(w, errors.New("MISSING POST AUTHOR"), http.StatusBadRequest)
+		return
+	}
+
+	sessions := models.Session.Fetch([]interface{}{"id"}, []interface{}{author})
+	if len(sessions) == 0 {
+		helpers.JSONResponse(w, errors.New("WRONG POST AUTHOR"), http.StatusBadRequest)
+		return
+	}
+
+	authorID := sessions[0].Values["idUser"].(string)
+
+	title := html.EscapeString(r.FormValue("title"))
+	if limit := 100; len(title) > limit {
+		helpers.JSONResponse(w, fmt.Errorf("TITLE EXCEEDS %d CHARS", limit), http.StatusBadRequest)
+		return
+	}
+
+	if len(title) > 0 {
+		if !helpers.ValidateInput("title", title) {
+			helpers.JSONResponse(w, errors.New("POST TITLE ERROR"), http.StatusBadRequest)
+			return
+		}
+	}
+
+	content := html.EscapeString(r.FormValue("content"))
+	if limit := 1500; len(content) > limit {
+		helpers.JSONResponse(w, fmt.Errorf("TEXT EXCEEDS %d CHARS", limit), http.StatusBadRequest)
+		return
+	}
+
+	category := html.EscapeString(r.FormValue("category"))
+	if len(category) == 0 {
+		helpers.JSONResponse(w, errors.New("MISSING POST CATEGORY"), http.StatusBadRequest)
+		return
+	}
+
+	if len(category) > 0 {
+		foundCategory := models.Category.Fetch([]interface{}{"name"}, []interface{}{category})
+		if len(foundCategory) == 0 {
+			if !helpers.ValidateInput("category", category) {
+				helpers.JSONResponse(w, errors.New("INVALID NEW CATEGORY"), http.StatusBadRequest)
+				return
+			}
+
+			newCategory := models.Category
+			newCategory.Values = make(map[string]interface{})
+			newCategory.Values["name"] = html.EscapeString(category)
+			newCategory.Create()
+		}
+	}
+
+	// Create Post
+	if notEmptyStr(authorID) && notEmptyStr(title) && notEmptyStr(content) && notEmptyStr(category) {
+		newPost := models.Post
+		newPost.Values = map[string]interface{}{
+			"authorId":        authorID,
+			"title":           title,
+			"content":         content,
+			"categoriesNames": category,
+		}
+		newPost.Create()
+	}
+
+	helpers.JSONResponse(w, errors.New("SUCCESS"), http.StatusAccepted)
+}
+
+func notEmptyStr(str string) bool {
+	return str == ""
 }

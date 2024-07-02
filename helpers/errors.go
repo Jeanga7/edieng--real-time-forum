@@ -3,10 +3,10 @@ package helpers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"forum/global"
 	"log"
 	"net/http"
-	"text/template"
 )
 
 func ErrorHandler(w http.ResponseWriter, err error, context string, statusCode int) {
@@ -44,14 +44,9 @@ func JSONResponse(w http.ResponseWriter, err error, statusCode int, more ...inte
 
 func ErrorSimple(err error) {
 	if err != nil {
-		tmpl, _ := template.ParseFiles("./views/error.html", "./views/header.html")
-
-		data := map[string]interface{}{
-			"errorName": http.StatusText(http.StatusInternalServerError),
-			"errorCode": http.StatusInternalServerError,
-		}
-		tmpl.Execute(global.W, data)
-		global.Status = 200
+		fmt.Println(err)
+		var w http.ResponseWriter
+		JSONResponse(w, err, http.StatusInternalServerError)
 	}
 }
 

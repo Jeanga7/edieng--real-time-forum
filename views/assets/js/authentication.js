@@ -38,8 +38,12 @@ async function ValidateField(route, selector, varName, data, checked, printed, l
                     logsZone.scrollTop = logsZone.scrollHeight;
                     if (d.more) {
                         responseData = JSON.parse(d.more);
-                        if (responseData.id) {userID = responseData.id;}
-                        if (responseData.idSession) {sessionID = responseData.idSession;}
+                        if (responseData.id) {
+                            userID = responseData.id;
+                        }
+                        if (responseData.idSession) {
+                            sessionID = responseData.idSession;
+                        }
                     }
                     resolve();
                 });
@@ -49,12 +53,12 @@ async function ValidateField(route, selector, varName, data, checked, printed, l
 }
 
 
-async function ValidateNextField(route, prev, next, prevFiedSelector, nextFieldSelector, rowSelector, data, checked, printed) {
+async function ValidateNextField(route, prev, next, prevFiedSelector, nextFieldSelector, rowSelector, data, checked, printed, labelText = "Enter your ", typingClass = activeForm === "login" ? "lgn" : "rgst") {
     if (checked[prev]) {
         if (!printed[next]) {
             document.querySelector(prevFiedSelector).readOnly = true;
             let txtsList = [{
-                    txt: "Enter your ",
+                    txt: labelText,
                     c: null,
                     eol: false
                 },
@@ -74,7 +78,7 @@ async function ValidateNextField(route, prev, next, prevFiedSelector, nextFieldS
                     eol: false
                 },
             ]
-            let typingClass = activeForm === "login" ? "lgn" : "rgst"
+
             await typeInTxts(rowSelector, txtsList, typingClass);
             printed[next] = true;
         }

@@ -4,13 +4,14 @@ import (
 	"errors"
 	"forum/helpers"
 	"forum/models"
+	"html"
 	"net/http"
 )
 
 func ResetNotifications(w http.ResponseWriter, r *http.Request) {
 	helpers.AllowedMethod(w, "POST", r)
 
-	sender, dest := r.FormValue("sender"), r.FormValue("dest")
+	sender, dest := html.EscapeString(r.FormValue("sender")), html.EscapeString(r.FormValue("dest"))
 
 	if len(sender) > 0 && len(dest) > 0 {
 		senders := models.User.Fetch([]interface{}{"nickname"}, []interface{}{sender})

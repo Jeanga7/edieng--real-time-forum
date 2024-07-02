@@ -16,7 +16,7 @@ func FetchComments(w http.ResponseWriter, r *http.Request) {
 	helpers.AllowedMethod(w, "POST", r)
 	global.W = w
 
-	postId := r.FormValue("postId")
+	postId := html.EscapeString(r.FormValue("postId"))
 	var res []map[string]interface{}
 
 	if len(postId) > 0 {
@@ -39,7 +39,7 @@ func CreateComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	postId, sessionId, commentTxt := r.FormValue("postId"), r.FormValue("sessionId"), r.FormValue("commentTxt")
+	postId, sessionId, commentTxt := html.EscapeString(r.FormValue("postId")), html.EscapeString(r.FormValue("sessionId")), html.EscapeString(r.FormValue("commentTxt"))
 
 	if len(postId) > 0 && len(sessionId) > 0 && len(commentTxt) > 0 {
 		posts := models.Post.Fetch([]interface{}{"id"}, []interface{}{postId})

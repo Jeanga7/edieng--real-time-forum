@@ -18,6 +18,7 @@ function handleWebsocket() {
         if (Object.prototype.toString.call(response) === "[object String]") {
             response = JSON.parse(response);
         }
+        
         switch (response.type) {
             case "success":
                 console.log(response.message);
@@ -209,7 +210,9 @@ function handleOpenNewPost() {
                 }, 500);
             })
 
-            await addInputBeforeCursor("new-post")
+            await addInputBeforeCursor("new-post");
+            resizeInput();
+            handleAddPost();
         }
     }, "open-new-post", 500));
 }
@@ -357,5 +360,14 @@ function handleLogout() {
                 resolve();
             }, 100);
         })
+    });
+}
+
+function handleAddPost() {
+    document.querySelector("#new-post").addEventListener("keydown", (e) => {
+        if (e.code === "Enter") {
+            let data = new FormData();
+
+        }
     });
 }

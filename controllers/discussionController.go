@@ -15,6 +15,7 @@ import (
 var clients = make(map[*websocket.Conn]string)
 var connectedNames = make(map[string]*websocket.Conn)
 var message = make(chan Message)
+var clientMsg = make(chan ClientMessage)
 
 type Message struct {
 	MessageContent string `json:"message"`
@@ -63,8 +64,8 @@ func ReadLoop(r *http.Request, conn *websocket.Conn) {
 		var msg ClientMessage
 		err := conn.ReadJSON(&msg)
 		if err != nil {
+			fmt.Println(err)
 			name, _, _, _ := FindUsersOnline(r)
-			fmt.Println(name + " disconnected")
 			delete(connectedNames, name)
 			Broadcasting(name, "offline")
 			break
@@ -158,14 +159,22 @@ func Broadcasting(user, typeMsg string) {
 		Time:      helpers.Now(),
 	}
 
-	// Broadcast
-	for n := range connectedNames {
-		if n != user {
-			res.To = n
-			txt, err := json.Marshal(res)
-			helpers.ErrorSimple(err)
-			err = connectedNames[n].WriteJSON(string(txt))
-			helpers.ErrorSimple(err)
+	clientMsg <- res
+}
+
+func HandleSendQueue() {
+	for {
+		for msg := range clientMsg {
+			// Broadcast
+			for n := range connectedNames {
+				if n != msg.Message {
+					msg.To = n
+					txt, err := json.Marshal(msg)
+					helpers.ErrorSimple(err)
+					err = connectedNames[n].WriteJSON(string(txt))
+					helpers.ErrorSimple(err)
+				}
+			}
 		}
 	}
 }
