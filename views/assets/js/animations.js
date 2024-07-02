@@ -129,8 +129,11 @@ function LettersAnimation(selector, interval = 5000, speed = 30, loop = true) {
 }
 
 function terminalScrollBottom(selector) {
-    let tl = document.querySelector(selector).closest(".terminal-box");
-    tl.scrollTop = tl.scrollHeight;
+    let tlElement = document.querySelector(selector)
+    if (tlElement) {
+        let tl = tlElement.closest(".terminal-box");
+        tl.scrollTop = tl.scrollHeight;
+    }
 }
 
 function insertMsg(refElement, isOld, className, date, author, msg) {
@@ -149,4 +152,3 @@ function insertMsg(refElement, isOld, className, date, author, msg) {
 
     txt[index(txt)].after(makeBr());
 }
-

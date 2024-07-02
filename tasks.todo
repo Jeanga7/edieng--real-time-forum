@@ -3,11 +3,12 @@
 [x] Limiter la longueur des mots et le nombre de caractère du chat
 [x] Reset chat list lorsque je reçois un message d'un utilisateur
 [x] Mettre l'id de session dans le formData du like et dislike pour éviter que ce soit mis au nom de la session en cours
+[x] Le logout doit permettre de se déconnecter via le terminal en transmettant à la fonction de logout via une requete post, le nickname du user à déconnecter
+[x] Ajouter un throttle pour le bouton "Add post"
+[x] Ajouter un throttle pour l'ouverture d'un chat
+[x] Résoudre le problème de typing
 [ ] Sécurisation des entêtes pour l'API et la page
-[ ] Le logout doit permettre de se déconnecter via le terminal en transmettant à la fonction de logout via une requete post, le nickname du user à déconnecter
 [ ] Mettre le nombre de réactions, posts et commentaires
 [ ] Rediriger toutes les routes vers la page d'accueil
-[ ] Ajouter un throttle pour le bouton "Add post"
-[ ] Ajouter un throttle pour l'ouverture d'un chat
-[ ] Résoudre le problème de typing
 [ ] Vérifier et résoudre les causes de crash Go Routine
+[ ] Utiliser les channels pour le broadcasting des messages

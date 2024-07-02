@@ -91,7 +91,7 @@ function handleOpenChat() {
                         resolve();
                     }, 700)
                 });
-                
+
                 await addInputBeforeCursor("netcat")
 
                 await new Promise((resolve) => {
@@ -191,12 +191,11 @@ function handleLoadMoreMsg() {
 }
 
 function handleOpenNewPost() {
-    document.querySelector("#add-post-btn").addEventListener("click", async (e) => {
+    document.querySelector("#add-post-btn").addEventListener("click", throttle(async (e) => {
+        await emptyNewPost();
         let np = document.querySelector("#new-post");
         let npl = document.querySelector("#new-post-logs");
         if (np.classList.contains("active-new-post")) {
-            document.querySelector("#new-post-text").textContent = "";
-            document.querySelector("#new-post-logs-text").textContent = "";
             np.classList.remove("active-new-post");
             npl.classList.remove("active-new-post-logs");
         } else {
@@ -212,15 +211,15 @@ function handleOpenNewPost() {
 
             await addInputBeforeCursor("new-post")
         }
-    });
+    }, "open-new-post", 500));
 }
 
 function handleOpenComments() {
     document.querySelectorAll(".comment-btn").forEach(el => {
-        el.addEventListener("click", async (e) => {
+        el.addEventListener("click", throttle(async (e) => {
+            await emptyComments();
             let postId = el.parentElement.dataset.post;
             let ac = document.querySelector("#all-comments");
-            document.querySelector("#all-comments-text").textContent = "";
             if (ac.classList.contains("active-all-comments") && postId === activePost) {
                 ac.classList.remove("active-all-comments");
                 activePost = null;
@@ -290,7 +289,22 @@ function handleOpenComments() {
                 handleSendComment();
                 terminalScrollBottom("#comment-input");
             }
-        });
+        }, "open-comments", 500));
+    })
+}
+
+function emptyComments() {
+    return new Promise((resolve) => {
+        document.querySelector("#all-comments-text").textContent = "";
+        resolve();
+    })
+}
+
+function emptyNewPost() {
+    return new Promise((resolve) => {
+        document.querySelector("#new-post-text").textContent = "";
+        document.querySelector("#new-post-logs-text").textContent = "";
+        resolve();
     })
 }
 

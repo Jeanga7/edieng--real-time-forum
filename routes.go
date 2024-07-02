@@ -17,7 +17,7 @@ func Routes(mux *http.ServeMux) {
 	// mux.HandleFunc("/start", controllers.NewLogin)
 	mux.HandleFunc("/logout", controllers.LogoutHandler)
 
-	// Like routes
+	// Reactions routes
 	mux.HandleFunc("/reaction", controllers.React)
 
 	// API Routes
