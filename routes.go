@@ -14,21 +14,8 @@ func Routes(mux *http.ServeMux) {
 	mux.HandleFunc("/", controllers.NewLogin)
 
 	// User routes
-	mux.HandleFunc("/register", controllers.RegisterHandler)
-	mux.HandleFunc("/login", controllers.LoginHandler)
 	// mux.HandleFunc("/start", controllers.NewLogin)
 	mux.HandleFunc("/logout", controllers.LogoutHandler)
-
-	// Posts routes
-	mux.HandleFunc("/create-post", controllers.CreatePost)
-	mux.HandleFunc("/edit-post", controllers.EditPost)
-	mux.HandleFunc("/delete-post", controllers.DeletePost)
-
-	// Comments routes
-	mux.HandleFunc("/create-comment", controllers.CreateComment)
-
-	// Category routes
-	// mux.HandleFunc("/add-category", controllers.AddCategory)
 
 	// Like routes
 	mux.HandleFunc("/reaction", controllers.React)

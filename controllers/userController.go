@@ -329,7 +329,7 @@ func NewLogin(w http.ResponseWriter, r *http.Request) {
 		UserData: data,
 	}
 
-	tmpl, err := template.ParseFiles("./views/realtime.html")
+	tmpl, err := template.ParseFiles("./views/index.html")
 	helpers.ErrorSimple(err)
 
 	tmpl.Execute(w, allData)
