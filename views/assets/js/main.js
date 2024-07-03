@@ -290,8 +290,7 @@ function resetInputWidth(el) {
 
 function firstFieldFocus(selector) {
     removeAllFocusedClass();
-    console.log(document.querySelector(selector));
-    let firstField = document.querySelector(selector).querySelectorAll(`.form-input`)[0];
+    let firstField = document.querySelectorAll(`${selector} input`)[0];
     firstField.focus();
     firstField.classList.add("focused");
 }

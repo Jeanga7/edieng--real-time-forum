@@ -142,21 +142,23 @@ function handleSendMsg() {
     document.querySelector("#netcat").addEventListener("keydown", async (e) => {
         let chatInput = document.querySelector("#netcat-input");
         if (chatInput && chatWith !== null) {
-            if (chatInput.value.length > 0) {
+            let val = chatInput.textContent;
+            if (val.length > 0) {
                 if (e.code === "Enter") {
                     e.preventDefault();
                     ws.send(JSON.stringify({
                         "from": userNickname,
                         "to": chatWith,
                         "type": "message",
-                        "message": chatInput.value,
+                        "message": val,
                         "signature": sessionID
                     }))
+
                     // Reset input
-                    let msg = chatInput.value;
-                    chatInput.value = "";
-                    chatInput.style.width = "0";
-                    chatInput.parentNode.querySelector(".measurer").textContent = "";
+                    let msg = val;
+                    val = "";
+                    chatInput.textContent = "";
+
                     // Insert new message
                     let chatInputName = document.querySelector(".netcat-input-name");
                     insertMsg(chatInputName, false, "bold-fluo", undefined, userNickname, msg)
@@ -205,6 +207,7 @@ function handleOpenNewPost() {
         if (np.classList.contains("active-new-post")) {
             np.classList.remove("active-new-post");
             npl.classList.remove("active-new-post-logs");
+            document.querySelector("#new-post").removeEventListener("keydown", addPost);
         } else {
             np.classList.add("active-new-post");
             npl.classList.add("active-new-post-logs");
@@ -373,72 +376,85 @@ function handleLogout() {
 function handleAddPost() {
     printed = {};
     checked = {};
-    document.querySelector("#new-post").addEventListener("keydown", async (e) => {
-        if (e.code === "Enter") {
-            e.preventDefault();
-            let data = new FormData();
-            let finalData = new FormData();
-            let fieldset = ["author", "title", "content", "category"];
+    document.querySelector("#new-post").addEventListener("keydown", addPost);
+}
 
-            [data, checked, printed] = await Validation(sessionID, createPostRoute, "author", data, checked, printed, "#new-post-logs-text", "new-post-logs");
-            let iniData = data;
+async function addPost(e) {
+    if (e.code === "Enter") {
+        e.preventDefault();
+        let data = new FormData();
+        let finalData = new FormData();
+        let fieldset = ["author", "title", "content", "category"];
 
-            for (let i = 1; i < fieldset.length; i++) {
-                var field = fieldset[i];
-                var prev = fieldset[i - 1];
-                var next = i < fieldset.length ? fieldset[i + 1] : undefined;
+        [data, checked, printed] = await Validation(sessionID, createPostRoute, "author", data, checked, printed, "#new-post-logs-text", "new-post-logs");
+        let iniData = data;
 
-                if (!printed[prev] || !checked[prev]) {
-                    return
-                }
+        for (let i = 1; i < fieldset.length; i++) {
+            var field = fieldset[i];
+            var prev = fieldset[i - 1];
+            var next = i < fieldset.length ? fieldset[i + 1] : undefined;
 
-                [data, checked, printed] = await ValidateField(createPostRoute, `#new-post-${field}`, field, iniData, checked, printed, "#new-post-logs-text", "new-post-logs");
-                if (!checked[field]) {
-                    return
-                } else {
-                    document.querySelector("#new-post-" + field).classList.remove("focused");
-                }
-
-                if (next && printed[field] && !printed[next]) {
-                    let fieldElement = document.querySelector("#new-post-" + field);
-                    fieldElement.setAttribute("contenteditable", false);
-                    await printAddPostField(next)
-                    printed[next] = true
-                }
+            if (!printed[prev] || !checked[prev]) {
+                return
             }
 
-            let allChecked = fieldset.reduce((res, check) => res && checked[check], true);
-
-            finalData.append("author", sessionID);
-            for (const field of fieldset.slice(-3)) {
-                finalData.append(field, document.querySelector("#new-post-" + field).textContent)
+            [data, checked, printed] = await ValidateField(createPostRoute, `#new-post-${field}`, field, iniData, checked, printed, "#new-post-logs-text", "new-post-logs");
+            if (!checked[field]) {
+                return
+            } else {
+                document.querySelector("#new-post-" + field).classList.remove("focused");
             }
 
-            if (allChecked) {
-                // alert("All checked.")
-                // Display the values
-                for (const pair of finalData.entries()) {
-                    console.log(pair[0], pair[1]);
-                }
+            if (next && printed[field] && !printed[next]) {
+                let fieldElement = document.querySelector("#new-post-" + field);
+                fieldElement.setAttribute("contenteditable", false);
+                await printAddPostField(next)
+                printed[next] = true
+            }
+        }
 
-                fetch(createPostRoute, {
+        let allChecked = fieldset.reduce((res, check) => res && checked[check], true);
+
+        finalData.append("author", sessionID);
+        for (const field of fieldset.slice(-3)) {
+            finalData.append(field, document.querySelector("#new-post-" + field).textContent)
+        }
+
+        if (allChecked) {
+            fetch(createPostRoute, {
                     method: 'POST',
                     body: finalData
                 })
-                .then(r=>r.json())
-                .then(async d=>{
+                .then(r => r.json())
+                .then(async d => {
                     let output = [{
                         txt: "Post published successfully!",
                         c: "bold-fluo command",
                         eol: true
                     }, ];
                     await printInTerminal("#new-post-logs-text", output, "new-post-logs", 10);
+
+
+                    // Get Posts
+                    let posts = await fetchPosts(userID);
+
+                    document.querySelector("#posts-zone").remove();
+                    ShowAllPosts(posts);
+                    printed = {};
+                    checked = {};
+
+                    await new Promise((resolve) => {
+                        setTimeout(() => {
+                            document.querySelector("#add-post-btn").click();
+                            resolve();
+                        }, 500)
+                    })
                 })
 
-            }
         }
-    });
+    }
 }
+
 
 async function printAddPostField(fieldName) {
     await new Promise((resolve) => {
