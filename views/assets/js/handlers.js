@@ -439,7 +439,8 @@ async function addPost(e) {
                     let posts = await fetchPosts(userID);
 
                     document.querySelector("#posts-zone").remove();
-                    ShowAllPosts(posts);
+                    await ShowAllPosts(posts);
+                    handleOpenComments();
                     printed = {};
                     checked = {};
 
