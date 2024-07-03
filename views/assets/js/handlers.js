@@ -18,7 +18,7 @@ function handleWebsocket() {
         if (Object.prototype.toString.call(response) === "[object String]") {
             response = JSON.parse(response);
         }
-        
+
         switch (response.type) {
             case "success":
                 console.log(response.message);
@@ -44,6 +44,7 @@ function handleWebsocket() {
                     userToOnline.querySelector(".user-status").classList.add("status-online");
                     userToOnline.querySelector(".user-nickname").classList.add("txt-online");
                     userToOnline.querySelector(".user-notifications").classList.add("txt-online");
+                    userToOnline.querySelector(".user-typing").classList.add("txt-online");
                 }
                 break;
             case "offline":
@@ -52,6 +53,7 @@ function handleWebsocket() {
                     userToOffline.querySelector(".user-status").classList.remove("status-online");
                     userToOffline.querySelector(".user-nickname").classList.remove("txt-online");
                     userToOffline.querySelector(".user-notifications").classList.remove("txt-online");
+                    userToOffline.querySelector(".user-typing").classList.remove("txt-online");
                 }
                 break;
             case "typing":
@@ -62,9 +64,16 @@ function handleWebsocket() {
 
 function handleOpenChat() {
     document.querySelectorAll(".user").forEach(el => {
-        el.addEventListener("click", async (e) => {
+        el.addEventListener("click", throttle(async (e) => {
+            let netcat = document.querySelector("#netcat-text")
+
             let chatUser = e.target.closest(".user").dataset.nickname;
             let nc = document.querySelector("#netcat");
+
+            await new Promise((resolve) => {
+                netcat.innerHTML = "";
+                resolve();
+            });
 
             if (chatWith === chatUser) {
                 if (nc.classList.contains("active-chat")) nc.classList.remove("active-chat");
@@ -82,9 +91,6 @@ function handleOpenChat() {
                 }
                 chatChunks = chunkList(msgs, 10);
                 msgs = chatChunks.shift();
-
-                let netcat = document.querySelector("#netcat-text")
-                netcat.innerHTML = "";
 
                 await new Promise((resolve) => {
                     setTimeout(async () => {
@@ -107,7 +113,7 @@ function handleOpenChat() {
 
                 handleLoadMoreMsg();
             }
-        });
+        }, "open-chat", 3000));
     });
 }
 

@@ -41,7 +41,6 @@ func CreateSession(w http.ResponseWriter, r *http.Request, idUser string) models
 
 func DeleteSession(w http.ResponseWriter, r *http.Request, idSession string) {
 	global.W = w
-	models.Session.Delete("id", "=", idSession)
 	IdUser = ""
 
 	sessionCookie := &http.Cookie{

@@ -122,12 +122,12 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sessionID := cookie.Value
-
-	idUser := models.Session.Fetch([]interface{}{"id"}, []interface{}{sessionID})
-	if len(idUser) > 0 {
-		BroadcastNewUser(GetNicknameById(idUser[0].Values["idUser"]))
+	sessions := models.Session.Fetch([]interface{}{"id"}, []interface{}{sessionID})
+	if len(sessions) > 0 {
+		sessions[0].Delete()
+		DeleteSession(w, r, sessionID)
 	}
-	DeleteSession(w, r, sessionID)
+
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
