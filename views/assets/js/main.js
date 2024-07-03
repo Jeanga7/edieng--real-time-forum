@@ -3,14 +3,24 @@ var txtDataToLoad = () => activeForm === "login" ? loginTxtsData : registerTxtsD
 var otherBtn = () => activeForm === "login" ? document.querySelector("#register-btn") : document.querySelector("#login-btn")
 
 
-window.onload = () => {
+window.onload = async () => {
     LettersAnimation("#preloader h1", 0, undefined, false);
     if (!loggedIn) {
-        authLayer();
+        await authLayer();
     } else {
-        feedsLayer();
+        await feedsLayer();
     }
+    focusInput();
+    disableTab();
 };
+
+function disableTab() {
+    document.addEventListener("keydown", (e) => {
+        if (e.code === "Tab") {
+            e.preventDefault();
+        }
+    });
+}
 
 async function authLayer() {
     await loadDOM();
@@ -26,7 +36,6 @@ async function authLayer() {
     await enableAllInputs();
     firstFieldFocus(`#${activeForm}`);
     formToggle();
-    focusInput();
     document.addEventListener("keydown", authHandleEnter);
 }
 
@@ -267,17 +276,22 @@ function resizeInput() {
         });
 
         el.addEventListener("input", (e) => {
-            let m = el.parentNode.querySelector(".measurer");
-            m.textContent = el.value;
-            let mWidth = m.offsetWidth;
-            el.style.width = (mWidth + 15) + "px";
+            resetInputWidth(el);
         });
     });
 }
 
+function resetInputWidth(el) {
+    let m = el.parentNode.querySelector(".measurer");
+    m.textContent = el.value;
+    let mWidth = m.offsetWidth;
+    el.style.width = (mWidth + 15) + "px";
+}
+
 function firstFieldFocus(selector) {
     removeAllFocusedClass();
-    let firstField = document.querySelectorAll(`${selector} input`)[0];
+    console.log(document.querySelector(selector));
+    let firstField = document.querySelector(selector).querySelectorAll(`.form-input`)[0];
     firstField.focus();
     firstField.classList.add("focused");
 }
@@ -379,27 +393,25 @@ function AddActionsBtn() {
     document.querySelector("#actions .terminal-body").appendChild(actionsZone)
 }
 
-function addInputBeforeCursor(terminal, type="input") {
+function addInputBeforeCursor(terminal, type = "input", fieldName = "input") {
     return new Promise((resolve) => {
         // Add chat input
-        let input = type === "input"
-                        ? /*html*/`
-                            <input type="text" name="${terminal}-input" id="${terminal}-input" class="forum-input" autocomplete="false">
-                        `
-                        : /*html*/`
-                            <textarea name="${terminal}-input" id="${terminal}-input" class="forum-input" autocomplete="false"></textarea>
-                        `;
-        let measurer = /*html*/ `
-            <span class="measurer"></span>
-        `;
+        let input = /*html*/ `
+                        <span type="text" name="${terminal}-${fieldName}" id="${terminal}-${fieldName}" class="forum-input" autocomplete="false" contenteditable></span>
+                    `;
+
+        let space = /*html*/`
+            <span style="width:8px;height:8px;display:inline-block;"></span>
+        `
+
         let cursor = document.querySelector(`#${terminal}-text`).querySelector(".blinking");
         if (cursor) {
             cursor.parentElement.before(createElementFromHTML(input));
-            let inputElement = document.querySelector(`#${terminal}-input`);
-            inputElement.after(createElementFromHTML(measurer));
+            cursor.parentElement.before(createElementFromHTML(space));
+            let inputElement = document.querySelector(`#${terminal}-${fieldName}`);
             inputElement.focus();
+            removeAllFocusedClass();
             inputElement.classList.add("focused");
-            resizeInput();
         }
         resolve();
     });
@@ -415,7 +427,12 @@ function focusInput() {
         el.addEventListener("click", (e) => {
             let focused = el.querySelectorAll(".focused");
             if (focused.length > 0) {
-                focused[0].focus();
+                let field = focused[0]
+                if (field.tagName.toLowerCase() === "span" && field.isContentEditable) {
+                    moveToEndOfSpan(".focused");
+                } else {
+                    field.focus();
+                }
             }
         });
     });
@@ -442,4 +459,3 @@ async function loadOldMsg(e) {
         e.target.scrollTop = e.target.scrollHeight;
     }
 }
-

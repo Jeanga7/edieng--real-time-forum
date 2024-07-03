@@ -17,6 +17,7 @@ const discussionsRoute = '/api/discussions';
 const commentsRoute = '/api/comments';
 const resetNotifsRoute = '/api/reset-notifications'
 const createCommentRoute = '/api/create-comment';
+const createPostRoute = '/api/create-post';
 const reactionRoute = '/reaction';
 const port = ":8989"
 
@@ -192,11 +193,14 @@ let allPostsTxt = [
     {txt: "", c: null, eol: true},
 ];
 
-let newPostTxt = [
+let newPostTxtIntro = [
     {txt: "$> rtf --new-post", c: "command", eol: true},
     {txt: "", c: null, eol: true},
+];
+
+let newPostTxtField = [
     {txt: "Enter the ", c: null, eol: false},
-    {txt: "post title", c: "bold-fluo", eol: false},
+    {txt: "title", c: "bold-fluo", eol: false},
     {txt: ": ", c: null, eol: false},
     {txt: " ", c: null, eol: false},
 ];
@@ -282,8 +286,6 @@ async function authHandleEnter(e) {
                 await switchToFeeds();
             }
         }
-    } else if (e.code === "Tab") {
-        e.preventDefault();
     }
 }
 

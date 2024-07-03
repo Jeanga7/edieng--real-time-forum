@@ -27,6 +27,8 @@ func Routes(mux *http.ServeMux) {
 
 	mux.HandleFunc("/api/posts", api.FetchPosts)
 
+	mux.HandleFunc("/api/create-post", api.CreatePost)
+
 	mux.HandleFunc("/api/category", api.FetchCategory)
 
 	mux.HandleFunc("/api/categories-list", api.CategoriesList)

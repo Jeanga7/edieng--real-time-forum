@@ -21,7 +21,7 @@ function handleWebsocket() {
 
         switch (response.type) {
             case "success":
-                console.log(response.message);
+                // console.log(response.message);
                 break;
             case "message":
                 if (chatWith === response.from) {
@@ -210,14 +210,15 @@ function handleOpenNewPost() {
             npl.classList.add("active-new-post-logs");
             await new Promise((resolve) => {
                 setTimeout(async () => {
-                    await printInTerminal("#new-post-text", newPostTxt, "np", 10);
+                    await printInTerminal("#new-post-text", newPostTxtIntro, "np", 10);
+                    insertNewPostFieldRow("title")
+                    await printInTerminal("#new-post-title-row", newPostTxtField, "np", 10);
                     await printInTerminal("#new-post-logs-text", newPostLogsTxt, "npl", 10);
                     resolve();
                 }, 500);
             })
 
-            await addInputBeforeCursor("new-post");
-            resizeInput();
+            await addInputBeforeCursor("new-post", undefined, "title");
             handleAddPost();
         }
     }, "open-new-post", 500));
@@ -370,10 +371,108 @@ function handleLogout() {
 }
 
 function handleAddPost() {
-    document.querySelector("#new-post").addEventListener("keydown", (e) => {
+    printed = {};
+    checked = {};
+    document.querySelector("#new-post").addEventListener("keydown", async (e) => {
         if (e.code === "Enter") {
+            e.preventDefault();
             let data = new FormData();
+            let finalData = new FormData();
+            let fieldset = ["author", "title", "content", "category"];
 
+            [data, checked, printed] = await Validation(sessionID, createPostRoute, "author", data, checked, printed, "#new-post-logs-text", "new-post-logs");
+            let iniData = data;
+
+            for (let i = 1; i < fieldset.length; i++) {
+                var field = fieldset[i];
+                var prev = fieldset[i - 1];
+                var next = i < fieldset.length ? fieldset[i + 1] : undefined;
+
+                if (!printed[prev] || !checked[prev]) {
+                    return
+                }
+
+                [data, checked, printed] = await ValidateField(createPostRoute, `#new-post-${field}`, field, iniData, checked, printed, "#new-post-logs-text", "new-post-logs");
+                if (!checked[field]) {
+                    return
+                } else {
+                    document.querySelector("#new-post-" + field).classList.remove("focused");
+                }
+
+                if (next && printed[field] && !printed[next]) {
+                    let fieldElement = document.querySelector("#new-post-" + field);
+                    fieldElement.setAttribute("contenteditable", false);
+                    await printAddPostField(next)
+                    printed[next] = true
+                }
+            }
+
+            let allChecked = fieldset.reduce((res, check) => res && checked[check], true);
+
+            finalData.append("author", sessionID);
+            for (const field of fieldset.slice(-3)) {
+                finalData.append(field, document.querySelector("#new-post-" + field).textContent)
+            }
+
+            if (allChecked) {
+                // alert("All checked.")
+                // Display the values
+                for (const pair of finalData.entries()) {
+                    console.log(pair[0], pair[1]);
+                }
+
+                fetch(createPostRoute, {
+                    method: 'POST',
+                    body: finalData
+                })
+                .then(r=>r.json())
+                .then(async d=>{
+                    let output = [{
+                        txt: "Post published successfully!",
+                        c: "bold-fluo command",
+                        eol: true
+                    }, ];
+                    await printInTerminal("#new-post-logs-text", output, "new-post-logs", 10);
+                })
+
+            }
         }
     });
+}
+
+async function printAddPostField(fieldName) {
+    await new Promise((resolve) => {
+        setTimeout(async () => {
+            let newPostTxt = [{
+                    txt: "Enter the ",
+                    c: null,
+                    eol: false
+                },
+                {
+                    txt: fieldName,
+                    c: "bold-fluo",
+                    eol: false
+                },
+                {
+                    txt: ": ",
+                    c: null,
+                    eol: false
+                },
+                {
+                    txt: " ",
+                    c: null,
+                    eol: false
+                },
+            ];
+
+            insertNewPostFieldRow(fieldName);
+            await printInTerminal(`#new-post-${fieldName}-row`, newPostTxt, "np", 10);
+
+            await addInputBeforeCursor("new-post", undefined, fieldName);
+            moveToEndOfSpan("#new-post-" + fieldName);
+
+            resolve();
+        }, 50);
+    })
+
 }

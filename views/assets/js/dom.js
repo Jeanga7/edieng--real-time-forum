@@ -247,3 +247,32 @@ let netcatTxt = (user, data) => {
     })
     return res;
 };
+
+function insertNewPostFieldRow(fieldName) {
+    document.querySelector("#new-post-text").innerHTML += /*html*/ `
+        <span id="new-post-${fieldName}-row"></span><br>
+    `
+}
+
+function moveToEndOfSpan(selector) {
+    // Sélectionnez l'élément span
+    const spanElement = document.querySelector(selector);
+
+    // Créez un objet Range
+    const range = document.createRange();
+
+    // Définissez la plage pour couvrir tout le contenu de l'élément span
+    range.selectNodeContents(spanElement);
+
+    // Obtenez l'objet Selection courant
+    const selection = window.getSelection();
+
+    // Supprimez toutes les plages existantes
+    selection.removeAllRanges();
+
+    // Ajoutez la nouvelle plage à la sélection
+    selection.addRange(range);
+
+    // Déplacez le curseur à la fin de la plage
+    range.collapse(false);
+}

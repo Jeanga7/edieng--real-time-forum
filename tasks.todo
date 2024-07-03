@@ -7,8 +7,8 @@
 [x] Ajouter un throttle pour le bouton "Add post"
 [x] Ajouter un throttle pour l'ouverture d'un chat
 [x] Résoudre le problème de typing
+[x] Vérifier et résoudre les causes de crash Go Routine
+[x] Utiliser les channels pour le broadcasting des messages
 [ ] Sécurisation des entêtes pour l'API et la page
 [ ] Mettre le nombre de réactions, posts et commentaires
 [ ] Rediriger toutes les routes vers la page d'accueil
-[ ] Vérifier et résoudre les causes de crash Go Routine
-[ ] Utiliser les channels pour le broadcasting des messages

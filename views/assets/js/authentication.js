@@ -1,11 +1,25 @@
 async function ValidateField(route, selector, varName, data, checked, printed, logsText = "#logs-text", terminalName = "logs") {
     removeAllFocusedClass();
     let field = document.querySelector(selector);
-    field.focus();
-    field.classList.add("focused");
-    let val = field.value;
+    let val;
+    if (field) {
+        field.focus();
+        field.classList.add("focused");
+
+        if (field.tagName.toLowerCase() === "span" && field.isContentEditable) {
+            val = field.textContent;
+            field.value = val;
+        } else if (field.tagName.toLowerCase() === "input") {
+            val = field.value;
+        }
+    }
+    
+    return Validation(val, route, varName, data, checked, printed, logsText, terminalName)
+}
+
+async function Validation(val, route, varName, data, checked, printed, logsText, terminalName) {
     data.append(varName, val)
-    if (val.length > 0 && !checked[varName]) {
+    if (val && val.length > 0 && !checked[varName]) {
         await new Promise((resolve) => {
             fetch(route, {
                     method: 'POST',
@@ -45,6 +59,7 @@ async function ValidateField(route, selector, varName, data, checked, printed, l
                             sessionID = responseData.idSession;
                         }
                     }
+                    
                     resolve();
                 });
         });
@@ -95,6 +110,8 @@ async function switchToFeeds() {
         setTimeout(async () => {
             document.querySelector("#container").innerHTML = feedsView;
             await startFeedsTerminals();
+            printed = {};
+            checked = {};
             resolve();
         }, 1800)
     });

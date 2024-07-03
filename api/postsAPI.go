@@ -143,11 +143,6 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	category := html.EscapeString(r.FormValue("category"))
-	if len(category) == 0 {
-		helpers.JSONResponse(w, errors.New("MISSING POST CATEGORY"), http.StatusBadRequest)
-		return
-	}
-
 	if len(category) > 0 {
 		foundCategory := models.Category.Fetch([]interface{}{"name"}, []interface{}{category})
 		if len(foundCategory) == 0 {
@@ -155,16 +150,18 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 				helpers.JSONResponse(w, errors.New("INVALID NEW CATEGORY"), http.StatusBadRequest)
 				return
 			}
-
-			newCategory := models.Category
-			newCategory.Values = make(map[string]interface{})
-			newCategory.Values["name"] = html.EscapeString(category)
-			newCategory.Create()
 		}
 	}
 
+	allFilled := notEmptyStr(authorID) && notEmptyStr(title) && notEmptyStr(content) && notEmptyStr(category)
+
 	// Create Post
-	if notEmptyStr(authorID) && notEmptyStr(title) && notEmptyStr(content) && notEmptyStr(category) {
+	if allFilled {
+		newCategory := models.Category
+		newCategory.Values = make(map[string]interface{})
+		newCategory.Values["name"] = html.EscapeString(category)
+		newCategory.Create()
+
 		newPost := models.Post
 		newPost.Values = map[string]interface{}{
 			"authorId":        authorID,
@@ -179,5 +176,5 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func notEmptyStr(str string) bool {
-	return str == ""
+	return str != "" && str != "undefined"
 }

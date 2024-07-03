@@ -171,8 +171,7 @@ func HandleSendQueue() {
 					msg.To = n
 					txt, err := json.Marshal(msg)
 					helpers.ErrorSimple(err)
-					err = connectedNames[n].WriteJSON(string(txt))
-					helpers.ErrorSimple(err)
+					connectedNames[n].WriteJSON(string(txt))
 				}
 			}
 		}
