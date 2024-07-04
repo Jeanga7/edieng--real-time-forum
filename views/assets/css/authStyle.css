@@ -528,7 +528,7 @@ input[type=number] {
     color: var(--pink);
     text-shadow: 0 0 4px var(--pink);
 }
-#stats-replied {
+#stats-comments {
     color: var(--yellow);
     text-shadow: 0 0 4px var(--yellow);
 }

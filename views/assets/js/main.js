@@ -315,7 +315,7 @@ async function ShowUserInfos(userInfos) {
     // Statistics
     let st = document.createElement("div");
     st.id = "user-stats";
-    st.innerHTML = userStats()
+    st.innerHTML = userStats(userInfos)
     infosZone.appendChild(st);
 
     document.querySelector("#user-infos .terminal-body").appendChild(infosZone);

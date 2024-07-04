@@ -9,6 +9,7 @@ import (
 	"forum/models"
 	"html"
 	"net/http"
+	"strings"
 )
 
 func FetchPosts(w http.ResponseWriter, r *http.Request) {
@@ -167,7 +168,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 			"authorId":        authorID,
 			"title":           title,
 			"content":         content,
-			"categoriesNames": category,
+			"categoriesNames": strings.Title(category),
 		}
 		newPost.Create()
 	}

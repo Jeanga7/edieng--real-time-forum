@@ -70,6 +70,17 @@ func FetchUsers(w http.ResponseWriter, r *http.Request) {
 
 	visibleCols := helpers.RemoveValueFromList(ListOfPossibleParams, "password")
 	usersData := TransformModels(users, visibleCols)
+
+	if len(usersData) == 1 {
+		idUser := users[0].Values["id"].(string)
+		hisPosts := models.Post.Fetch([]interface{}{"authorId"}, []interface{}{idUser})
+		hisLikes := models.Like.Fetch([]interface{}{"authorId"}, []interface{}{idUser})
+		hisDislikes := models.Dislike.Fetch([]interface{}{"authorId"}, []interface{}{idUser})
+		hisComments := models.Comment.Fetch([]interface{}{"authorId"}, []interface{}{idUser})
+		usersData[0]["posts"] = len(hisPosts)
+		usersData[0]["reactions"] = len(hisLikes) + len(hisDislikes)
+		usersData[0]["comments"] = len(hisComments)
+	}
 	WriteJSONResponse(w, usersData)
 }
 

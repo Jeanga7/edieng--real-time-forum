@@ -178,10 +178,10 @@ let makePostImage = (img) => /*html*/`
 <div class="post-image" style="background-image:url('assets/img/posts/${img}');"></div>
 `
 
-let userStats = () => /*html*/ `
-<span id="stats-posted">0 posted</span>
-<span id="stats-reacted">0 reacted</span>
-<span id="stats-replied">0 replied</span>`
+let userStats = (data) => /*html*/ `
+<span id="stats-posted">${data.posts} posted</span>
+<span id="stats-reacted">${data.reactions} reacted</span>
+<span id="stats-comments">${data.comments} comments</span>`
 
 let makeUserName = (userInfos) => /*html*/ `
 <span id="user-fullname">${userInfos.firstname + " " + userInfos.lastname}</span>
