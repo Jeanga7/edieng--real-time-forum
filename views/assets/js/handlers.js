@@ -441,6 +441,7 @@ async function addPost(e) {
                     document.querySelector("#posts-zone").remove();
                     await ShowAllPosts(posts);
                     handleOpenComments();
+                    enableReactions();
                     printed = {};
                     checked = {};
 

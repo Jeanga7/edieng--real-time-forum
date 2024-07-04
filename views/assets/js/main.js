@@ -440,7 +440,7 @@ function focusInput() {
 let debounceScroll = (e) => debounce(loadOldMsg, "chat", 800)(e);
 
 async function loadOldMsg(e) {
-    if (e.target.scrollTop < 100 && chatChunks.length > 0) {
+    if (e.target.scrollTop < 10 && chatChunks.length > 0) {
         let msgs = reverseArray(chatChunks.shift());
 
         let oldMsgs = () => document.querySelectorAll(".old-msg-name");
