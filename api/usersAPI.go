@@ -147,7 +147,9 @@ func ValidateFields(w http.ResponseWriter, r *http.Request) {
 
 		userData := map[string]map[string]interface{}{}
 
-		for _, p := range ListOfPossibleParams {
+		var ListOfParams = []string{"firstname", "lastname", "nickname", "email", "password", "age", "gender"}
+
+		for _, p := range ListOfParams {
 			userData[p], userData[p] = map[string]interface{}{}, map[string]interface{}{}
 		}
 
